@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" xmlns:intf="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns1="urn:client.wsvoucher" xmlns:tns2="http://app.gl.fi.eas.kingdee.com" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema targetNamespace="urn:client.wsvoucher" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher"/>
+   <import namespace="http://app.gl.fi.eas.kingdee.com"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="WSBean">
+    <sequence/>
+   </complexType>
+   <complexType name="WSWSVoucher">
+    <complexContent>
+     <extension base="tns1:WSBean">
+      <sequence>
+       <element name="accountNumber" nillable="true" type="xsd:string"/>
+       <element name="assistBizDate" nillable="true" type="xsd:string"/>
+       <element name="assistEndDate" nillable="true" type="xsd:string"/>
+       <element name="asstActName1" nillable="true" type="xsd:string"/>
+       <element name="asstActName2" nillable="true" type="xsd:string"/>
+       <element name="asstActName3" nillable="true" type="xsd:string"/>
+       <element name="asstActName4" nillable="true" type="xsd:string"/>
+       <element name="asstActName5" nillable="true" type="xsd:string"/>
+       <element name="asstActName6" nillable="true" type="xsd:string"/>
+       <element name="asstActName7" nillable="true" type="xsd:string"/>
+       <element name="asstActName8" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber1" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber2" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber3" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber4" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber5" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber6" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber7" nillable="true" type="xsd:string"/>
+       <element name="asstActNumber8" nillable="true" type="xsd:string"/>
+       <element name="asstActType1" nillable="true" type="xsd:string"/>
+       <element name="asstActType2" nillable="true" type="xsd:string"/>
+       <element name="asstActType3" nillable="true" type="xsd:string"/>
+       <element name="asstActType4" nillable="true" type="xsd:string"/>
+       <element name="asstActType5" nillable="true" type="xsd:string"/>
+       <element name="asstActType6" nillable="true" type="xsd:string"/>
+       <element name="asstActType7" nillable="true" type="xsd:string"/>
+       <element name="asstActType8" nillable="true" type="xsd:string"/>
+       <element name="asstSeq" type="xsd:int"/>
+       <element name="attaches" type="xsd:int"/>
+       <element name="auditor" nillable="true" type="xsd:string"/>
+       <element name="bizDate" nillable="true" type="xsd:string"/>
+       <element name="bizNumber" nillable="true" type="xsd:string"/>
+       <element name="bookedDate" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName1" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName2" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName3" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName4" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName5" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName6" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName7" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActName8" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber1" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber2" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber3" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber4" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber5" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber6" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber7" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActNumber8" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType1" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType2" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType3" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType4" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType5" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType6" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType7" nillable="true" type="xsd:string"/>
+       <element name="cashAsstActType8" nillable="true" type="xsd:string"/>
+       <element name="cashflowAmountLocal" type="xsd:double"/>
+       <element name="cashflowAmountOriginal" type="xsd:double"/>
+       <element name="cashflowAmountRpt" type="xsd:double"/>
+       <element name="companyNumber" nillable="true" type="xsd:string"/>
+       <element name="creator" nillable="true" type="xsd:string"/>
+       <element name="creditAmount" type="xsd:double"/>
+       <element name="currencyNumber" nillable="true" type="xsd:string"/>
+       <element name="cussent" type="xsd:int"/>
+       <element name="customerNumber" nillable="true" type="xsd:string"/>
+       <element name="debitAmount" type="xsd:double"/>
+       <element name="description" nillable="true" type="xsd:string"/>
+       <element name="entryDC" type="xsd:int"/>
+       <element name="entrySeq" type="xsd:int"/>
+       <element name="icketNumber" nillable="true" type="xsd:string"/>
+       <element name="invoiceNumber" nillable="true" type="xsd:string"/>
+       <element name="isCheck" type="xsd:boolean"/>
+       <element name="itemFlag" type="xsd:int"/>
+       <element name="localRate" type="xsd:double"/>
+       <element name="measurement" nillable="true" type="xsd:string"/>
+       <element name="oppAccountSeq" type="xsd:int"/>
+       <element name="originalAmount" type="xsd:double"/>
+       <element name="periodNumber" type="xsd:int"/>
+       <element name="periodYear" type="xsd:int"/>
+       <element name="poster" nillable="true" type="xsd:string"/>
+       <element name="price" type="xsd:double"/>
+       <element name="primaryCoef" type="xsd:double"/>
+       <element name="primaryItem" nillable="true" type="xsd:string"/>
+       <element name="qty" type="xsd:double"/>
+       <element name="settlementNumber" nillable="true" type="xsd:string"/>
+       <element name="settlementType" nillable="true" type="xsd:string"/>
+       <element name="supplyCoef" type="xsd:double"/>
+       <element name="supplyItem" nillable="true" type="xsd:string"/>
+       <element name="tempNumber" nillable="true" type="xsd:string"/>
+       <element name="type" nillable="true" type="xsd:string"/>
+       <element name="voucherAbstract" nillable="true" type="xsd:string"/>
+       <element name="voucherNumber" nillable="true" type="xsd:string"/>
+       <element name="voucherType" nillable="true" type="xsd:string"/>
+      </sequence>
+     </extension>
+    </complexContent>
+   </complexType>
+   <complexType name="WSInvokeException">
+    <sequence/>
+   </complexType>
+  </schema>
+  <schema targetNamespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://app.gl.fi.eas.kingdee.com"/>
+   <import namespace="urn:client.wsvoucher"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="ArrayOf_tns1_WSWSVoucher">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="tns1:WSWSVoucher[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="ArrayOf_tns2_WSWSRtnInfo">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="tns2:WSWSRtnInfo[]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+   <complexType name="ArrayOfArrayOf_xsd_string">
+    <complexContent>
+     <restriction base="soapenc:Array">
+      <attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:string[][]"/>
+     </restriction>
+    </complexContent>
+   </complexType>
+  </schema>
+  <schema targetNamespace="http://app.gl.fi.eas.kingdee.com" xmlns="http://www.w3.org/2001/XMLSchema">
+   <import namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher"/>
+   <import namespace="urn:client.wsvoucher"/>
+   <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <complexType name="WSWSRtnInfo">
+    <complexContent>
+     <extension base="tns1:WSBean">
+      <sequence>
+       <element name="description" nillable="true" type="xsd:string"/>
+       <element name="easNumber" nillable="true" type="xsd:string"/>
+       <element name="exception" nillable="true" type="xsd:string"/>
+       <element name="message" nillable="true" type="xsd:string"/>
+       <element name="number" nillable="true" type="xsd:string"/>
+       <element name="period" type="xsd:int"/>
+       <element name="voucherType" nillable="true" type="xsd:string"/>
+       <element name="year" type="xsd:int"/>
+      </sequence>
+     </extension>
+    </complexContent>
+   </complexType>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="WSInvokeException">
+
+      <wsdl:part name="fault" type="tns1:WSInvokeException">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherOfReturnIDRequest">
+
+      <wsdl:part name="voucherCols" type="intf:ArrayOf_tns1_WSWSVoucher">
+
+      </wsdl:part>
+
+      <wsdl:part name="isVerify" type="xsd:int">
+
+      </wsdl:part>
+
+      <wsdl:part name="isImpCashflow" type="xsd:int">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherOfReturnIDResponse">
+
+      <wsdl:part name="importVoucherOfReturnIDReturn" type="intf:ArrayOfArrayOf_xsd_string">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherResponse">
+
+      <wsdl:part name="importVoucherReturn" type="intf:ArrayOf_tns2_WSWSRtnInfo">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherRequest">
+
+      <wsdl:part name="voucherCols" type="intf:ArrayOf_tns1_WSWSVoucher">
+
+      </wsdl:part>
+
+      <wsdl:part name="isTempSave" type="xsd:boolean">
+
+      </wsdl:part>
+
+      <wsdl:part name="isVerify" type="xsd:boolean">
+
+      </wsdl:part>
+
+      <wsdl:part name="hasCashflow" type="xsd:boolean">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherResponse1">
+
+      <wsdl:part name="importVoucherReturn" type="intf:ArrayOfArrayOf_xsd_string">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="importVoucherRequest1">
+
+      <wsdl:part name="voucherCols" type="intf:ArrayOf_tns1_WSWSVoucher">
+
+      </wsdl:part>
+
+      <wsdl:part name="isVerify" type="xsd:int">
+
+      </wsdl:part>
+
+      <wsdl:part name="isImpCashflow" type="xsd:int">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="WSWSVoucherSrvProxy">
+
+      <wsdl:operation name="importVoucher" parameterOrder="voucherCols isTempSave isVerify hasCashflow">
+
+         <wsdl:input message="intf:importVoucherRequest" name="importVoucherRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="intf:importVoucherResponse" name="importVoucherResponse">
+
+       </wsdl:output>
+
+         <wsdl:fault message="intf:WSInvokeException" name="WSInvokeException">
+
+       </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="importVoucher" parameterOrder="voucherCols isVerify isImpCashflow">
+
+         <wsdl:input message="intf:importVoucherRequest1" name="importVoucherRequest1">
+
+       </wsdl:input>
+
+         <wsdl:output message="intf:importVoucherResponse1" name="importVoucherResponse1">
+
+       </wsdl:output>
+
+         <wsdl:fault message="intf:WSInvokeException" name="WSInvokeException">
+
+       </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="importVoucherOfReturnID" parameterOrder="voucherCols isVerify isImpCashflow">
+
+         <wsdl:input message="intf:importVoucherOfReturnIDRequest" name="importVoucherOfReturnIDRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="intf:importVoucherOfReturnIDResponse" name="importVoucherOfReturnIDResponse">
+
+       </wsdl:output>
+
+         <wsdl:fault message="intf:WSInvokeException" name="WSInvokeException">
+
+       </wsdl:fault>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="WSWSVoucherSoapBinding" type="intf:WSWSVoucherSrvProxy">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="importVoucher">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="importVoucherRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://webservice.app.gl.fi.eas.kingdee.com" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="importVoucherResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="WSInvokeException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="WSInvokeException" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="importVoucher">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="importVoucherRequest1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://webservice.app.gl.fi.eas.kingdee.com" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="importVoucherResponse1">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="WSInvokeException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="WSInvokeException" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="importVoucherOfReturnID">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="importVoucherOfReturnIDRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://webservice.app.gl.fi.eas.kingdee.com" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="importVoucherOfReturnIDResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:output>
+
+         <wsdl:fault name="WSInvokeException">
+
+            <wsdlsoap:fault encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" name="WSInvokeException" namespace="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher" use="encoded"/>
+
+         </wsdl:fault>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="WSWSVoucherSrvProxyService">
+
+      <wsdl:port binding="intf:WSWSVoucherSoapBinding" name="WSWSVoucher">
+
+         <wsdlsoap:address location="http://10.43.22.1:7888/ormrpc/services/WSWSVoucher"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

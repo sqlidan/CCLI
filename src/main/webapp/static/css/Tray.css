@@ -1,0 +1,91 @@
+@charset "utf-8";
+/* CSS Document */
+
+/************库位情况汇总*********************/
+ul {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    clear: both;
+}
+
+ul li {
+    border: solid 1px #000;
+    float: left;
+    font-size: 12px;
+}
+
+.bai {
+    background-color: white;
+}
+
+.lan {
+    background-color: #0000ff
+}
+
+/****************冷藏货物存储状况*****************/
+
+.fl {
+    float: left;
+    display: inline;
+    font-size: 12px;
+    padding-left: 20px;
+}
+
+.fr {
+    float: right;
+    display: inline;
+    font-size: 12px;
+    padding-right: 20px;
+}
+
+.leftcol, .rightcol {
+    width: 300px;
+    height: 25px;
+    padding-top: 10px;
+}
+
+.main {
+    height: 25px;
+}
+
+.content {
+    width: 900px;
+    margin: 10px auto;
+    vertical-align: middle;
+    height: auto;
+    display: block;
+}
+
+.cl {
+    clear: both;
+}
+
+table.gridtable {
+    margin-left: auto;
+    margin-right: auto;
+    font-family: verdana, arial, sans-serif;
+    font-size: 10px;
+    color: #333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+
+table.gridtable th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+    height: auto;
+}
+
+table.gridtable td {
+    text-align: center;
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+    height: auto;
+}
