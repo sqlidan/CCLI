@@ -1,0 +1,12 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<ehcache updateCheck="false" name="defaultCache">
+
+    <!-- DefaultCache setting. -->
+    <defaultCache maxEntriesLocalHeap="100"
+                  eternal="false"
+                  timeToIdleSeconds="30000"
+                  timeToLiveSeconds="60000"
+                  overflowToDisk="true"
+                  maxEntriesLocalDisk="100000"/>
+
+</ehcache>

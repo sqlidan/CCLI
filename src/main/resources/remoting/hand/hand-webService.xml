@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <!-- 用户webService接口 -->
+    <jaxws:server id="userWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.users.service.UserWebService"
+                  address="/userWebService">
+        <jaxws:serviceBean>
+            <ref bean="userWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 仓库webService接口 -->
+    <jaxws:server id="warehouseWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.warehouse.service.WarehouseWebService"
+                  address="/warehouseWebService">
+        <jaxws:serviceBean>
+            <ref bean="warehouseWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 入库webService接口 -->
+    <jaxws:server id="warehousingWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.in.service.WarehousingWebService"
+                  address="/warehousingWebService">
+        <jaxws:serviceBean>
+            <ref bean="warehousingWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 出库webService接口 -->
+    <jaxws:server id="outboundWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.out.service.OutboundWebService"
+                  address="/outboundWebService">
+        <jaxws:serviceBean>
+            <ref bean="outboundWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 库内管理webService接口 -->
+    <jaxws:server id="warehouseInteriorWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.interior.service.WarehouseInteriorWebService"
+                  address="/warehouseInteriorWebService">
+        <jaxws:serviceBean>
+            <ref bean="warehouseInteriorWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 回库管理webService接口 -->
+    <jaxws:server id="goBackStockWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.goBack.service.GoBackStockWebService"
+                  address="/goBackStockWebService">
+        <jaxws:serviceBean>
+            <ref bean="goBackStockWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!--装卸webService接口 -->
+    <jaxws:server id="steveWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.steve.service.SteveWebService"
+                  address="/steveWebService">
+        <jaxws:serviceBean>
+            <ref bean="steveWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 任务提醒webService接口 -->
+    <jaxws:server id="taskWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.task.service.TaskWebService"
+                  address="/taskWebService">
+        <jaxws:serviceBean>
+            <ref bean="taskWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+    <!-- 怡之航二期 新增功能 -->
+
+    <jaxws:server id="businessPlatformWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.platform.service.BusinessPlatformWebService"
+                  address="/businessPlatformWebService">
+        <jaxws:serviceBean>
+            <ref bean="businessPlatformWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+
+ 	<!--手持作业列表webService接口 -->
+    <jaxws:server id="allocationWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.allocation.service.AllocationWebService"
+                  address="/allocationWebService">
+        <jaxws:serviceBean>
+            <ref bean="allocationWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+    
+    
+    <!--增值税发票对接webService接口 -->
+    <jaxws:server id="invoiceWS"
+                  serviceClass="com.haiersoft.ccli.remoting.hand.invoice.service.InvoiceWebService"
+                  address="/invoiceService">
+        <jaxws:serviceBean>
+            <ref bean="invoiceWebService"/>
+        </jaxws:serviceBean>
+    </jaxws:server>
+	
+</beans>
