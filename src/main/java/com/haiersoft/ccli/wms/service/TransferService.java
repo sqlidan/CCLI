@@ -345,7 +345,7 @@ public class TransferService extends BaseService<BisTransferStock, String> {
 						String enterState=getMap.get("ENTER_STATE").toString();
 						Integer allNum=Integer.valueOf(getMap.get("PIECE").toString());
 						//按策略进行拣货
-						List<Map<String, Object>> getTrayList = trayInfoService.findTrayList(getObj.getWarehouseId(), stockId, billNum, ctnNum, asn, skuNum, enterState, sqlIf, sqlOrd, allNum, "");
+						List<Map<String, Object>> getTrayList = trayInfoService.findTrayList(getObj.getWarehouseId(), stockId, billNum, ctnNum, asn, skuNum, enterState, sqlIf, sqlOrd, allNum, "", "");
 						if(getTrayList!=null && getTrayList.size()>0 && allNum>0){
 							for(int i=0;i<getTrayList.size();i++){
 								Map<String,Object> trayInfo=getTrayList.get(i);

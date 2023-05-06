@@ -470,10 +470,10 @@
                     var row = dglx.datagrid('getSelected');
                     console.log(row);
 
-                    if (!row || !row.floorNum) {
+                    if (!row || (!row.floorNum && !row.roomNum)) {
                         parent.$.messager.show({
                             title: "提示",
-                            msg: "请选择要变更的仓库",
+                            msg: "请选择要变更的仓库房间",
                             position: "bottomRight"
                         });
                         return;
@@ -482,10 +482,11 @@
                     $.ajax({
                         async: false,
                         type: 'POST',
-                        url: "${ctx}/base/floor/refFloor/" + ordid + "/" + row.floorNum,
+                        url: "${ctx}/base/floor/refFloor/" + ordid + "/" + row.floorNum + "/" + row.roomNum,
                         data: {
                             "ordid": ordid,
-                            "floorNum": row.floorNum
+                            "floorNum": row.floorNum,
+                            "roomNum": row.roomNum
                         },
                         success: function (data) {
                             console.log(data);

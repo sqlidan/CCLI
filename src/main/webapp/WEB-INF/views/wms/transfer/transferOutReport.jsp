@@ -128,14 +128,14 @@ $(function(){
 function report(ntype){
 	if($("#searchFrom").form('validate')){
 		$("#ntype").val(ntype);
-		var url = "/ccli/bis/transfer/report";
+		var url = "${ctx}/bis/transfer/report";
 	 	$("#searchFrom").attr("action",url).submit();
  	}
 }
 function reportpdf(ntype){
 	if($("#searchFrom").form('validate')){
 		$("#ntype").val(ntype);
-		var url = "/ccli/bis/transfer/reportpdf";
+		var url = "${ctx}/bis/transfer/reportpdf";
 	 	$("#searchFrom").attr("action",url).submit();
  	}
 }

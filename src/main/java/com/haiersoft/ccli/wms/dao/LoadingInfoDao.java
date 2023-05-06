@@ -548,6 +548,7 @@ public class LoadingInfoDao extends HibernateDao<BisLoadingInfo, Integer> {
     public List<Map<String, Object>> listFloorTray(String billNum, String ctnNum, String skuNum) {
         StringBuffer sbSQL = new StringBuffer();
         sbSQL.append("  select t.floor_num floorNum,        ");
+        sbSQL.append("         t.room_num roomNum,          ");
         sbSQL.append("         t.bill_num billNum,          ");
         sbSQL.append("         t.ctn_num ctnNum,            ");
         sbSQL.append("         t.sku_id skuId,              ");
@@ -559,8 +560,8 @@ public class LoadingInfoDao extends HibernateDao<BisLoadingInfo, Integer> {
         sbSQL.append("     and t.ctn_num = :ctnNum          ");
         sbSQL.append("     and t.bill_num = :billNum        ");
         sbSQL.append("     and t.sku_id = :skuId            ");
-        sbSQL.append("   group by t.floor_num, t.bill_num, t.ctn_num, t.sku_id       ");
-        sbSQL.append("   order by t.floor_num               ");
+        sbSQL.append("   group by t.floor_num, t.room_num, t.bill_num, t.ctn_num, t.sku_id       ");
+        sbSQL.append("   order by t.floor_num, t.room_num   ");
 
         Map<String, Object> params = Maps.newHashMap();
         params.put("ctnNum", ctnNum);

@@ -70,7 +70,7 @@ public class LoadingStrategyContorller extends BaseController {
 		Map<String, Object> rets = loadingStartegyService.saveStrategy(strategy);
 		if ("success".equals(rets.get("retStr")) && strategy.getOrderNum() != null && !"".equals(strategy.getOrderNum())) {
 			if ("O".equals(strategy.getOrderNum().substring(0, 1))) {
-				rets = loadingInfoService.createTruck(strategy.getOrderNum(), rets.get("id").toString(), "");
+				rets = loadingInfoService.createTruck(strategy.getOrderNum(), rets.get("id").toString(), "", "");
 			} else if ("T".equals(strategy.getOrderNum().substring(0, 1))) {
 				rets = transferService.createTruck(strategy.getOrderNum(), rets.get("id").toString());
 			}

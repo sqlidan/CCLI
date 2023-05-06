@@ -96,9 +96,11 @@ public class FloorContorller extends BaseController {
      *
      * @return
      */
-    @RequestMapping(value = "refFloor/{ordId}/{floorNum}", method = RequestMethod.POST)
+    @RequestMapping(value = "refFloor/{ordId}/{floorNum}/{roomNum}", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> refFloor(@PathVariable("ordId") String ordId, @PathVariable("floorNum") String floorNum) {
+    public Map<String, Object> refFloor(@PathVariable("ordId") String ordId,
+                                        @PathVariable("floorNum") String floorNum,
+                                        @PathVariable("roomNum") String roomNum) {
         Map<String, Object> returnInfo = Maps.newHashMap();
         returnInfo.put("code", "200");
 
@@ -113,9 +115,9 @@ public class FloorContorller extends BaseController {
         List<BisLoadingInfo> truckList = loadingInfoService.getLoadingInfoIfOrd(ordId);
         if (!CollectionUtils.isEmpty(truckList)) {
             for (BisLoadingInfo loadInfo : truckList) {
-                if (loadInfo.getFloorNum().equals(floorNum)) {
+                if (loadInfo.getFloorNum().equals(floorNum) && loadInfo.getRoomNum().equals(roomNum)) {
                     returnInfo.put("code", "400");
-                    returnInfo.put("msg", "当前楼层和已分配楼层一致!");
+                    returnInfo.put("msg", "当前选择楼层房间和已分配楼层房间一致,不需要变更!");
                     return returnInfo;
                 }
             }
@@ -128,7 +130,7 @@ public class FloorContorller extends BaseController {
             ordObj.setOrderState("1");
             loadingOrderService.update(ordObj);
             // 重新生成装车单
-            Map<String, Object> truckMap = loadingInfoService.createTruck(ordId, "0", floorNum);
+            Map<String, Object> truckMap = loadingInfoService.createTruck(ordId, "0", floorNum, roomNum);
 
             if (truckMap.containsKey("splitTray")) {
                 // 需要拆托

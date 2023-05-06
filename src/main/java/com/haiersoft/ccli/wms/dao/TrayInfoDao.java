@@ -3,6 +3,7 @@ package com.haiersoft.ccli.wms.dao;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -412,26 +413,43 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Map<String, Object>> findTrayList(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, String sqlOrd, Integer pickNum, String chooseFloor) {
+	public List<Map<String, Object>> findTrayList(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, String sqlOrd, Integer pickNum, String chooseFloor, String chooseRoomNum) {
 		if (userid != null && billNum != null && ctnNum != null && sku != null && state != null) {
 			if (!"".equals(userid) && !"".equals(billNum) && !"".equals(ctnNum) && !"".equals(sku) && !"".equals(state)) {
 
 				String floorNum = "";
-				if (StringUtils.isNotEmpty(chooseFloor)) {
+				String roomNum = "";
+				if (StringUtils.isNotEmpty(chooseFloor) && StringUtils.isNotEmpty(chooseRoomNum)) {
 					floorNum = chooseFloor;
+					roomNum = chooseRoomNum;
 				} else {
 					// 查找所有可拣货的仓库楼层
-					List<String> pickFloorList = listCanPickFloor(ckId, userid, billNum, ctnNum, asn, sku, state, sqlIf, pickNum);
+					List<Map<String, Object>> pickFloorList = listCanPickFloor(ckId, userid, billNum, ctnNum, asn, sku, state, sqlIf, pickNum);
 					if (!CollectionUtils.isEmpty(pickFloorList) && pickFloorList.size() > 1) {
 						// 货物存放于多楼层的,采用轮训取货的方式
 						// 获取该提单最后一车配载的楼层
-						String lastFloor = getLastFloor(billNum, ctnNum, sku);
+						Map<String, Object> lastFloorRoom = getLastFloor(billNum, ctnNum, sku);
 						int startNum = 0;
-						if (StringUtils.isNotEmpty(lastFloor)) {
+						if (Objects.nonNull(lastFloorRoom) && lastFloorRoom.containsKey("FLOORNUM")) {
+							String floorNumLast = (String) lastFloorRoom.get("FLOORNUM");
+							String roomNumLast = (String) lastFloorRoom.get("ROOMNUM");
+
 							for (int i = 0; i < pickFloorList.size(); i++) {
-								String floorNow = pickFloorList.get(i);
-								if (lastFloor.equals(floorNow)) {
+								Map<String, Object> floorRoom = pickFloorList.get(i);
+								String floorNumNow = (String) floorRoom.get("FLOORNUM");
+								String roomNumNow = (String) floorRoom.get("ROOMNUM");
+								if (floorNumLast.equals(floorNumNow) && roomNumLast.equals(roomNumNow)) {
 									startNum = i + 1;
+									break;
+								}
+								int floorNumLastInt = Integer.parseInt(floorNumLast);
+								int roomNumLastInt = Integer.parseInt(roomNumLast);
+								int floorNumNowInt = Integer.parseInt(floorNumNow);
+								int roomNumNowInt = Integer.parseInt(roomNumNow);
+
+								if (floorNumNowInt > floorNumLastInt
+										|| (floorNumNowInt == floorNumLastInt && roomNumNowInt > roomNumLastInt)) {
+									startNum = i;
 									break;
 								}
 							}
@@ -439,7 +457,9 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 						if (startNum >= pickFloorList.size()) {
 							startNum = 0;
 						}
-						floorNum = pickFloorList.get(startNum);
+						Map<String, Object> chooseFloorRoom = pickFloorList.get(startNum);
+						floorNum = (String) chooseFloorRoom.get("FLOORNUM");
+						roomNum = (String) chooseFloorRoom.get("ROOMNUM");
 					}
 				}
 
@@ -463,7 +483,9 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 				}
 				if (StringUtils.isNotEmpty(floorNum)) {
 					sbSQL.append(" and t.floor_num = :floorNum ");
+					sbSQL.append(" and t.room_num = :roomNum ");
 					parme.put("floorNum", floorNum);
+					parme.put("roomNum", roomNum);
 				}
 				if (sqlIf != null && !"".equals(sqlIf)) {
 					sbSQL.append(" and ").append(sqlIf);
@@ -485,10 +507,10 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 	 * @param sku
 	 * @return
 	 */
-	private String getLastFloor(String billNum, String ctnNum, String sku) {
+	private Map<String, Object> getLastFloor(String billNum, String ctnNum, String sku) {
 
 		StringBuffer sbSQL = new StringBuffer();
-		sbSQL.append(" select t.floor_num ");
+		sbSQL.append(" select t.floor_num floorNum,t.room_num roomNum ");
 		sbSQL.append("   from bis_loading_info t ");
 		sbSQL.append("  where t.bill_num = :billNum ");
 		sbSQL.append("    and t.ctn_num = :ctnNum ");
@@ -501,11 +523,12 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		parme.put("sku", sku);
 
 		SQLQuery sqlQuery = createSQLQuery(sbSQL.toString(), parme);
-		List<String> flootList = sqlQuery.list();
+		sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+		List<Map<String, Object>> flootList = sqlQuery.list();
 		if (!CollectionUtils.isEmpty(flootList)) {
 			return flootList.get(0);
 		}
-		return "";
+		return Maps.newHashMap();
 	}
 
 	/**
@@ -520,13 +543,14 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 	 * @param sqlIf   策略sql条件
 	 * @return
 	 */
-	private List<String> listCanPickFloor(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, Integer pickNum) {
+	private List<Map<String, Object>> listCanPickFloor(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, Integer pickNum) {
 		if (userid != null && billNum != null && ctnNum != null && sku != null && state != null) {
 			if (!"".equals(userid) && !"".equals(billNum) && !"".equals(ctnNum) && !"".equals(sku) && !"".equals(state)) {
 				HashMap<String, Object> parme = Maps.newHashMap();
 				StringBuffer sbSQL = new StringBuffer();
-				sbSQL.append(" select a.floor_num from ( ");
-				sbSQL.append(" select t.floor_num, sum(t.now_piece) allNum ");
+				sbSQL.append(" select a.floor_num floorNum, a.room_num roomNum ");
+				sbSQL.append("	 from ( 					");
+				sbSQL.append(" select t.floor_num, t.room_num, sum(t.now_piece) allNum ");
 				sbSQL.append("   from bis_tray_info t ");
 				sbSQL.append("  where t.now_piece > 0 ");
 				sbSQL.append("    and t.istruck = '0'       ");
@@ -554,11 +578,12 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 					sbSQL.append(" and ").append(sqlIf);
 
 				}
-				sbSQL.append("  group by t.floor_num ) a where a.allNum > :allNum order by a.floor_num ");
+				sbSQL.append("  group by t.floor_num, t.room_num ) a where a.allNum > :allNum order by a.floor_num, a.room_num ");
 				parme.put("allNum", pickNum);
 
 				SQLQuery sqlQuery = createSQLQuery(sbSQL.toString(), parme);
-				List<String> list = sqlQuery.list();
+				sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+				List<Map<String, Object>> list = sqlQuery.list();
 				if (!CollectionUtils.isEmpty(list)) {
 					return list;
 				}

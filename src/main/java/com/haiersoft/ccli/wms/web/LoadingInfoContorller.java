@@ -82,7 +82,7 @@ public class LoadingInfoContorller extends BaseController {
         if (request.getParameter("ordid") != null && request.getParameter("clcode") != null) {
             String ordCode = request.getParameter("ordid").toString();//订单编码
             String clCode = request.getParameter("clcode").toString();//策略编码
-            getList = loadingInfoService.createTruck(ordCode, clCode, "");
+            getList = loadingInfoService.createTruck(ordCode, clCode, "", "");
         }
         return getList;
     }

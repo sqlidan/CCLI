@@ -672,7 +672,7 @@ public class TransferContorller extends BaseController {
 	 * @param response
 	 * @throws Exception
 	 */
-	 	@RequestMapping(value = "reportpdf")
+	 	@RequestMapping(value = "reportpdf", method = RequestMethod.POST)
 	   	@ResponseBody
 	   	public void exportpdf(@Valid @ModelAttribute @RequestBody BisTransferStock obj,HttpServletRequest request, HttpServletResponse response) throws Exception{
 	 		if(obj.getNtype()!=null && obj.getNtype()>0){

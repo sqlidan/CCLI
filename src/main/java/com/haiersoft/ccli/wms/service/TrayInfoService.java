@@ -97,8 +97,8 @@ public class TrayInfoService extends BaseService<TrayInfo, Integer> {
 	 * @param pickNum  拣货数量
 	 * @return
 	 */
-	public List<Map<String, Object>> findTrayList(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, String sqlOrd, Integer pickNum, String chooseFloor) {
-		return trayInfoDao.findTrayList(ckId, userid, billNum, ctnNum, asn, sku, state, sqlIf, sqlOrd, pickNum, chooseFloor);
+	public List<Map<String, Object>> findTrayList(String ckId, String userid, String billNum, String ctnNum, String asn, String sku, String state, String sqlIf, String sqlOrd, Integer pickNum, String chooseFloor, String chooseRoomNum) {
+		return trayInfoDao.findTrayList(ckId, userid, billNum, ctnNum, asn, sku, state, sqlIf, sqlOrd, pickNum, chooseFloor, chooseRoomNum);
 	}
 	
 	

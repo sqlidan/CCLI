@@ -38,6 +38,7 @@
             singleSelect: true,
             columns: [[
                 {field: 'floorNum', title: '楼层', sortable: false, width: 100},
+                {field: 'roomNum', title: '房间', sortable: false, width: 100},
                 {field: 'billNum', title: '提单号', sortable: false, width: 100},
                 {field: 'ctnNum', title: '箱号', sortable: false, width: 100},
                 {field: 'skuId', title: 'skuId', sortable: false, width: 100},
@@ -85,6 +86,7 @@
             index: rows.length + 1,
             row: {
                 floorNum: jsonObj.FLOORNUM,
+                roomNum: jsonObj.ROOMNUM,
                 billNum: jsonObj.BILLNUM,
                 ctnNum: jsonObj.CTNNUM,
                 skuId: jsonObj.SKUID,

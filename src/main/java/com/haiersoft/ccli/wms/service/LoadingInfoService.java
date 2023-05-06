@@ -126,9 +126,10 @@ public class LoadingInfoService extends BaseService<BisLoadingInfo, Integer> {
      * @param ordCode     //订单编号
      * @param clCode      //策略编号
      * @param chooseFloor //事先选择的仓库
+     * @param chooseRoomNum //事先选择的仓库房间
      */
     @Transactional(readOnly = false)
-    public synchronized Map<String, Object> createTruck(String ordCode, String clCode, String chooseFloor) {//TODO BUG
+    public synchronized Map<String, Object> createTruck(String ordCode, String clCode, String chooseFloor, String chooseRoomNum) {//TODO BUG
         Map<String, Object> retMap = new HashMap<String, Object>();
         retMap.put("endStr", "error");
         List<BisLoadingInfo> checkList = loadingInfofDao.findBy("loadingPlanNum", ordCode);
@@ -181,7 +182,7 @@ public class LoadingInfoService extends BaseService<BisLoadingInfo, Integer> {
 	                    }
 	                    allNum = Integer.valueOf(getMap.get("PIECE").toString());
 	                    //按策略进行拣货
-                        getTrayList = trayInfoService.findTrayList(loadingOrder.getWarehouseId(), stockId, billNum, ctnNum, asn, skuNum, enterState, sqlIf, sqlOrd, allNum, chooseFloor);
+                        getTrayList = trayInfoService.findTrayList(loadingOrder.getWarehouseId(), stockId, billNum, ctnNum, asn, skuNum, enterState, sqlIf, sqlOrd, allNum, chooseFloor, chooseRoomNum);
 	                    if (getTrayList != null && getTrayList.size() > 0 && allNum > 0) {
 	                        Map<String, Object> trayInfo = null;
 	                        for (int i = 0; i < getTrayList.size(); i++) {
