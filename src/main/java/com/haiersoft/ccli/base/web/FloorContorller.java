@@ -76,15 +76,17 @@ public class FloorContorller extends BaseController {
                 String billNum = getMap.get("BILL_NUM").toString();
                 String ctnNum = getMap.get("CTN_NUM").toString();
                 String skuNum = getMap.get("SKU_ID").toString();
+                String stockId = getMap.get("STOCK_ID").toString();
+                String enterState = getMap.get("ENTER_STATE").toString();
 
-                String numCode = billNum + "_" + ctnNum + "_" + skuNum;
+                String numCode = billNum + "_" + ctnNum + "_" + skuNum + "_" + stockId + "_" + enterState;
                 if (numList.contains(numCode)) {
                     continue;
                 }
                 numList.add(numCode);
 
                 // 获取目前库存
-                List<Map<String, Object>> trayList = loadingInfoService.listFloorTray(billNum, ctnNum, skuNum);
+                List<Map<String, Object>> trayList = loadingInfoService.listFloorTray(billNum, ctnNum, skuNum, stockId, enterState);
                 list.addAll(trayList);
             }
         }
@@ -132,16 +134,22 @@ public class FloorContorller extends BaseController {
             // 重新生成装车单
             Map<String, Object> truckMap = loadingInfoService.createTruck(ordId, "0", floorNum, roomNum);
 
-            if (truckMap.containsKey("splitTray")) {
-                // 需要拆托
-                returnInfo.put("needSplit", "Y");
-                returnInfo.put("trayIds", truckMap.get("trayIds"));
-                returnInfo.put("splitTray", truckMap.get("splitTray"));
+            if (truckMap.containsKey("endStr") && "success".equals(truckMap.get("endStr").toString())) {
+                if (truckMap.containsKey("splitTray")) {
+                    // 需要拆托
+                    returnInfo.put("needSplit", "Y");
+                    returnInfo.put("trayIds", truckMap.get("trayIds"));
+                    returnInfo.put("splitTray", truckMap.get("splitTray"));
+                } else {
+                    // 分配完成
+                    String tNum = truckMap.get("tNum").toString();
+                    // 装车单备注
+                    loadingInfoService.insertRemark(ordId, tNum);
+                }
             } else {
-                // 分配完成
-                String tNum = truckMap.get("tNum").toString();
-                // 装车单备注
-                loadingInfoService.insertRemark(ordId, tNum);
+                returnInfo.put("code", "400");
+                returnInfo.put("msg", "库存不足无法生成装车单!");
+                return returnInfo;
             }
         } else {
             returnInfo.put("code", "400");

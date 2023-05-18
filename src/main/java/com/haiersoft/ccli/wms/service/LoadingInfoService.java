@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.haiersoft.ccli.common.utils.DateUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -783,7 +781,7 @@ public class LoadingInfoService extends BaseService<BisLoadingInfo, Integer> {
     /*
      * 获取楼层库存
      */
-    public List<Map<String, Object>> listFloorTray(String billNum, String ctnNum, String skuNum) {
-        return loadingInfofDao.listFloorTray(billNum, ctnNum, skuNum);
+    public List<Map<String, Object>> listFloorTray(String billNum, String ctnNum, String skuNum, String stockId, String enterState) {
+        return loadingInfofDao.listFloorTray(billNum, ctnNum, skuNum, stockId, enterState);
     }
 }

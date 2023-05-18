@@ -545,7 +545,7 @@ public class LoadingInfoDao extends HibernateDao<BisLoadingInfo, Integer> {
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
 
-    public List<Map<String, Object>> listFloorTray(String billNum, String ctnNum, String skuNum) {
+    public List<Map<String, Object>> listFloorTray(String billNum, String ctnNum, String skuNum, String stockId, String enterState) {
         StringBuffer sbSQL = new StringBuffer();
         sbSQL.append("  select t.floor_num floorNum,        ");
         sbSQL.append("         t.room_num roomNum,          ");
@@ -560,6 +560,8 @@ public class LoadingInfoDao extends HibernateDao<BisLoadingInfo, Integer> {
         sbSQL.append("     and t.ctn_num = :ctnNum          ");
         sbSQL.append("     and t.bill_num = :billNum        ");
         sbSQL.append("     and t.sku_id = :skuId            ");
+        sbSQL.append("     and t.stock_in = :stockId        ");
+        sbSQL.append("     and t.enter_state = :enterState  ");
         sbSQL.append("   group by t.floor_num, t.room_num, t.bill_num, t.ctn_num, t.sku_id       ");
         sbSQL.append("   order by t.floor_num, t.room_num   ");
 
@@ -567,6 +569,8 @@ public class LoadingInfoDao extends HibernateDao<BisLoadingInfo, Integer> {
         params.put("ctnNum", ctnNum);
         params.put("billNum", billNum);
         params.put("skuId", skuNum);
+        params.put("stockId", stockId);
+        params.put("enterState", enterState);
 
         SQLQuery sqlQuery = createSQLQuery(sbSQL.toString(), params);
         return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
