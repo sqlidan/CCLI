@@ -1,27 +1,18 @@
 package com.haiersoft.ccli.supervision.web;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.haiersoft.ccli.base.service.HscodeService;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.platform.entity.PlatformReservationOutbound;
 import com.haiersoft.ccli.platform.service.ReservationOutboundService;
-import com.haiersoft.ccli.supervision.entity.ApprHead;
-import com.haiersoft.ccli.supervision.entity.ApprInfo;
-import com.haiersoft.ccli.supervision.entity.ManiHead;
-import com.haiersoft.ccli.supervision.entity.ManiInfo;
 import com.haiersoft.ccli.supervision.service.*;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,11 +29,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.rmi.RemoteException;
+import java.io.*;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -125,7 +113,6 @@ public class ReservedOutBoundLCLController extends BaseController {
 		// page.orderBy("status,appointDate").order("asc,desc");
 		//page.orderBy("status,appointDate,queuingTime").order("asc,desc,asc").setOrderNulls("false,false,true");
 		page.orderBy("appointDate,queuingTime").order("desc,asc").setOrderNulls("false,true");
-
 		page= reservationOutboundService.search(page,filters);
 		return getEasyUIData(page);
 	}
@@ -175,7 +162,7 @@ public class ReservedOutBoundLCLController extends BaseController {
 					file.mkdirs();
 				}
 				// 5、创建一个Result对象
-				File f = new File("D:/supervision/" + fileName + ".FLJGRX");
+						File f = new File("D:/supervision/" + fileName + ".FLJGRX");
 				// 判断文件是否存在
 				if (!f.exists()) {
 					f.createNewFile();
@@ -272,42 +259,35 @@ public class ReservedOutBoundLCLController extends BaseController {
 				handler.characters(eight.toCharArray(), 0, eight.length());
 
 				attr.clear();
-				handler.startElement("", "", "XML_TYPE", attr);
-				String XMLTYPE = "W3C";
-				handler.characters(XMLTYPE.toCharArray(), 0, XMLTYPE.length());
-				handler.endElement("", "", "XML_TYPE");
+				handler.startElement("", "", "SDEPORT_DATA", attr);
 				handler.characters(eight.toCharArray(), 0, eight.length());
-
-			/*	// 经营单位代码
-				attr.clear();
-				handler.startElement("", "", "TradeCode", attr);
-				String TradeCode = "3702631016";
-				handler.characters(TradeCode.toCharArray(), 0, TradeCode.length());
-				handler.endElement("", "", "TradeCode");
-				handler.characters(eight.toCharArray(), 0, eight.length());
-				// 经营单位名称
-				attr.clear();
-				handler.startElement("", "", "TradeName", attr);
-				handler.characters(FILEGERATER.toCharArray(), 0, FILEGERATER.length());
-				handler.endElement("", "", "TradeName");
-				handler.characters(eight.toCharArray(), 0, eight.length());
-				// 仓库名称
-				attr.clear();
-				handler.startElement("", "", "HouseName", attr);
-				String HouseNameOne = "怡之航";
-				handler.characters(HouseNameOne.toCharArray(), 0, HouseNameOne.length());
-				handler.endElement("", "", "HouseName");
-				handler.characters(eight.toCharArray(), 0, eight.length());*/
-
-
-
-
-
-
-
-				attr.clear();
-				handler.startElement("", "", "StockInfo", attr);
-				handler.characters(ten.toCharArray(), 0, ten.length());
+					attr.clear();
+					handler.startElement("", "", "NonbondedPassportMessage", attr);
+					handler.characters(eight.toCharArray(), 0, eight.length());
+						attr.clear();
+						handler.startElement("", "", "NonbondedPassport", attr);
+						handler.characters(eight.toCharArray(), 0, eight.length());
+					//SeqNo
+					attr.clear();
+					handler.startElement("", "", "SeqNo", attr);
+					String SeqNo ="";
+					handler.characters(SeqNo.toCharArray(), 0, SeqNo.length());
+					handler.endElement("", "", "SeqNo");
+					handler.characters(eight.toCharArray(), 0, eight.length());
+                    //CopSeqNo
+					attr.clear();
+					handler.startElement("", "", "CopSeqNo", attr);
+					String CopSeqNo =outbound.getId();
+					handler.characters(CopSeqNo.toCharArray(), 0, CopSeqNo.length());
+					handler.endElement("", "", "CopSeqNo");
+					handler.characters(eight.toCharArray(), 0, eight.length());
+					//VehicleNo
+					attr.clear();
+					handler.startElement("", "", "VehicleNo", attr);
+					String VehicleNo =outbound.getCarNumber();
+					handler.characters(VehicleNo.toCharArray(), 0, VehicleNo.length());
+					handler.endElement("", "", "VehicleNo");
+					handler.characters(eight.toCharArray(), 0, eight.length());
 				   //经营单位代码
 					attr.clear();
 					handler.startElement("", "", "TradeCode", attr);
@@ -315,138 +295,68 @@ public class ReservedOutBoundLCLController extends BaseController {
 					handler.characters(TradeCode.toCharArray(), 0, TradeCode.length());
 					handler.endElement("", "", "TradeCode");
 					handler.characters(eight.toCharArray(), 0, eight.length());
-					//报送日期
-					attr.clear();
-					handler.startElement("", "", "ApplyDate", attr);
-					handler.characters(formatbd.format(time).toCharArray(), 0, formatbd.format(time).length());
-					handler.endElement("", "", "ApplyDate");
-					handler.characters(eight.toCharArray(), 0, eight.length());
-					//仓库物料号
-					attr.clear();
-					handler.startElement("", "", "WmsMtsNo", attr);
-					String wmsmtsNO = "";
-					handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
-					handler.endElement("", "", "WmsMtsNo");
-					handler.characters(ten.toCharArray(), 0, ten.length());
+
 					// 经营单位名称
 					attr.clear();
 					handler.startElement("", "", "TradeName", attr);
 					handler.characters(FILEGERATER.toCharArray(), 0, FILEGERATER.length());
 					handler.endElement("", "", "TradeName");
 					handler.characters(eight.toCharArray(), 0, eight.length());
-					// 账册号
+					// 企业号
 					attr.clear();
-					handler.startElement("", "", "EmsNo", attr);
-					String EmsNo = "";
+					handler.startElement("", "", "CustomsCode", attr);
+					String EmsNo = "4230";
 					handler.characters(EmsNo.toCharArray(), 0, EmsNo.length());
-					handler.endElement("", "", "EmsNo");
+					handler.endElement("", "", "CustomsCode");
 					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 账册序号
+					// 出入状态
 					attr.clear();
-					handler.startElement("", "", "EmsSeqNo", attr);
-					String EmsSeqNo = "";
-					handler.characters(EmsSeqNo.toCharArray(), 0, EmsSeqNo.length());
-					handler.endElement("", "", "EmsSeqNo");
+					handler.startElement("", "", "IEFlag", attr);
+					String ieflag = "I";
+					handler.characters(ieflag.toCharArray(), 0, ieflag.length());
+					handler.endElement("", "", "IEFlag");
+					handler.characters(ten.toCharArray(), 0, ten.length());
+
+					// 备注
+					attr.clear();
+					handler.startElement("", "", "Rmk", attr);
+					String rmk = "1";
+					handler.characters(rmk.toCharArray(), 0, ieflag.length());
+					handler.endElement("", "", "Rmk");
 					handler.characters(ten.toCharArray(), 0, ten.length());
 
 
-					// 商品料号
-					attr.clear();
-					handler.startElement("", "", "GoodsMtsNo", attr);
-					// handler.characters("".toCharArray(), 0, "".length());
-					String GoodsMtsNo = "";
-					handler.characters(GoodsMtsNo.toCharArray(), 0, GoodsMtsNo.length());
-					handler.endElement("", "", "GoodsMtsNo");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 商品编码
-					attr.clear();
-					handler.startElement("", "", "CodeTs", attr);
-					// handler.characters("".toCharArray(), 0, "".length());
-					String CodeTs = "";
-					handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
-					handler.endElement("", "", "CodeTs");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 商品名称
-					attr.clear();
-					handler.startElement("", "", "GoodsName", attr);
-					// handler.characters("".toCharArray(), 0, "".length());
-					String GoodsName = outbound.getProductName() == null ? "" : outbound.getProductName();
-					handler.characters(GoodsName.toCharArray(), 0, GoodsName.length());
-					handler.endElement("", "", "GoodsName");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 商品规格型号
-					attr.clear();
-					handler.startElement("", "", "GoodsModelDesc", attr);
-					String GoodsModelDesc = "";
-					handler.characters(GoodsModelDesc.toCharArray(), 0, GoodsModelDesc.length());
-					handler.endElement("", "", "GoodsModelDesc");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 申报计量单位
-					attr.clear();
-					handler.startElement("", "", "WmsDclUnit", attr);
-					String DclUnit = "kg";
-					handler.characters(DclUnit.toCharArray(), 0, DclUnit.length());
-					handler.endElement("", "", "WmsDclUnit");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 申报数量
-					attr.clear();
-					handler.startElement("", "", "WmsDclQty", attr);
-					// handler.characters("".toCharArray(), 0, "".length());
-					String DclQty = outbound.getNum() == null ? "" : outbound.getNum();
-					handler.characters(DclQty.toCharArray(), 0, DclQty.length());
-					handler.endElement("", "", "WmsDclQty");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 法定单位
-					attr.clear();
-					handler.startElement("", "", "WmsLawUnit", attr);
-					String WmsDclUnit =  "035";
-					handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
-					handler.endElement("", "", "WmsLawUnit");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 法定数量
-					attr.clear();
-					handler.startElement("", "", "WmsLawQty", attr);
-					String WmsDclQty = "";
-					handler.characters(WmsDclQty.toCharArray(), 0, WmsDclQty.length());
-					handler.endElement("", "", "WmsLawQty");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 库区号
-					attr.clear();
-					handler.startElement("", "", "PlaceIds", attr);
-					//handler.characters("".toCharArray(), 0, "".length());
-					String PlaceIds = outbound.getRoomNum() == null ? "" : outbound.getRoomNum();
-					handler.characters(PlaceIds.toCharArray(), 0, PlaceIds.length());
-					handler.endElement("", "", "PlaceIds");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 库位号
-					attr.clear();
-					handler.startElement("", "", "LocationIds", attr);
-					//handler.characters("".toCharArray(), 0, "".length());
-					String LocationIds = "";
-					handler.characters(LocationIds.toCharArray(), 0, LocationIds.length());
-					handler.endElement("", "", "LocationIds");
-					handler.characters(ten.toCharArray(), 0, ten.length());
-					// 出入库状态 0 预出入库 1在库
-					attr.clear();
-					handler.startElement("", "", "StockStatus", attr);
-					handler.characters("1".toCharArray(), 0, "1".length());
-					handler.endElement("", "", "StockStatus");
-					handler.characters(ten.toCharArray(), 0, ten.length());
 
-					handler.endElement("", "", "StockInfo");
+
+					handler.endElement("", "", "NonbondedPassport");
 					handler.characters(eight.toCharArray(), 0, eight.length());
+				handler.endElement("", "", "NonbondedPassportMessage");
+				handler.characters(eight.toCharArray(), 0, eight.length());
+				handler.endElement("", "", "SDEPORT_DATA");
+				handler.characters(eight.toCharArray(), 0, eight.length());
+
+				attr.clear();
+				handler.startElement("", "", "XML_TYPE", attr);
+				String XMLTYPE = "W3C";
+				handler.characters(XMLTYPE.toCharArray(), 0, XMLTYPE.length());
+				handler.endElement("", "", "XML_TYPE");
+				handler.characters(eight.toCharArray(), 0, eight.length());
+
+			    handler.endElement("", "  ", "XMLObject");
 				// 关闭document
 				handler.endDocument();
-				///文件上传FTP
+				//将生成的xml文件反写
+				reservationOutboundService.updateFiledNameById(fileName,id);
 				System.out.println("生成.FLJGRX成功");
-				String ftpHost = "10.135.252.42";
-				String ftpUserName = "yzh";
-				String ftpPassword = "yzh";
+				String ftpHost = "10.135.200.5";
+				String ftpUserName = "adminftp";
+				String ftpPassword = "adminftp!@#2023";
 				fileName = fileName + ".FLJGRX";
 				int ftpPort = 21;
 				String ftpPath = "Send/";
 				FileInputStream in = new FileInputStream(f);
-				//uploadFile(ftpHost,ftpUserName, ftpUserName, ftpPort, ftpPath, fileName, in);
+				///文件上传FTP  //怡之航 将预约出库 报文申报上传到韩总电脑Send目录下
+				uploadFile(ftpHost,ftpUserName, ftpPassword, ftpPort, ftpPath, fileName, in);
 				f.delete();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -454,6 +364,92 @@ public class ReservedOutBoundLCLController extends BaseController {
 			}
 		}
 		return "success";
+	}
+
+
+	/**
+	 * Description:             向FTP服务器上传文件
+	 * @param ftpHost              FTP服务器hostname
+	 * @param ftpUserName          FTP登录账号
+	 * @param ftpPassword          FTP登录密码
+	 * @param ftpPort          FTP服务器基础目录
+	 * @param ftpPath          FTP服务器文件存放路径。例如分日期存放：/2015/01/01。文件的路径为basePath+filePath
+	 * @param filename          上传到FTP服务器上的文件名
+	 * @param input             输入流
+	 * @return                  成功返回true，否则返回false
+	 */
+	public static boolean uploadFile(String ftpHost, String ftpUserName, String ftpPassword, int ftpPort, String ftpPath, String filename, InputStream input) {
+		boolean result = false;
+		FTPClient ftpClient = new FTPClient();
+		try {
+			int reply;
+			ftpClient = getFTPClient(ftpHost, ftpUserName, ftpPassword, ftpPort);
+			ftpClient.changeWorkingDirectory(ftpPath);
+
+			reply = ftpClient.getReplyCode();
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				ftpClient.disconnect();
+				return result;
+			}
+
+			filename = new String(filename.getBytes("GBK"), FTP.DEFAULT_CONTROL_ENCODING);//编码文件名，支持中文文件名
+			//上传文件
+			if (!ftpClient.storeFile(filename, input)) {
+
+				return result;
+
+			}
+			System.out.println("上传成功");
+			input.close();
+			ftpClient.logout();
+			result = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (ftpClient.isConnected()) {
+				try {
+					ftpClient.disconnect();
+				} catch (IOException ioe) {
+				}
+			}
+		}
+		return result;
+	}
+
+
+	/**
+	 * 获取FTPClient对象
+	 * @param ftpHost       FTP主机服务器
+	 * @param ftpUserName   FTP 登录密码
+	 * @param ftpPassword   FTP登录用户名
+	 * @param ftpPort       FTP端口 默认为21
+	 * @return
+	 */
+	public static FTPClient getFTPClient(String ftpHost, String ftpUserName, String ftpPassword, int ftpPort) {
+		FTPClient ftpClient = new FTPClient();
+		try {
+			ftpClient = new FTPClient();
+			ftpClient.connect(ftpHost, ftpPort);              // 连接FTP服务器
+			ftpClient.login(ftpUserName, ftpPassword);// 登陆FTP服务器
+			ftpClient.setControlEncoding("UTF-8"); // 中文支持
+			ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+			ftpClient.enterLocalPassiveMode();
+			if (!FTPReply.isPositiveCompletion(ftpClient.getReplyCode())) {
+				System.out.println("未连接到FTP，用户名或密码错误。");
+				//logger.info();
+				ftpClient.disconnect();
+			} else {
+				System.out.println("FTP连接成功。");
+				// logger.info("");
+			}
+		} catch (SocketException e) {
+			e.printStackTrace();
+			System.out.println("FTP的IP地址可能错误，请正确配置。");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("FTP的端口错误,请正确配置。");
+		}
+		return ftpClient;
 	}
 
 }

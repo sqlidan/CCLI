@@ -37,12 +37,7 @@ public class StandingBookMidGroupController {
     @RequestMapping("uploadFileToAline/{ids}")
     @ResponseBody
     public String uploadFileToAline(@PathVariable List<String> ids){
-
-        String message = null;
-        if(!CollectionUtils.isEmpty(ids)){
-            message= standingBookMidGroupService.subbitJson(ids, true);
-        }
-        return message;
+    	return standingBookMidGroupService.subbitJson(ids, true);
     }
     /**
      * 冷链上传数据到中台进行比对
@@ -52,12 +47,7 @@ public class StandingBookMidGroupController {
     @RequestMapping("uploadFileToNotAline/{ids}")
     @ResponseBody
     public String uploadFileToNotAline(@PathVariable List<String> ids){
-
-        String message = null;
-        if(!CollectionUtils.isEmpty(ids)){
-            message= standingBookMidGroupService.subbitJson(ids, false);
-        }
-        return message;
+        return standingBookMidGroupService.subbitJson(ids, false);
     }
 
     /**

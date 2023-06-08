@@ -1,8 +1,11 @@
 package com.haiersoft.ccli.cost.web;
 
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.cost.dao.StandingBookMidGroupDao;
 import com.haiersoft.ccli.cost.service.BaseExpenseCategoryDetailService;
 import com.haiersoft.ccli.cost.service.BisPayMidGroupServeice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -18,6 +21,10 @@ public class BaseExpenseCategoryDetailContorller extends BaseController {
     private BaseExpenseCategoryDetailService baseExpenseCategoryDetailService;
     @Autowired
     private BisPayMidGroupServeice bisPayMidGroupServeice;
+    @Autowired
+    private StandingBookMidGroupDao standingBookMidGroupDao;
+
+    private static final Logger LOG = LoggerFactory.getLogger(BaseExpenseCategoryDetailContorller.class);
     @RequestMapping("testDemo")
     public  String  testDemo(){
         String detailCode = "";
@@ -36,5 +43,13 @@ public class BaseExpenseCategoryDetailContorller extends BaseController {
         }
         return costClassifyCode;
     }
+
+    @RequestMapping("getOne")
+    public String getOne(){
+        String s = standingBookMidGroupDao.queryUnitsByFeeCode("cc");
+        LOG.info(s+"数值为："+s);
+        return s;
+    }
+
 
 }

@@ -274,11 +274,8 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 			if(outCode!=null && !"".equals(outCode)){
 				sb.append(", (znum-nvl(lnum,0)) as gnum ");
 			}
-			sb.append(" from ( select c.*,s.net_single,s.gross_single,s.cargo_name,s.msc_num,s.lot_num,nvl(s.type_size,' ') " +
-					"as type_size,c.ENTER_STATE||'$$'||c.bill_num||'$$'||c.ctn_num||'$$'||c.SKU_ID||nvl2(c.asn, '$$'||c.asn,'') as lab, ");
-			sb.append(" (select sum(p.num)  from base_client_pledge p where p.client=:pclientId " +
-					"and PTYPE=1 and p.bill_num=c.bill_num and p.ctn_num=c.ctn_num and p.sku_id=c.SKU_ID " +
-					"and p.enter_state=c.ENTER_STATE  ");
+			sb.append(" from ( select c.*,s.net_single,s.gross_single,s.cargo_name,s.msc_num,s.lot_num,nvl(s.type_size,' ') as type_size,c.ENTER_STATE||'$$'||c.bill_num||'$$'||c.ctn_num||'$$'||c.SKU_ID||nvl2(c.asn, '$$'||c.asn,'') as lab, ");
+			sb.append(" (select sum(p.num)  from base_client_pledge p where p.client=:pclientId and PTYPE=1 and p.bill_num=c.bill_num and p.ctn_num=c.ctn_num and p.sku_id=c.SKU_ID and p.enter_state=c.ENTER_STATE  ");
 			if(ckId!=null && !"".equals(ckId)){
 				sb.append(" and  p.WAREHOUSE_ID=:pckid");
 				parme.put("pckid", ckId);

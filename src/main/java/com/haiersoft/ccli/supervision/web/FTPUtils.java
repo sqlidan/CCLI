@@ -760,4 +760,46 @@ public class FTPUtils {
 
     }
 
+
+    /**
+     * 获取目录下所有的文件名称
+     *
+     * @param filePath 指定的目录
+     * @return 文件列表,或者null
+     */
+    public FTPFile[] getFilesList( String remotePath ) {
+        // 初始表示下载失败
+        FTPFile[] fs = null;
+
+        try {
+            int reply;
+            // 连接FTP服务器
+            // 如果采用默认端口，可以使用ftp.connect(url)的方式直接连接FTP服务器
+            ftpClient.connect("10.135.200.5", Integer.parseInt("21"));
+            //登陆ftp
+            ftpClient.login(username, password);
+            reply = ftpClient.getReplyCode();
+            /*
+             * 判断是否连接成功
+             */
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                ftpClient.disconnect();
+                return fs;
+            }
+            // 转移到FTP服务器目录
+            ftpClient.changeWorkingDirectory(remotePath);
+            // 列出该目录下所有文件
+            fs = ftpClient.listFiles();
+            return fs;
+        } catch (IOException e) {
+            logger.error("从FTP服务器下载文件异常"+e.getMessage());
+            throw new RuntimeException("从FTP服务器下载文件异常" , e);
+        } finally {
+            // 登出服务器并断开连接
+            ftpUtils.logout();
+            return fs;
+        }
+
+    }
+
 }

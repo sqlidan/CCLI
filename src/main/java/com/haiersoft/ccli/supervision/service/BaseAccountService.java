@@ -140,6 +140,10 @@ public class BaseAccountService extends BaseService<BaseAccount, String> {
 			params.put("billNo",info.get(i).getBillNo());
 			params.put("containerNo",info.get(i).getContainerNo());
 			List<BaseAccountExcel> 	baseAccountExcel = this.seachStatisticsSql(params);
+			//查询有没有底账信息
+			if (baseAccountExcel == null) {
+				break;
+			}
 			if (Double.valueOf(baseAccountExcel.get(0).getSurplusNum()) < Double.valueOf(info.get(i).getNum())
 					|| Double.valueOf(baseAccountExcel.get(0).getSurplusWeight()) < Double.valueOf(info.get(i).getWeight())) {
 				flag = true;

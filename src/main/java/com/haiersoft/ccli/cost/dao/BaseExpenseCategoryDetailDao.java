@@ -18,7 +18,7 @@ public class BaseExpenseCategoryDetailDao extends HibernateDao<BaseExpenseCatego
 
 
     public  Map<String,Object> getCodeByFeeCode(String feecode) {
-        String sql = "SELECT DETAIL_CODE,DETAIL_CODE_NAME FROM BASE_EXPENSE_CATEGORY_DETAIL WHERE FEE_ID =:feecode";
+        String sql = "SELECT DETAIL_CODE,DETAIL_CODE_NAME,WAREHOUSE,WAREHOUSE_PAY FROM BASE_EXPENSE_CATEGORY_DETAIL WHERE FEE_ID =:feecode";
         Map<String,Object> map = new HashMap();
         Map<String,Object> map1 = new HashMap<>();
         map.put("feecode",feecode);

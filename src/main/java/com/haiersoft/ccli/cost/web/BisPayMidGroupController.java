@@ -31,35 +31,26 @@ public class BisPayMidGroupController {
     /**
      * 上传 数据到中台 生成结算单
      */
-    @RequestMapping(value = "uploadFileToAline/{ids}", method = RequestMethod.POST)
-    @ResponseBody
-    public String  uploadFileToAline(@PathVariable List<String> ids)  {
-
-        String message = new String();
-        try {
-            if(!CollectionUtils.isEmpty(ids)){
-                message = bisPayMidGroupServeice.subbitJson(ids, true);
-            }
-        }catch (Exception e){
-            log.info(e+"应付报错信息");
-        }
-        return message;
-    }
+	@RequestMapping(value = "uploadFileToAline/{ids}", method = RequestMethod.POST)
+	@ResponseBody
+	public String uploadFileToAline(@PathVariable List<String> ids) {
+		if (!CollectionUtils.isEmpty(ids)) {
+			return bisPayMidGroupServeice.subbitJson(ids, true);
+		} else {
+			return "应付订单生成结算单传过来的id为空";
+		}
+	}
     /**
      * 上传 数据到中台 不生成结算单
      */
     @RequestMapping(value = "uploadFileToNotAline/{ids}", method = RequestMethod.POST)
     @ResponseBody
     public String  uploadFileToNotAline(@PathVariable List<String> ids)  {
-        String message = new String();
-        try {
-            if (!CollectionUtils.isEmpty(ids)) {
-                message = bisPayMidGroupServeice.subbitJson(ids, false);
-            }
-        }catch (Exception e){
-            log.info(e+"应付报错信息");
-        }
-        return message;
+    	if (!CollectionUtils.isEmpty(ids)) {
+			return bisPayMidGroupServeice.subbitJson(ids, false);
+		} else {
+			return "应付订单不生成结算单传过来的id为空";
+		}
     }
 
 

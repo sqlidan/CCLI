@@ -55,6 +55,7 @@ function gridDG(){
 		pageList : [ 10, 20, 30, 40, 50 ],
 		singleSelect:false,
 		columns: [[
+			{field: 'xid', title: '项号',width: 100},
 			{field: 'billNo', title: '提单号',width: 150},
 			{field: 'containerNo', title: '箱号',  width: 150},
 			{field: 'productType', title: '货类', width: 100,
@@ -70,8 +71,8 @@ function gridDG(){
 			},
 			{
 				field: 'productName', title: '货物名称(品名)', width: 150},
-			{field: 'rSumnum', title: '原申报数量', width: 50},
-			{field: 'rSumweight', title: '原申报重量', width: 50},
+			{field: 'rSumnum', title: '原申报数量', width: 100},
+			{field: 'rSumweight', title: '原申报重量', width: 100},
 			{field: 'surplusNum', title: '剩余件数',  width: 100},
 			{field: 'surplusWeight', title: '剩余重量',  width: 100}
 			/*{field: 'appointDate', title: '入库日期',  width: 150}*/

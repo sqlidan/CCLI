@@ -90,10 +90,10 @@ public class PlatformReservationOutbound implements Serializable {
     private String address;
 
        @Column(name = "DES_CONTACT_NAME")
-    private String desContactName;
+       private String desContactName;
 
        @Column(name = "DES_CONTACT_PHONE")
-    private String desContactPhone;
+       private String desContactPhone;
 
        @Column(name = "QUEUING_TIME")
        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
@@ -103,8 +103,8 @@ public class PlatformReservationOutbound implements Serializable {
        private String locationNo;
 
     //库号
-    @Column(name = "ROOM_NUM")
-    private String roomNum;
+       @Column(name = "ROOM_NUM")
+       private String roomNum;
 
        @Column(name = "CREATED_TIME")
        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
@@ -127,6 +127,12 @@ public class PlatformReservationOutbound implements Serializable {
 
        @Column(name = "LOCAL_STATUS")
        public String LocalStatus;
+       //生成的报文名称
+       @Column(name = "FILE_NAME")
+       public String fileName;
+       //0:已申报   1:申报成功   2：申报失败
+       @Column(name = "IS_SUCCESS")
+        public String isSuccess;
 
 
     public String getManifestId() {

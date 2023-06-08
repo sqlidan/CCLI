@@ -13,6 +13,7 @@ import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.common.utils.HttpGo;
 import com.haiersoft.ccli.cost.dao.BisPayMidGroupDao;
+import com.haiersoft.ccli.cost.dao.StandingBookMidGroupDao;
 import com.haiersoft.ccli.cost.entity.BaseExpenseCategoryDetail;
 import com.haiersoft.ccli.cost.entity.BisPay;
 import com.haiersoft.ccli.cost.entity.enumVo.CostClassifyEnum;
@@ -54,14 +55,12 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
     private ClientService clientService;
     @Autowired
     private ClientRelationService clientRelationService;
+    @Autowired
+    private StandingBookMidGroupDao standingBookMidGroupDao;
 
-    private static final  String CUSTOMER_URL = "http://10.135.123.32:8080/api/customer/getCustomerbyCode";
-    private static final  String STANDINGBOOK_MIDGROUP_URL="http://10.135.123.32:8080/api/cost";
-    private static final String BISPAYORDER_URL="http://10.135.123.32:8080/api/order";
-    private static final String  TRUE_STATEMENT = "http://10.135.123.32:8080/api/statement/deleteCostByStatementNo?statementNo";
-    private static final String  FALSE_STATEMENT = "http://10.135.123.32:8080/api/cost/remove?origCostId";
-    private static final String  CLEINT_URL = "http://10.135.123.32:8080/api/customer/getCustomerbyCode";
-    private static final String  COSTCODE_URL = "http://10.135.123.32:8080/api/costCode/getCostCodeListByAppId";
+    private static final  String CUSTOMER_URL = "http://10.135.123.7:8080/api/customer/getCustomerbyCode";
+    private static final  String STANDINGBOOK_MIDGROUP_URL="http://10.135.123.7:8080/api/cost";
+    private static final String BISPAYORDER_URL="http://10.135.123.7:8080/api/order";
     private static final String STATU = "已上传";
     private static final String NOTSTATU = "未上传";
     private static final String STATEMENT = "已生成结算单";
@@ -74,10 +73,11 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
     }
 
 
-    public String selectBisOneByCodeNum(List<String> codeNums,Boolean flag) throws Exception {
+    public String selectBisOneByCodeNum(List<String> codeNums,Boolean flag){
         BaseClientInfo baseClientInfo = new BaseClientInfo();
         NumberFormat numberFormat = NumberFormat.getInstance();
         List<Map<String, Object>> allDatas = bisPayMidGroupDao.selectOneByCodeNum(codeNums);
+        log.info("需要上传的订单详情数据是"+allDatas);
 //        allDatas.stream().collect(Collectors.collectingAndThen(
 //                Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(p -> (String) p.get("PAYID")))),
 //                ArrayList::new));
@@ -93,23 +93,27 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
             Object origBizId = allData.get("PAYID"); //原始业务编号
             String feecodes = allData.get("FEECODE").toString();
             Map<String,Object> mapBase =baseExpenseCategoryDetailService.getCodeByFeeCode(feecodes);
+            String units = standingBookMidGroupDao.queryUnitsByFeeCode(feecodes);
             Object detail = mapBase.get("DETAIL_CODE");
             Object detailname = mapBase.get("DETAIL_CODE_NAME");
             if(StringUtils.isEmpty(detail)){
-                error =error+"原始业务编号为"+origBizId+"的客户费用代码异常;";
+                error =error+"原始业务编号为"+origBizId+"下费用编号"+feecodes+"的财务中台客户费用代码为空，请联系开发人员维护;";
                 continue;
             }
-            if(StringUtils.isEmpty(detailname)){
-                error=error+"原始业务编号为"+origBizId+"的客户费目编码为空;";
-                continue;
-            }
+
+//            if(StringUtils.isEmpty(detailname)){
+//                error=error+"原始业务编号为"+origBizId+"的客户费目编码为空;";
+//                continue;
+//            }
             detailCode= detail.toString();
             detailcodename =detailname.toString();
-            String costClassifyCode = StandingBookMidGroupService.sendParamReturncostClassifyCode(detailcodename);
-            if(StringUtils.isEmpty(costClassifyCode)){
-                error=error+"原始业务编号为"+origBizId+"的客户费用代码对应的费目类别编码异常;";
+            //String costClassifyCode = StandingBookMidGroupService.sendParamReturncostClassifyCode(detailcodename);
+            if(StringUtils.isEmpty(mapBase.get("WAREHOUSE"))&&StringUtils.isEmpty(mapBase.get("WAREHOUSE_PAY"))){
+                error=error+"原始业务编号为"+origBizId+"的财务中台客户费用代码"+detail+"对应的费目类别Warehouse和Warehouse_pay都为空;";
                 continue;
             }
+            String warehouse = StringUtils.isEmpty(mapBase.get("WAREHOUSE_PAY"))? 
+            		mapBase.get("WAREHOUSE").toString():mapBase.get("WAREHOUSE_PAY").toString();
             //数据库客户名称
             String clientname = (String) allData.get("CLIENTNAME");
             Object clientid = allData.get("CLIENTID");
@@ -125,10 +129,16 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
             map.put("isForeign",false);
             map.put("customerName",baseClientInfo.getRealClientName());
             String jsonClient = gson.toJson(map);
+            log.info("查询客户名称:"+jsonClient);
             String encrypt = AESUtils.encrypt(jsonClient,PASSWORD);
             String responseParam = httpGo.sendRequestHeader(CUSTOMER_URL, encrypt);
+            try {
+    	        JSON.parse(responseParam);
+    	    } catch (Exception e) {
+    	    	return "解析财务中台获取客户信息接口返回异常："+responseParam;
+    	    }
             //返回
-            JSONObject jsonObject =JSONObject.parseObject(responseParam);
+            JSONObject jsonObject =JSON.parseObject(responseParam);
             Integer code = (Integer)jsonObject.get("code");
             if(200 != code){
                 error = error+".客户名称"+clientname+"查询错误;";
@@ -146,7 +156,7 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
 
             Object origCostId = allData.get("ID");// 原始费用编号
             String origCostIds = origCostId.toString();
-            Object unit = allData.get("CURRENCY"); //计量单位
+//            Object unit = allData.get("CURRENCY"); //计量单位
             Object unitPrice = allData.get("UNITPRICE");// 单价  -  单价
             Object quantity = allData.get("NUM");// 数量 - 数量
             BigDecimal origAm = (BigDecimal) allData.get("SHOULDRMB"); //应收  - 原始金额
@@ -167,12 +177,17 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                 Float aFloat = Float.valueOf(taxrate.toString());
                 md.setTaxRate(numberFormat.format(aFloat * 100));
             }
-            md.setCostClassifyCode(costClassifyCode);
+            md.setCostClassifyCode(warehouse);
             md.setActAmount(origAmount); //实际金额
             md.setOrigBizId(origBizId.toString());
             md.setBookTime(settleDate.toString());
             md.setOrigCostId(origCostIds);
-            md.setUnit(unit.toString());
+            if(StringUtils.isEmpty(units)){
+                md.setUnit("箱");
+            }
+            if(!StringUtils.isEmpty(units)){
+                md.setUnit(units);
+            }
             md.setQuantity(new BigDecimal(quantity.toString()));
             md.setExchRate(new BigDecimal(exchRate.toString()));
             md.setDirection(direction.toString());
@@ -181,17 +196,24 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
             md.setType("1");
             md.setUnitPrice(new BigDecimal(unitPrice.toString()));
 
-            md.setCurrency("cny");
+            md.setCurrency("CNY");
             md.setOrigAmount(origAmount);  //原始金额
             md.setCostCode(detailCode);
-            md.setCostCenterCode("00001662002");
-            md.setOperator("2550010");
+            md.setCostCenterCode("00001663002");//业务开发部
+            md.setOperator("2550010");//韩总的员工号
             md.setOrgCode("080013");
             midGroupVoList.add(md);
         }
+        if (CollectionUtils.isEmpty(midGroupVoList)) {
+            log.info("应付费用传过去的数据为空");
+            return error;
+        }
+        if(error != "" || !error.equals("")){
+            return error;
+        }
         Gson gson = new Gson();
         Map mapParams = new HashMap();
-        mapParams.put("orgCode","080013");
+        mapParams.put("orgCode","080013");//冷链组织编号
         mapParams.put("appId","7e86aa901e86de01");
         mapParams.put("costList",midGroupVoList);
         mapParams.put("isMerge",flag);
@@ -202,6 +224,11 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
         String responseParam = httpGo.sendRequestHead(STANDINGBOOK_MIDGROUP_URL, map, encrypt);
 
         if(!StringUtils.isEmpty(responseParam)){
+        	try {
+      	        JSON.parse(responseParam);
+      	    } catch (Exception e) {
+      	    	return "解析财务中台上传费用接口返回异常："+responseParam;
+      	    }
             JSONObject jsonObject = JSONObject.parseObject(responseParam);
             Object code = jsonObject.get("code");
             String codes = String.valueOf(code);
@@ -228,8 +255,6 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                     log.info("请求明细参数是："+JSON.toJSONString(midGroupVoList)+",返回值是："+JSON.toJSONString(jsonObject));
                     return "success";
                 }
-
-
             }
             log.info("请求明细参数是："+JSON.toJSONString(midGroupVoList)+",返回值是："+JSON.toJSONString(jsonObject));
              return msg;
@@ -241,13 +266,14 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
     * 传过来的id集合
     * */
     @Transactional
-    public String subbitJson(List<String> ids,Boolean flag) throws Exception {
+    public String subbitJson(List<String> ids,Boolean flag) {
         //先将订单传过去
+        log.info("前端应付传过来的ids:{}",ids);
         String messages = this.selectBisAllByCodeNumSendOrder(ids);
-        if(messages.equals("success") || "success" == messages){
+        log.info("前端应付订单上传返回的信息:{}",messages);
+        if(messages.equals("success")){
             // 在传明细
-            String message = this.selectBisOneByCodeNum(ids,flag);
-            return  message;
+            return  this.selectBisOneByCodeNum(ids,flag);
         }
         return messages;
     }
@@ -278,11 +304,11 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                 map.put("isForeign","false");
             }
             String clientOne = this.sendParamReturnClientCode(map);
-            if("error".equals(clientCode) || "error" == clientCode){
+            if("".equals(clientCode)){
                 return "客户名称为:"+clientCode+"未在天眼查中检索到数据";
             }
             BisPayVo payVo = new BisPayVo();
-            payVo.setCostCenterCode("00001662002");
+            payVo.setCostCenterCode("00001663002");
             payVo.setCustomerCode(clientOne);
             payVo.setBizTime(settleDate.toString());
             payVo.setOrigBizId((String) origBizId);
@@ -314,8 +340,13 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
         String jsonArray = gson.toJson(bisPayVo);
         String encrypt = AESUtils.encrypt(jsonArray,PASSWORD);
         String responseParam = httpGo.sendRequestHead(BISPAYORDER_URL, map, encrypt);
-        JSONObject jsonObject = JSONObject.parseObject(responseParam);
-        log.info("应付订单返回的数据"+jsonObject);
+        try {
+	        JSON.parse(responseParam);
+	    } catch (Exception e) {
+	    	return "解析财务中台上传订单接口返回异常："+responseParam;
+	    }
+        JSONObject jsonObject = JSON.parseObject(responseParam);
+        log.info("应付订单返回的数据:{}",jsonObject);
         Integer code = (Integer) jsonObject.get("code");
         if(200 == code){
             return "success";
@@ -339,35 +370,28 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
 
     //根据参数 返回客户code
     public String sendParamReturnClientCode(Map<String,String> params){
-        String error = "";
-        Integer codeC = 200;
-        String clientId =new String();
-        String customerName = params.get("customerName");
-        String customerNa = customerName.trim();
-        params.remove("customerName");
-        params.put("customerName",customerNa);
         Gson gson = new Gson();
         String jsonArray = gson.toJson(params);
-        log.info("获取客户编码从本系统到到中台的数据:"+jsonArray);
+        log.info("获取客户编码从本系统到到中台的数据:{}",jsonArray);
         String encrypt = AESUtils.encrypt(jsonArray,PASSWORD);
-        String response = httpGo.sendRequestHeader(CLEINT_URL,encrypt);
-        log.info("根据本系统的"+customerNa+"从中台获取的数据为:"+response);
+        String response = httpGo.sendRequestHeader(CUSTOMER_URL,encrypt);
+        log.info("财务中台获取客户信息接口返回的数据为:{}",response);
         if(!StringUtils.isEmpty(response)){
-            JSONObject jsonObject = JSONObject.parseObject(response);
-            Object code = jsonObject.get("code");
-            String msg = jsonObject.get("msg").toString();
-
-            if( codeC.equals(code) || codeC == code ){
+            try {
+    	        JSON.parse(response);
+    	    } catch (Exception e) {
+    	    	return "解析财务中台获取客户信息接口返回异常："+response;
+    	    }
+            JSONObject jsonObject = JSON.parseObject(response);
+            if( jsonObject.getInteger("code")==200 ){
                 Object datas =  jsonObject.get("data");
-                JSONObject data = JSONObject.parseObject(datas.toString());
-                Object codeM = data.get("code");
-                clientId = codeM.toString();
+                JSONObject data = JSON.parseObject(datas.toString());
+                return data.getString("code");
             }else{
-                return msg;
+                return "";
             }
         }
-
-        return clientId;
+		return "";
     }
 
     /*
@@ -431,7 +455,7 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     String encryptNO = AESUtils.encrypt(statementNo,PASSWORD);
-                    String bodys = HttpUtil.createPost("http://10.135.123.32:8080/api/statement/removeCostByStatementNo?statementNo="+encryptNO)
+                    String bodys = HttpUtil.createPost("http://10.135.123.7:8080/api/statement/removeCostByStatementNo?statementNo="+encryptNO)
                                 .header("Content-Type", "application/json")
                                 .header("APPID","7e86aa901e86de01")
                                 .header("Fmp-Tenant-Data-Node","080013")

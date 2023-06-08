@@ -117,6 +117,8 @@ public class BaseAccount implements Serializable {
     private String surplusNum;
     //剩余重量
     private String surplusWeight;
+    //项号
+    private Integer xid;
 
     public Integer getId() {
         return id;
@@ -268,5 +270,13 @@ public class BaseAccount implements Serializable {
 
     public void setSurplusWeight(String surplusWeight) {
         this.surplusWeight = surplusWeight;
+    }
+
+    public Integer getXid() {
+        return xid;
+    }
+
+    public void setXid(Integer xid) {
+        this.xid = xid;
     }
 }

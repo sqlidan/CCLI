@@ -7,6 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -102,5 +103,28 @@ public class StandingBookMidGroupDao extends HibernateDao<BisStandingBook, Integ
         params.put("midGroupStatic",STATU);
         SQLQuery sqlQuery=createSQLQuery(sql.toString(), params);
         return sqlQuery.executeUpdate();
+    }
+
+    public String queryUnitsByFeeCode(String feecodes) {
+        String label = null;
+        String sql = "SELECT\n" +
+                "\tunit.label \n" +
+                "FROM\n" +
+                "\tBASE_EXPENSE_CATEGORY_INFO feecode\n" +
+                "\tLEFT JOIN ( SELECT unit.label, unit.value FROM dict unit WHERE unit.TYPE = 'units' ) unit ON feecode.units = unit.value \n" +
+                "WHERE\n" +
+                "\tCODE =:feecodes";
+        Map<String,Object> params = new HashMap<>();
+        params.put("feecodes",feecodes);
+        List<Map<String, Object>> sqlLe   = findSqlOrSelect(sql, params);
+        for (Map<String, Object> map : sqlLe) {
+           Object labels =  map.get("LABEL");
+           if(!StringUtils.isEmpty(labels)){
+               label= labels.toString();
+               return label;
+           }
+
+        }
+        return label;
     }
 }

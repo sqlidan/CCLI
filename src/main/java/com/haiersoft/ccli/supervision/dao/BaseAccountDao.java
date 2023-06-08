@@ -17,7 +17,7 @@ import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.stereotype.Repository;
 
-;import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Repository
@@ -230,16 +230,18 @@ public class BaseAccountDao extends HibernateDao<BaseAccount, String> {
 
 
         sb.append(" SELECT                  ");
+        sb.append("  ba.xid,                ");
         sb.append(" ba.BILL_NO as billNo,                                            ");
         sb.append(" ba.CONTAINER_NO as containerNo,                                     ");
         sb.append("  ba.PRODUCT_TYPE as productType,                    ");
         sb.append("  ba.PRODUCT_NAME as productName,                    ");
         sb.append("  ba.R_SUMNUM  as rSumnum,                   ");
         sb.append("  ba.R_SUMWEIGHT as rSumweight,                  ");
-        sb.append("  ba.R_SUMNUM-c.C_SUMNUM as surplusNum,                   ");
-        sb.append("  ba.R_SUMWEIGHT-c.C_SUMWEIGHT as surplusWeight                  ");
+        sb.append("  ba.R_SUMNUM-nvl(c.C_SUMNUM,0) as surplusNum,                   ");
+        sb.append("  ba.R_SUMWEIGHT-nvl(c.C_SUMWEIGHT,0) as surplusWeight                  ");
         sb.append("   from (                 ");
         sb.append("  SELECT               ");
+        sb.append("   max(ba.xid) xid,               ");
         sb.append("   ba.BILL_NO ,                 ");
         sb.append("   ba.CONTAINER_NO ,          ");
         sb.append("   ba.PRODUCT_TYPE,     ");
@@ -293,8 +295,10 @@ public class BaseAccountDao extends HibernateDao<BaseAccount, String> {
         sb.append("  and ba.CONTAINER_NO = c.CONTAINER_NO            ");
         sb.append("  and  ba.PRODUCT_TYPE = c.PRODUCT_TYPE               ");
         sb.append("  and ba.PRODUCT_NAME = c.PRODUCT_NAME               ");
-        Map<String, Object> paramType = new HashMap<>();
+        sb.append("  order by ba.xid             ");
 
+        Map<String, Object> paramType = new HashMap<>();
+        paramType.put("xid", Integer.class);
         paramType.put("billNo", String.class);
         paramType.put("containerNo", String.class);
         paramType.put("productType", String.class);
@@ -324,8 +328,8 @@ public class BaseAccountDao extends HibernateDao<BaseAccount, String> {
         sb.append("  ba.PRODUCT_NAME as productName,                    ");
         sb.append("  ba.R_SUMNUM  as rSumnum,                   ");
         sb.append("  ba.R_SUMWEIGHT as rSumweight,                  ");
-        sb.append("  ba.R_SUMNUM-c.C_SUMNUM as surplusNum,                   ");
-        sb.append("  ba.R_SUMWEIGHT-c.C_SUMWEIGHT as surplusWeight                  ");
+        sb.append("  ba.R_SUMNUM-nvl(c.C_SUMNUM,0) as surplusNum,                   ");
+        sb.append("  ba.R_SUMWEIGHT-nvl(c.C_SUMWEIGHT,0) as surplusWeight                  ");
         sb.append("   from (                 ");
         sb.append("  SELECT               ");
         sb.append("   ba.BILL_NO ,                 ");

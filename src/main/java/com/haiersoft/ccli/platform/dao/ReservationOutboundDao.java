@@ -34,4 +34,33 @@ public class ReservationOutboundDao extends HibernateDao<PlatformReservationOutb
         sqlQuery.executeUpdate();
     }
 
+
+    /**
+     *
+     * @param fileName
+     * @param id
+     */
+    public void updateFiledNameById(String fileName, String id) {
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("fileName", fileName);
+        params.put("id", id);
+        String sql = "update PLATFORM_RESERVATION_OUTBOUND set IS_SUCCESS = '0',FILE_NAME = :fileName where ID = :id ";
+        SQLQuery sqlQuery=createSQLQuery(sql, params);
+        sqlQuery.executeUpdate();
+    }
+
+
+    /**
+     * @param fileName
+     * @param isSuccess
+     */
+    public void updateIsSuccessByFiledName(String fileName, String isSuccess) {
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.put("fileName", fileName);
+        params.put("isSuccess", isSuccess);
+        String sql = "update PLATFORM_RESERVATION_OUTBOUND set IS_SUCCESS = :isSuccess where FILE_NAME = :fileName";
+        SQLQuery sqlQuery=createSQLQuery(sql, params);
+        sqlQuery.executeUpdate();
+    }
+
 }

@@ -38,7 +38,7 @@ public enum CostClassifyEnum {
     CODESFOURT("单证费","WarehouseA"),
     CODESFIFT("改单费","WarehouseA"),
 
-
+    CODESEIGHTQS("海关验货代理","WarehouseA"),
     CODESEIGHTQ("海关验货代理费","WarehouseA"),
     CODESNINEQ("查验服务费","WarehouseC"),
     CODESTENQ("散货船代理费","WarehouseA"),
@@ -60,7 +60,7 @@ public enum CostClassifyEnum {
     CODESTHRITYQW("出库报关费","WarehouseA"),
     CODESFOURTYQW("加班费","WarehouseC"),
     CODESFIFTYQW("缠膜费","WarehouseC"),
-    CODESSIXTYQW("代理审批费","WarehouseC"),
+    CODESSIXTYQW("代理审批费","WarehouseA"),
     CODESSEVENTYQW("滞报金","WarehouseA"),
     CODESTHRITQW("洗箱费","WarehouseA"),
     CODESFOURTQW("箱使费","WarehouseA"),
@@ -78,7 +78,7 @@ public enum CostClassifyEnum {
     CODESFOURTYQWG("超期制冷费","WarehouseA"),
     CODESFIFTYQWG("出入库及一次性降温费","WarehouseC"),
     CODESSIXTYQWG("插电费","WarehouseC"),
-    CODESSEVENTYQWG("仓储费","WarehouseC"),
+    CODESSEVENTYQWG("仓储费","WarehouseS"),
     CODESTHRITQWG("报关费","WarehouseA"),
     CODESFOURTQWG("报检费","WarehouseA"),
     CODESFIFTQWG("插电制冷费","WarehouseC"),
