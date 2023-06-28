@@ -643,6 +643,12 @@ public class TransferContorller extends BaseController {
 						sumNum + 3, String.valueOf(sumGross));
 			}
 
+			excelUtil.setCellStrValue(starRows + getlist.size()+2,7,
+					"PrintTime :");
+			excelUtil.setCellStrValue(starRows + getlist.size()+2,
+					8,DateUtils.getDateTime());
+
+
 			excelUtil.exportToNewFile();
 			FileInputStream in = new FileInputStream(new File(desPath));
 			int len = 0;
@@ -672,7 +678,7 @@ public class TransferContorller extends BaseController {
 	 * @param response
 	 * @throws Exception
 	 */
-	 	@RequestMapping(value = "reportpdf", method = RequestMethod.POST)
+	 	@RequestMapping(value = "reportpdf")
 	   	@ResponseBody
 	   	public void exportpdf(@Valid @ModelAttribute @RequestBody BisTransferStock obj,HttpServletRequest request, HttpServletResponse response) throws Exception{
 	 		if(obj.getNtype()!=null && obj.getNtype()>0){
@@ -850,7 +856,7 @@ public class TransferContorller extends BaseController {
 	       		sbHtml.append("<table style=\"border-spacing:0px;text-align:center; border-collapse:collapse;font-family:宋体;font-size:12px;width:100%\"><tr>");
 	       		@SuppressWarnings("unused")
 				User user = UserUtil.getCurrentUser();
-	       		sbHtml.append("<td style=\"text-align:right;margin-top:10px;\">").append("操作人员：").append(" PrintTime : &nbsp;").append(DateUtils.getDateTime()).append("</td>");
+	       		sbHtml.append("<td style=\"text-align:right;margin-top:10px;\">").append("操作人员：").append(" PrintTime : ").append(DateUtils.getDateTime()).append("</td>");
 	       		sbHtml.append("</tr></table>");
 	       		MyFileUtils html=new MyFileUtils();
 	       		html.setFilePath(pathHtml);

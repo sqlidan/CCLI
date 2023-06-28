@@ -1127,6 +1127,12 @@ public class EnterStockController extends BaseController {
                 excelUtil.setCellStrValue(starRows + getlist.size(), sumNum + 3, String.valueOf(sumGross));
             }
 
+            excelUtil.setCellStrValue(starRows + getlist.size()+2,7,
+                    "PrintTime :");
+            excelUtil.setCellStrValue(starRows + getlist.size()+2,
+                    8,DateUtils.getDateTime());
+
+
             excelUtil.exportToNewFile();
             FileInputStream in = new FileInputStream(new File(desPath));
             int len = 0;

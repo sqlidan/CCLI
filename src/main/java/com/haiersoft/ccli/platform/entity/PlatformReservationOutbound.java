@@ -134,6 +134,8 @@ public class PlatformReservationOutbound implements Serializable {
        @Column(name = "IS_SUCCESS")
         public String isSuccess;
 
+        @Column(name = "IS_BULK_CARGO")
+        public String isBulkCargo;
 
     public String getManifestId() {
         return ManifestId;
@@ -401,5 +403,13 @@ public class PlatformReservationOutbound implements Serializable {
 
     public void setRoomNum(String roomNum) {
         this.roomNum = roomNum;
+    }
+
+    public String getIsBulkCargo() {
+        return isBulkCargo;
+    }
+
+    public void setIsBulkCargo(String isBulkCargo) {
+        this.isBulkCargo = isBulkCargo;
     }
 }

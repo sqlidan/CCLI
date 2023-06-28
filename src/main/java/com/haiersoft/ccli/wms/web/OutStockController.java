@@ -1288,6 +1288,10 @@ public class OutStockController extends BaseController {
 				excelUtil.setCellStrValue(starRows + getlist.size(),
 						sumNum + 4, new DecimalFormat("####.00").format(sumGross));
 			}
+			excelUtil.setCellStrValue(starRows + getlist.size()+2,7,
+					"PrintTime :");
+			excelUtil.setCellStrValue(starRows + getlist.size()+2,
+					8,DateUtils.getDateTime());
 
 			excelUtil.exportToNewFile();
 			FileInputStream in = new FileInputStream(new File(desPath));

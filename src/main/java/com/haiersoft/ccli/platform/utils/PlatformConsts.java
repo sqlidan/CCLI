@@ -25,4 +25,8 @@ public interface PlatformConsts {
 
 	// 排队  重新排队
 	String PLATFORM_URL_RESERT_QUEUE = PLATFORM_URL + "/platform/platformQueue/resertQueue";
+
+	// 散货同步信息
+	String PLATFORM_URL_BULKCARGO_UPDATE_OUTRESERVATION = PLATFORM_URL + "/platform/platformQueue/updateOutReservation";
+
 }

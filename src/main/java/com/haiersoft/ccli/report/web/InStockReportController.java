@@ -343,7 +343,10 @@ public class InStockReportController extends BaseController {
             excelUtil.setCellDoubleValue(myNum + listMap.size() + addRow, nTJNum + 4, Double.parseDouble(new DecimalFormat("#.##").format(sumGross)));
 
         }
-
+        excelUtil.setCellStrValue(myNum + listMap.size()+addRow+2,7,
+                "PrintTime :");
+        excelUtil.setCellStrValue(myNum + listMap.size()+addRow+2,
+                8,DateUtils.getDateTime());
 
         excelUtil.exportToNewFile();
 

@@ -1,6 +1,7 @@
 package com.haiersoft.ccli.platform.web;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
@@ -127,6 +128,37 @@ public class ReservationOutboundController extends BaseController {
 
         try{
             httpUtil.doPost(PlatformConsts.PLATFORM_URL_CANCEL_RESERVATION_NO_GATEIN, JSON.toJSONString(sendMap));
+        }catch (HttpHostConnectException ex){
+            logger.info(ex.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "success";
+    }
+    //散货同步信息修改客户信息
+    @RequestMapping(value = "synchronousInformation/{id}")
+    @ResponseBody
+    public String synchronousInformation(@PathVariable("id") String id) {
+        if(id==null&&id.equals("")) {
+            return "error";
+        }
+        PlatformReservationOutbound platformReservationOutbound= reservationOutboundService.get(id);
+
+
+        Map<String,String> sendMap = new HashMap<>();
+
+        sendMap.put("inoutBoundFlag","2");
+        sendMap.put("yyid",platformReservationOutbound.getYyid());
+
+        try{
+          String result=  httpUtil.doPostSync(PlatformConsts.PLATFORM_URL_BULKCARGO_UPDATE_OUTRESERVATION, JSON.toJSONString(sendMap));
+
+            JSONObject jsonObject = JSON.parseObject(result);
+            String code =jsonObject.getString("code");
+            if(!"200".equals(code)){
+                return jsonObject.getString("msg");
+            }
+
         }catch (HttpHostConnectException ex){
             logger.info(ex.getMessage());
         } catch (Exception e) {

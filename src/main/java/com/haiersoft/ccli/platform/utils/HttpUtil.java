@@ -5,6 +5,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -87,6 +88,26 @@ public class HttpUtil{
 	 * @param json
 	 * @return
 	 */
+
+	public String doPostSync(String url, String json) throws Exception{
+
+		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
+		HttpPost post = new HttpPost(url);
+		StringEntity s = new StringEntity(json,"UTF-8");
+		s.setContentEncoding("UTF-8");
+		s.setContentType("application/json");// 发送json数据需要设置contentType
+		post.setEntity(s);
+		HttpResponse res = httpclient.execute(post);
+
+		if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+			HttpEntity entity = res.getEntity();
+			//String responseBody = new String(EntityUtils.toString(entity).getBytes("utf-8"));
+			String responseBody = EntityUtils.toString(entity,"utf-8");
+			return responseBody;
+		}
+		return "";
+	}
+
 	@Async
 	public void doPost(String url, String json) throws Exception{
 
@@ -112,7 +133,7 @@ public class HttpUtil{
 //		HttpUriRequest request2 = HttpRequest;
 //		HttpResponse res = httpclient.
 //
-//	}
+//    }
 
 	public static String doPostUploadFile(String url, MultipartFile file,String fileParamName) {
 		CloseableHttpClient httpclient = HttpClientBuilder.create().build();
