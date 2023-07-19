@@ -58,9 +58,10 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
     @Autowired
     private StandingBookMidGroupDao standingBookMidGroupDao;
 
-    private static final  String CUSTOMER_URL = "http://10.135.123.7:8080/api/customer/getCustomerbyCode";
-    private static final  String STANDINGBOOK_MIDGROUP_URL="http://10.135.123.7:8080/api/cost";
-    private static final String BISPAYORDER_URL="http://10.135.123.7:8080/api/order";
+    private static final  String CUSTOMER_URL = "http://kubemaster.sdlandsea.net:30156/api/customer/getCustomerbyCode";
+    private static final  String STANDINGBOOK_MIDGROUP_URL="http://kubemaster.sdlandsea.net:30156/api/cost";
+    private static final String BISPAYORDER_URL="http://kubemaster.sdlandsea.net:30156/api/order";
+    private static final String BASE_URL="http://kubemaster.sdlandsea.net:30156";//撤回接口根路径配置
     private static final String STATU = "已上传";
     private static final String NOTSTATU = "未上传";
     private static final String STATEMENT = "已生成结算单";
@@ -455,7 +456,7 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     String encryptNO = AESUtils.encrypt(statementNo,PASSWORD);
-                    String bodys = HttpUtil.createPost("http://10.135.123.7:8080/api/statement/removeCostByStatementNo?statementNo="+encryptNO)
+                    String bodys = HttpUtil.createPost(BASE_URL+"/api/statement/removeCostByStatementNo?statementNo="+encryptNO)
                                 .header("Content-Type", "application/json")
                                 .header("APPID","7e86aa901e86de01")
                                 .header("Fmp-Tenant-Data-Node","080013")

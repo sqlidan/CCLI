@@ -70,9 +70,13 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
     private HttpGo httpGo;
 
 
-    private final static String STANDINGBOOK_MIDGROUP_URL = "http://10.135.123.7:8080/api/cost";
-    private static final String CUSTOMER_URL = "http://10.135.123.7:8080/api/customer/getCustomerbyCode";
-    private static final String BISPAYORDER_URL = "http://10.135.123.7:8080/api/order";
+//    private final static String STANDINGBOOK_MIDGROUP_URL = "http://10.135.123.7:8080/api/cost";
+//    private static final String CUSTOMER_URL = "http://10.135.123.7:8080/api/customer/getCustomerbyCode";
+//    private static final String BISPAYORDER_URL = "http://10.135.123.7:8080/api/order";
+    private final static String STANDINGBOOK_MIDGROUP_URL = "http://kubemaster.sdlandsea.net:30156/api/cost";
+    private static final String CUSTOMER_URL = "http://kubemaster.sdlandsea.net:30156/api/customer/getCustomerbyCode";
+    private static final String BISPAYORDER_URL = "http://kubemaster.sdlandsea.net:30156/api/order";
+    private static final String BASE_URL="http://kubemaster.sdlandsea.net:30156";//撤回接口根路径配置
     private static final String STATU = "已上传";
     private static final String NOTSTATU = "未上传";
     private static final String STATEMENT = "已生成结算单";
@@ -497,7 +501,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     String encryptNO = AESUtils.encrypt(statementNo, PASSWORD);
-                    String bodys = HttpUtil.createPost("http://10.135.123.7:8080/api/statement/removeCostByStatementNo?statementNo=" + encryptNO)
+                    String bodys = HttpUtil.createPost(BASE_URL+"/api/statement/removeCostByStatementNo?statementNo=" + encryptNO)
                             .header("Content-Type", "application/json")
                             .header("APPID", "7e86aa901e86de01")
                             .header("Fmp-Tenant-Data-Node", "080013")
@@ -535,7 +539,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
 
     static cn.hutool.json.JSONObject delete(String encrypt) {
 
-        String body = HttpUtil.createPost("http://10.135.123.7:8080/api/cost/remove?origCostId=" + encrypt)
+        String body = HttpUtil.createPost(BASE_URL+"/api/cost/remove?origCostId=" + encrypt)
                 .header("Content-Type", "application/json")
                 .header("APPID", "7e86aa901e86de01")
                 .header("Fmp-Tenant-Data-Node", "080013")
