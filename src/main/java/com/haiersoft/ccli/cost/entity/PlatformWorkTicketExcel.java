@@ -59,6 +59,9 @@ public class PlatformWorkTicketExcel {
     @Excel(name = "实际操作")
     private Double actualWeightx;
 
+    @Excel(name = "系数")
+    private String numPlus;
+
     @Excel(name = "姓名")
     private String name;
 
@@ -162,5 +165,13 @@ public class PlatformWorkTicketExcel {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getNumPlus() {
+        return numPlus;
+    }
+
+    public void setNumPlus(String numPlus) {
+        this.numPlus = numPlus;
     }
 }

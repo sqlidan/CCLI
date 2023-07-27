@@ -15,7 +15,7 @@
 				<input type="text" name="filter_LIKES_T4.NAME" class="easyui-validatebox" data-options="width:150,prompt: '楼上叉车'"/>
 				<input type="text" name="filter_LIKES_T5.NAME" class="easyui-validatebox" data-options="width:150,prompt: '现场叉车'"/>
 				<input type="text" name="filter_LIKES_STEVEDORE_NAME" class="easyui-validatebox" data-options="width:150,prompt: '装卸工姓名'"/>
-       	        <input type="text" name="filter_LIKES_ASN_TRANS_NUM" class="easyui-validatebox" data-options="width:150,prompt: 'ASN'"/>
+       	        <input type="text" name="filter_LIKES_ASN_TRANS_NUM" class="easyui-validatebox" data-options="width:150,prompt: '装车单'"/>
 				<input type="text" name="filter_LIKES_CLIENT_NAME" class="easyui-validatebox" data-options="width:150,prompt: '装卸队'"/>
 		        <input type="text" name="filter_GTD_T1.CREATED_TIME" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width:150,prompt: '开始日期'"/>
 		        - <input type="text" name="filter_LTD_T1.CREATED_TIME" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width:150,prompt: '结束日期'"/>

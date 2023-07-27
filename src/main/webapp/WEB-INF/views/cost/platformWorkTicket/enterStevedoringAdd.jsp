@@ -43,7 +43,7 @@
 					    <option value=1>1</option>
 					    <option value=1.5>1.5</option>
 					    <option value=2>2</option>
-					    <option value=2.5 selected>2.5</option>
+					    <option value=2.5>2.5</option>
 					    <option value=3>3</option>
 					    <option value=3.5>3.5</option>
 					</select>
@@ -83,8 +83,9 @@
 <script type="text/javascript">
 var action="${action}";
 
-var numPlus='${platformWorkTicket.numPlus}';
-$('#numPlus').val(numPlus);
+/*var numPlus='${platformWorkTicket.numPlus}';
+$('#numPlus').val(numPlus);*/
+$('#numPlus').val(1)
 
 var asn='${platformWorkTicket.asnTransNum}'
 $("#asnE").val(asn);

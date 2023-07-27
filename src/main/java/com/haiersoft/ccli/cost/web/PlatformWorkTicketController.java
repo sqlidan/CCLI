@@ -12,6 +12,7 @@ import com.haiersoft.ccli.cost.entity.PlatformWorkTicket;
 import com.haiersoft.ccli.cost.entity.PlatformWorkTicketExcel;
 import com.haiersoft.ccli.cost.service.PlatformWorkTicketService;
 import com.haiersoft.ccli.system.entity.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.hibernate.SQLQuery;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
@@ -264,6 +265,12 @@ public class PlatformWorkTicketController extends BaseController {
 		List<PlatformWorkTicketExcel> resultExcelList = new ArrayList<>();
 		for( PlatformWorkTicket ticket :result){
 
+			//错误数据会导致 空指针 程序报错  这边先做=1 处理
+			if(StringUtils.isEmpty(ticket.getNumPlus())){
+				ticket.setNumPlus("1");
+			}
+			BigDecimal numPlus = new BigDecimal(ticket.getNumPlus());
+
 			PlatformWorkTicketExcel lh=new PlatformWorkTicketExcel();
 			BeanUtils.copyProperties(ticket,lh);
 			if(lh.getInOutBoundFlag().equals("1")){
@@ -279,8 +286,9 @@ public class PlatformWorkTicketController extends BaseController {
 
 			BigDecimal lhO = new BigDecimal("0.6");
 			BigDecimal lhA = new BigDecimal("0.3");
-			lh.setOperationWeight(lhO.multiply(new BigDecimal(String.valueOf(lh.getWeight()))).doubleValue());
-			lh.setActualWeightx(lhA.multiply(new BigDecimal(String.valueOf(lh.getWeight()))).doubleValue());
+			BigDecimal lhWeight = BigDecimal.valueOf(lh.getWeight()).multiply(numPlus);
+			lh.setOperationWeight(lhO.multiply(lhWeight).doubleValue());
+			lh.setActualWeightx(lhA.multiply(lhWeight).doubleValue());
 			lh.setPost("理货");
 			lh.setName(ticket.getTallyName());
 
@@ -301,8 +309,9 @@ public class PlatformWorkTicketController extends BaseController {
 
 			BigDecimal forkliftSceneO = new BigDecimal("0.6");
 			BigDecimal forkliftSceneA = new BigDecimal("0.3");
-			forkliftScene.setOperationWeight(forkliftSceneO.multiply(new BigDecimal(String.valueOf(forkliftScene.getWeight()))).doubleValue());
-			forkliftScene.setActualWeightx(forkliftSceneA.multiply(new BigDecimal(String.valueOf(forkliftScene.getWeight()))).doubleValue());
+			BigDecimal forkliftWeight = BigDecimal.valueOf(forkliftScene.getWeight()).multiply(numPlus);
+			forkliftScene.setOperationWeight(forkliftSceneO.multiply(forkliftWeight).doubleValue());
+			forkliftScene.setActualWeightx(forkliftSceneA.multiply(forkliftWeight).doubleValue());
 
 			forkliftScene.setPost("现场叉车");
 			forkliftScene.setName(ticket.getForkliftSceneName());
@@ -324,9 +333,11 @@ public class PlatformWorkTicketController extends BaseController {
 			}
 			BigDecimal forkliftUpO = new BigDecimal("0.8");
 			BigDecimal forkliftUpA = new BigDecimal("0.4");
+			BigDecimal forkliftUpWeight = BigDecimal.valueOf(forkliftUp.getWeight()).multiply(numPlus);
 
-			forkliftUp.setOperationWeight(forkliftUpO.multiply(new BigDecimal(String.valueOf(forkliftUp.getWeight()))).doubleValue());
-			forkliftUp.setActualWeightx(forkliftUpA.multiply(new BigDecimal(String.valueOf(forkliftUp.getWeight()))).doubleValue());
+
+			forkliftUp.setOperationWeight(forkliftUpO.multiply(forkliftUpWeight).doubleValue());
+			forkliftUp.setActualWeightx(forkliftUpA.multiply(forkliftUpWeight).doubleValue());
 			forkliftUp.setPost("楼上叉车");
 			forkliftUp.setName(ticket.getForkliftUpName());
 
