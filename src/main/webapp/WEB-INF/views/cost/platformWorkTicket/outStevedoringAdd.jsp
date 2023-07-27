@@ -83,9 +83,10 @@
 <script type="text/javascript">
 	var action="${action}";
 
-	var numPlus='${platformWorkTicket.numPlus}';
+	/*var numPlus='${platformWorkTicket.numPlus}';
 	$('#numPlus').val(numPlus);
-
+*/
+	$('#numPlus').val(1);
 	var loadingNum='${platformWorkTicket.asnTransNum}'
 	$("#loadingNume").val(loadingNum);
 

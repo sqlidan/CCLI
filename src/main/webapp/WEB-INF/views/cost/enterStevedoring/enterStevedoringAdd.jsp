@@ -40,10 +40,10 @@
 				<td>重量系数：</td>
 				<td>
 					<select id="numPlus" name="numPlus" class="easyui-combobox" data-options="width: 50, required:'required'" value="" >
-					    <option value=1>1</option>
+					    <option value=1 selected>1</option>
 					    <option value=1.5>1.5</option>
 					    <option value=2>2</option>
-					    <option value=2.5 selected>2.5</option>
+					    <option value=2.5 >2.5</option>
 					    <option value=3>3</option>
 					    <option value=3.5>3.5</option>
 					</select>
