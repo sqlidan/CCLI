@@ -44,7 +44,8 @@
             <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
             <span class="toolbar-item dialog-tool-separator"></span>
-
+            <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="synchronousInformation()">同步信息</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="cancel()">取消预约</a>
         </form>
         <form id="searchFrom3" action="">
@@ -131,6 +132,16 @@
                     field: 'num', title: '件数', width: 50,
                 },
                 {field: 'weight', title: '重量',  width: 60},
+                {
+                    field: 'isBulkCargo', title: '是否散货', width: 100,
+                    formatter: function (val, row, index) {
+                        if (val == "1") {
+                            return "散货";
+                        } else if (val == "0") {
+                            return "";
+                        }
+                    }
+                },
                 {field: 'roomNum', title: '库号', width: 70},
                 {field: 'locationNo', title: '房间号', width: 70},
                 {field: 'carNumber', title: '车牌号', width: 70},
@@ -188,6 +199,34 @@
                 $.ajax({
                     type:'get',
                     url:"${ctx}/platform/reservation/outbound/cancel/"+id,
+                    success: function(data){
+                        successTip(data,dg);
+                    }
+                });
+            }
+        });
+    }
+
+    //同步信息
+    function synchronousInformation(){
+        var row = dg.datagrid('getSelected');
+
+        if(rowIsNull(row)) return;
+
+        if(row.status!='0'){
+            parent.$.messager.alert("提示","该状态不能同步信息");
+            return;
+        }
+        if(row.isBulkCargo!='1'){
+            parent.$.messager.alert("提示","不是散货，不需要同步信息");
+            return;
+        }
+        var id = row.id;
+        parent.$.messager.confirm('提示', '是否同步：'+row.carNumber+'信息？', function(data){
+            if (data){
+                $.ajax({
+                    type:'get',
+                    url:"${ctx}/platform/reservation/outbound/synchronousInformation/"+id,
                     success: function(data){
                         successTip(data,dg);
                     }
