@@ -1,5 +1,7 @@
 package com.haiersoft.ccli.supervision.web;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -85,6 +87,11 @@ public class EnterManiController extends BaseController{
 	@Transactional
 	private void inDoing(ManiHead maniHead) {
 		Date currDate = new Date();
+
+		DecimalFormat format = new DecimalFormat("0.00");
+
+		String grossWt  = format.format(new BigDecimal(maniHead.getGrossWt()));
+		maniHead.setGrossWt(grossWt);
 		// 核放单头
 		maniHead.setIeFlag("I");
 		maniHead.setEmptyFlag("N");

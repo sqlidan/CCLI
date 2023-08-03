@@ -187,8 +187,8 @@ function exportExcel(){
 		parent.$.messager.show({ title : "提示",msg: "请选择时间起止范围", position: "bottomRight" });
 		return;
 	}
-	if((new Date(endTime)-new Date(strTime))/(1000*60*60*24)>31){
-		parent.$.messager.show({ title : "提示",msg: "时间范围不要大于31天", position: "bottomRight" });
+	if((new Date(endTime)-new Date(strTime))/(1000*60*60*24)>32){
+		parent.$.messager.show({ title : "提示",msg: "时间范围不要大于32天", position: "bottomRight" });
 		return;
 	}
 
