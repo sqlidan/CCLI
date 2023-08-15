@@ -79,7 +79,7 @@ public class FTPUtils {
             url ="10.135.252.42"; // 设置服务器地址
             port ="21"; // 设置端口
             username ="yzh"; // 设置用户名
-            password ="yzh"; // 设置密码
+            password ="Eimskip0804"; // 设置密码
             rootDirectory ="/Send/"; //设置文件存放根目录
         } finally {
             // 判断输入流是否为空

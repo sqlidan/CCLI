@@ -684,7 +684,7 @@ public class SupervisionController {
 			System.out.println("生成.FLJGRX成功");
 			String ftpHost="10.135.252.42";
 		    String ftpUserName = "yzh";
-		    String ftpPassword = "yzh";
+		    String ftpPassword = "Eimskip0804";
 		    fileName=fileName+".FLJGRX";
 		    int ftpPort = 21;
 		    String ftpPath = "Send/";
@@ -1352,7 +1352,7 @@ public class SupervisionController {
 			System.out.println("生成.FLJGRX成功");
 			String ftpHost="10.135.252.42";
 		    String ftpUserName = "yzh";
-		    String ftpPassword = "yzh";
+		    String ftpPassword = "Eimskip0804";
 		    fileName=fileName+".FLJGRX";
 		    int ftpPort = 21;
 		    String ftpPath = "Send/";
@@ -1685,7 +1685,7 @@ public class SupervisionController {
 			System.out.println("生成.FLJGRX成功");
 			String ftpHost="10.135.252.42";
 		    String ftpUserName = "yzh";
-		    String ftpPassword = "yzh";
+		    String ftpPassword = "Eimskip0804";
 		    fileName=fileName+".FLJGRX";
 		    int ftpPort = 21;
 		    String ftpPath = "Send/";

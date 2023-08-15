@@ -1,16 +1,15 @@
 package com.haiersoft.ccli.wms.dao;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.hibernate.SQLQuery;
-import org.springframework.stereotype.Repository;
-
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.wms.entity.BisCustomsClearance;
+import org.hibernate.SQLQuery;
+import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -18,7 +17,7 @@ import com.haiersoft.ccli.wms.entity.BisCustomsClearance;
  *
  */
 @Repository
-public class CustomsClearanceDao extends HibernateDao<BisCustomsClearance, String>{
+public class CustomsClearanceDao extends HibernateDao<BisCustomsClearance, String> {
 	
     private static String like(String str) {
         return "%" + str + "%";
@@ -34,9 +33,9 @@ public class CustomsClearanceDao extends HibernateDao<BisCustomsClearance, Strin
 		buffer.append("SELECT a.*,t.* FROM BIS_CUSTOMS_CLEARANCE a");
 		buffer.append(" LEFT JOIN (");
 		buffer.append("SELECT sum(bcci.NUM) AS NUM,sum(bcci.NET_WEIGHT) AS NET_WEIGHT, sum(bcci.GROSS_WEIGHT) AS GROSS_WEIGHT");
-		buffer.append(", sum(bcci.MONEY) AS MONEY, min(bcci.CURRENCY_VALUE) AS CURRENCY_VALUE,bcci.CUS_ID, min(bcci.WOODEN_NO) AS WOODEN_NO");
+		buffer.append(", sum(bcci.MONEY) AS MONEY, min(bcci.CURRENCY_VALUE) AS CURRENCY_VALUE,bcci.CUS_ID,bcci.ACCOUNT_BOOK, min(bcci.WOODEN_NO) AS WOODEN_NO");
 		buffer.append(" FROM BIS_CUSTOMS_CLEARANCE_INFO bcci");
-		buffer.append(" GROUP BY bcci.CUS_ID");
+		buffer.append(" GROUP BY bcci.CUS_ID,bcci.ACCOUNT_BOOK");
 		buffer.append(") t");
 		buffer.append(" ON T.CUS_ID = a.CD_NUM");
 		buffer.append(" where 1=1  ");

@@ -1,17 +1,7 @@
 package com.haiersoft.ccli.wms.entity;
 
+import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import org.jeecgframework.poi.excel.annotation.Excel;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * BisCustomsDeclarationInfo entity. @author MyEclipse Persistence Tools
@@ -74,7 +64,16 @@ public class BisCustomsClearanceInfo implements java.io.Serializable {
 	@Column(name = "WOODEN_NO")
 	private String woodenNo; //木托编号
 
+	@Column(name = "ACCOUNT_BOOK")
+	private String accountBook;
 
+	public String getAccountBook() {
+		return accountBook;
+	}
+
+	public void setAccountBook(String accountBook) {
+		this.accountBook = accountBook;
+	}
 
 	public Integer getId() {
 		return id;

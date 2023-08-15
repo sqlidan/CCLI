@@ -1,17 +1,12 @@
 package com.haiersoft.ccli.wms.entity;
 
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * 
@@ -133,7 +128,17 @@ public class BisCustomsClearance implements java.io.Serializable {
 	@Transient
 	private String searchEndTime;//申报时间止
 
-	
+	@Transient
+	private String accountBook;
+
+	public String getAccountBook() {
+		return accountBook;
+	}
+
+	public void setAccountBook(String accountBook) {
+		this.accountBook = accountBook;
+	}
+
 	public String getCdNum() {
 		return cdNum;
 	}
