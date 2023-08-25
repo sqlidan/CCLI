@@ -482,7 +482,7 @@ function selectAjax(){
 function gridDG(passPortId){
    dg =$('#dg').datagrid({
 		method: "get",
-	    url:'${ctx}/wms/passPortInfo/jsonDJ/'+passPortId,
+	    url:'${ctx}/wms/passPortInfo/jsonDJ?passPortId='+passPortId,
 	    fit : true,
 		fitColumns : true,
 		border : false,
@@ -510,7 +510,7 @@ function gridDG(passPortId){
 function gridDG2(passPortId){
 	dg2 =$('#dg2').datagrid({
 		method: "get",
-		url:'${ctx}/wms/passPortInfo/json/'+passPortId,
+		url:'${ctx}/wms/passPortInfo/json?passPortId='+passPortId,
 		fit : true,
 		fitColumns : true,
 		border : false,
@@ -557,46 +557,66 @@ function clearIt(){
 //表头保存
 function submitForm(){
 	if($("#mainForm").form('validate')){
-		var type = "";
 		if(passPortId){
 			type = "update";
-		}else{
-			type = "insert";
-		}
-		//用ajax提交form
-		$.ajax({
-			async: false,
-			type: 'POST',
-			url: "${ctx}/wms/passPortInfo/"+type,
-			data: $('#mainForm').serialize(),
-			dataType: "text",
-			success: function(msg){
-				if(msg == "success"){
-					parent.$.messager.show({ title : "提示",msg: "操作成功！", position: "bottomRight" });
+			//用ajax提交form
+			$.ajax({
+				async: false,
+				type: 'POST',
+				url: "${ctx}/wms/passPortInfo/update",
+				data: $('#mainForm').serialize(),
+				dataType: "text",
+				success: function(msg){
+					if(msg == "success"){
+						parent.$.messager.show({ title : "提示",msg: "操作成功！", position: "bottomRight" });
+					}
 				}
-			}
-		});
+			});
+		}else{
+			//用ajax提交form
+			$.ajax({
+				async: false,
+				type: 'POST',
+				url: "${ctx}/wms/passPortInfo/insert",
+				data: $('#mainForm').serialize(),
+				dataType: "text",
+				success: function(resStr){
+					var res = JSON.parse(resStr);
+					if(res.msg == "success"){
+						parent.$.messager.show({ title : "提示",msg: "操作成功！ID:"+res.id, position: "bottomRight" });
+						passPortId = res.id;
+					}
+				}
+			});
+		}
+
  	}
 }
 //================================================================================================================================
 //表体添加
 function addInfo(){
 	if($("#mainForm2").form('validate')){
-		//用ajax提交form
-		$.ajax({
-			async: false,
-			type: 'POST',
-			url: "${ctx}/wms/passPortInfo/create/"+passPortId,
-			data: $('#mainForm2').serialize(),
-			dataType: "text",
-			success: function(msg){
-				if(msg == "success"){
-					$('#mainForm2').form('clear');
-					parent.$.messager.show({ title : "提示",msg: "保存成功！", position: "bottomRight" });
-					window.setTimeout(function(){gridDG2(passPortId)},100);
+		if(!passPortId){
+			parent.$.messager.show({title: "提示", msg: "请先保存表头信息再添加表体信息！", position: "bottomRight" });
+		}else{
+			//用ajax提交form
+			$.ajax({
+				async: false,
+				type: 'POST',
+				url: "${ctx}/wms/passPortInfo/create?passPortId="+passPortId,
+				data: $('#mainForm2').serialize(),
+				dataType: "text",
+				success: function(msg){
+					if(msg == "success"){
+						$('#mainForm2').form('clear');
+						parent.$.messager.show({ title : "提示",msg: "保存成功！", position: "bottomRight" });
+						window.setTimeout(function(){gridDG2(passPortId)},100);
+					}else{
+						parent.$.messager.show({ title : "提示",msg: msg, position: "bottomRight" });
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 }
 //表体删除
@@ -650,31 +670,35 @@ function copyInfo(){
 //================================================================================================================================
 //添加关联单证
 function addDJInfo(){
-	dt=$("#dlg").dialog({
-		title: '添加关联单证',
-		width: 500,
-		height: 300,
-		href:'${ctx}/wms/passPortInfo/createDJ/'+passPortId,
-		maximizable:true,
-		modal:true,
-		buttons:[{
-			text:'确认',
-			handler:function(){
-				if($("#mainform").form('validate')){
-					$("#mainform").submit();
+	if(!passPortId){
+		parent.$.messager.show({title: "提示", msg: "请先保存表头信息再添加关联单证信息！", position: "bottomRight" });
+	}else{
+		dt=$("#dlg").dialog({
+			title: '添加关联单证',
+			width: 500,
+			height: 300,
+			href:'${ctx}/wms/passPortInfo/createDJ?passPortId='+passPortId,
+			maximizable:true,
+			modal:true,
+			buttons:[{
+				text:'确认',
+				handler:function(){
+					if($("#mainform").form('validate')){
+						$("#mainform").submit();
+						dt.panel('close');
+					}
+				}
+			},{
+				text:'取消',
+				handler:function(){
 					dt.panel('close');
 				}
+			}],
+			onClose: function (){
+				window.setTimeout(function(){gridDG(passPortId)},100);
 			}
-		},{
-			text:'取消',
-			handler:function(){
-				dt.panel('close');
-			}
-		}],
-		onClose: function (){
-			window.setTimeout(function(){gridDG(passPortId)},100);
-		}
-	});
+		});
+	}
 }
 //关联单证删除
 function delDJInfo(){
@@ -703,18 +727,22 @@ function delDJInfo(){
 }
 //关联单证提交
 function submit(){
-	parent.$.messager.confirm('提示', '您确定要申报提交吗？', function(data){
-		if (data){
-			$.ajax({
-				type: 'get',
-				url: "${ctx}/wms/passPortInfo/submitDJinfo/" + passPortId,
-				success: function(data){
-					dg.datagrid('clearSelections');
-					successTip(data, dg);
-				}
-			});
-		}
-	});
+	if(!passPortId){
+		parent.$.messager.show({title: "提示", msg: "请先保存表头信息再提交关联单证！", position: "bottomRight" });
+	}else{
+		parent.$.messager.confirm('提示', '您确定要申报提交吗？', function(data){
+			if (data){
+				$.ajax({
+					type: 'get',
+					url: "${ctx}/wms/passPortInfo/submitDJinfo?passPortId=" + passPortId,
+					success: function(data){
+						dg.datagrid('clearSelections');
+						successTip(data, dg);
+					}
+				});
+			}
+		});
+	}
 }
 </script>
 </body>

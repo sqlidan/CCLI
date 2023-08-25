@@ -255,7 +255,7 @@ function gridDG(){
 }
 //新增
 function add(){
-	window.parent.mainpage.mainTabs.addModule('核放单新增','wms/passPort/manager');
+	window.parent.mainpage.mainTabs.addModule('核放单新增','wms/passPort/add');
 }
 //编辑
 function update(){

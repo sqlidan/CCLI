@@ -13,9 +13,11 @@ import com.haiersoft.ccli.system.utils.UserUtil;
 import com.haiersoft.ccli.wms.entity.apiEntity.*;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfoDJ;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryInfo;
+import com.haiersoft.ccli.wms.service.passPort.PassPortInfoDJService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortInfoService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryInfoService;
@@ -51,6 +53,8 @@ public class PassPortController extends BaseController {
     private PassPortService passPortService;
     @Autowired
     private PassPortInfoService passPortInfoService;
+    @Autowired
+    private PassPortInfoDJService passPortInfoDJService;
 
     private static final String memberCode = "eimskipMember";
     private static final String pass = "66668888";
@@ -82,7 +86,7 @@ public class PassPortController extends BaseController {
     /**
      * 核放单-跳转新增页面
      */
-    @RequestMapping(value = "manager", method = RequestMethod.GET)
+    @RequestMapping(value = "add", method = RequestMethod.GET)
     public String manager(Model model) {
         User user = UserUtil.getCurrentUser();
         model.addAttribute("passPort", new BisPassPort());
@@ -175,7 +179,6 @@ public class PassPortController extends BaseController {
     //暂存/申报核放单
     public Map<String, Object> passPortSave(String id) {
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         //获取表头数据
         BisPassPort bisPassPortHead = new BisPassPort();
         List<BisPassPort> bisPassPortList = passPortService.getList(id);
@@ -186,13 +189,39 @@ public class PassPortController extends BaseController {
         } else {
             bisPassPortHead = bisPassPortList.get(0);
         }
-        //获取表体数据
-        List<BisPassPortInfo> bisPassPortInfoList = passPortInfoService.getList(id);
-        if (bisPassPortInfoList == null || bisPassPortInfoList.size() == 0) {
+        //校验是否是空车进出区
+        boolean empty = false;
+        if(bisPassPortHead != null && bisPassPortHead.getPassportTypecd() != null && bisPassPortHead.getPassportTypecd().trim().length() > 0){
+            System.out.println("继续判断");
+            if("6".equals(bisPassPortHead.getPassportTypecd().trim())){
+                empty = true;
+            }
+        }else{
             resultMap.put("code","500");
-            resultMap.put("msg","未获取到核放单表头数据");
+            resultMap.put("msg","核放单类型必填");
             return resultMap;
         }
+
+        List<BisPassPortInfo> bisPassPortInfoList = new ArrayList<>();
+        List<BisPassPortInfoDJ> bisPassPortInfoDJList = new ArrayList<>();
+        //核放单类型为空车进出区时不校验表体和关联单据淑君
+        if(!empty){
+            //获取表体数据
+            bisPassPortInfoList = passPortInfoService.getList(id);
+            if (bisPassPortInfoList == null || bisPassPortInfoList.size() == 0) {
+                resultMap.put("code","500");
+                resultMap.put("msg","未获取到核放单表体数据");
+                return resultMap;
+            }
+            //获取表体数据
+            bisPassPortInfoDJList = passPortInfoDJService.getList(id);
+            if (bisPassPortInfoDJList == null || bisPassPortInfoDJList.size() == 0) {
+                resultMap.put("code","500");
+                resultMap.put("msg","未获取到核放单关联单证数据");
+                return resultMap;
+            }
+        }
+
 
         String seqNo = isNullOrEmpty(bisPassPortHead.getSeqNo());
         String passportNo = isNullOrEmpty(bisPassPortHead.getPassportNo());
@@ -246,38 +275,55 @@ public class PassPortController extends BaseController {
 //        passPortHead.setPassId2("");//卡口ID2
 //        passPortHead.setStucd("");//状态
 
-        // 表体参数字段
         List<PassPortList> passPortLists = new ArrayList<>();
-        for (BisPassPortInfo forBisPassPortInfo : bisPassPortInfoList) {
-            PassPortList passPortList = new PassPortList();
-            passPortList.setSeqNo(seqNo);
-            passPortList.setPassportNo(passportNo);
-            passPortList.setDclQty(isNullOrEmpty(forBisPassPortInfo.getDclQty()));
-            passPortList.setDclUnitcd(isNullOrEmpty(forBisPassPortInfo.getDclUnitcd()));
-            passPortList.setGdecd(isNullOrEmpty(forBisPassPortInfo.getGdecd()));
-            passPortList.setGdsMtno(isNullOrEmpty(forBisPassPortInfo.getGdsMtno()));
-            passPortList.setGdsNm(isNullOrEmpty(forBisPassPortInfo.getGdsNm()));
-            passPortList.setGrossWt(isNullOrEmpty(forBisPassPortInfo.getGrossWt()));
-            passPortList.setNetWt(isNullOrEmpty(forBisPassPortInfo.getNetWt()));
-            passPortList.setPassportSeqNo(isNullOrEmpty(forBisPassPortInfo.getPassportSeqno()));
-            passPortList.setRltGdsSeqno(isNullOrEmpty(forBisPassPortInfo.getRltGdsSeqno()));
-            passPortList.setRmk(isNullOrEmpty(forBisPassPortInfo.getRemark()));
+        List<PassPortAcmp> passPortAcmpList = new ArrayList<>();
+        //核放单类型为空车进出区时不校验表体和关联单据淑君
+        if(!empty) {
+            // 表体参数字段
+            for (BisPassPortInfo forBisPassPortInfo : bisPassPortInfoList) {
+                PassPortList passPortList = new PassPortList();
+                passPortList.setSeqNo(seqNo);
+                passPortList.setPassportNo(passportNo);
+                passPortList.setDclQty(isNullOrEmpty(forBisPassPortInfo.getDclQty()));
+                passPortList.setDclUnitcd(isNullOrEmpty(forBisPassPortInfo.getDclUnitcd()));
+                passPortList.setGdecd(isNullOrEmpty(forBisPassPortInfo.getGdecd()));
+                passPortList.setGdsMtno(isNullOrEmpty(forBisPassPortInfo.getGdsMtno()));
+                passPortList.setGdsNm(isNullOrEmpty(forBisPassPortInfo.getGdsNm()));
+                passPortList.setGrossWt(isNullOrEmpty(forBisPassPortInfo.getGrossWt()));
+                passPortList.setNetWt(isNullOrEmpty(forBisPassPortInfo.getNetWt()));
+                passPortList.setPassportSeqNo(isNullOrEmpty(forBisPassPortInfo.getPassportSeqno()));
+                passPortList.setRltGdsSeqno(isNullOrEmpty(forBisPassPortInfo.getRltGdsSeqno()));
+                passPortList.setRmk(isNullOrEmpty(forBisPassPortInfo.getRemark()));
 //            passPortList.setOriactGdsSeqno("");//备案序号
 //            passPortList.setGdsSpcfModelDesc("");//经营单位代码 反填
 
-            passPortLists.add(passPortList);
+                passPortLists.add(passPortList);
+            }
+
+            //关联单证参数字段
+            for (BisPassPortInfoDJ forBisPassPortInfoDJ : bisPassPortInfoDJList) {
+                PassPortAcmp passPortAcmp = new PassPortAcmp();
+                passPortAcmp.setSeqNo(seqNo);
+                passPortAcmp.setPassPortNo(passportNo);
+                passPortAcmp.setRtlBillNo(isNullOrEmpty(forBisPassPortInfoDJ.getRtlNo()));
+                passPortAcmp.setRtlBillTypecd(isNullOrEmpty(forBisPassPortInfoDJ.getRtlTbTypecd()));
+//            passPortAcmp.setPassportAcmpSeqNo("");//核放单关联单证统一编号
+
+                passPortAcmpList.add(passPortAcmp);
+            }
         }
 
         PassPortMessage passPortMessage = new PassPortMessage();
 
-        passPortMessage.setPassportHead(passPortHead);//核注清单表头
-        passPortMessage.setPassportList(passPortLists);//核注清单表体
+        passPortMessage.setPassportHead(passPortHead);//表头
+        passPortMessage.setPassportList(passPortLists);//表体
+        passPortMessage.setPassportAcmp(passPortAcmpList);//关联单证
         passPortMessage.setMemberCode(memberCode);
         passPortMessage.setPass(pass);
         passPortMessage.setIcCode(icCode);
         //核放单暂存
         System.out.println("passPortMessage== "+JSON.toJSONString(passPortMessage));
-        resultMap = PassPortSaveService(passPortMessage);
+//        resultMap = PassPortSaveService(passPortMessage);
 //        //核放单申报
 //        resultMap = PassPortDeclearService(passPortMessage);
 
@@ -308,7 +354,7 @@ public class PassPortController extends BaseController {
         sasCommonSeqNoRequest.setIcCode(icCode);
         //核放单作废
         System.out.println("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
-        resultMap = PassPortNullifyService(sasCommonSeqNoRequest);
+//        resultMap = PassPortNullifyService(sasCommonSeqNoRequest);
 
         return resultMap;
     }

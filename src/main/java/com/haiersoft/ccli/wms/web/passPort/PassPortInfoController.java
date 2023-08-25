@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
+import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.supervision.tempuri.ReturnModel;
 import com.haiersoft.ccli.system.entity.User;
@@ -61,16 +62,23 @@ public class PassPortInfoController extends BaseController {
     /**
      * 信息
      */
-    @RequestMapping(value = "json/{passPortId}", method = RequestMethod.GET)
+    @RequestMapping(value = "json", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> getData(HttpServletRequest request, @PathVariable("passPortId") String passPortId) {
-        Page<BisPassPortInfo> page = getPage(request);
-        List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+    public Map<String, Object> getData(HttpServletRequest request, @RequestParam("passPortId") String passPortId) {
+        if (passPortId == null || passPortId.trim().length() == 0) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("rows", new ArrayList<>());
+            map.put("total", 0);
+            return map;
+        } else {
+            Page<BisPassPortInfo> page = getPage(request);
+            List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 
-        PropertyFilter filter = new PropertyFilter("EQS_passPortId", passPortId);
-        filters.add(filter);
-        page = passPortInfoService.search(page, filters);
-        return getEasyUIData(page);
+            PropertyFilter filter = new PropertyFilter("EQS_passPortId", passPortId);
+            filters.add(filter);
+            page = passPortInfoService.search(page, filters);
+            return getEasyUIData(page);
+        }
     }
 
     /**
@@ -78,13 +86,35 @@ public class PassPortInfoController extends BaseController {
      */
     @RequestMapping(value = "insert", method = RequestMethod.POST)
     @ResponseBody
-    public String create(@Valid BisPassPort bisPassPort, Model model, HttpServletRequest request) {
+    public Map<String, Object> create(@Valid BisPassPort bisPassPort, Model model, HttpServletRequest request) {
+        bisPassPort.setId(getNewPassPortId());
         bisPassPort.setState("0");//状态
         User user = UserUtil.getCurrentUser();
         bisPassPort.setCreateBy(user.getName());//创建人
         bisPassPort.setCreateTime(new Date());//创建时间
         passPortService.save(bisPassPort);
-        return "success";
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("code", "200");
+        map.put("msg", "success");
+        map.put("id", bisPassPort.getId());
+        return map;
+    }
+
+    public String getNewPassPortId() {
+        User user = UserUtil.getCurrentUser();
+        String userCode = user.getUserCode();
+        //判断用户码是否为空
+        if (StringUtils.isNull(user.getUserCode())) {
+            userCode = "YZH";
+        } else {//判断用户码 的长度
+            if (userCode.length() > 3) {
+                userCode = userCode.substring(0, 3);
+            } else if (userCode.length() < 3) {
+                userCode = StringUtils.lpadStringLeft(3, userCode);
+            }
+        }
+        String linkId = "P" + userCode + StringUtils.timeToString();
+        return linkId;
     }
 
     /**
@@ -142,11 +172,11 @@ public class PassPortInfoController extends BaseController {
     }
 
     /**
-     * 添加货物信息
+     * 添加表体信息
      */
-    @RequestMapping(value = "create/{passPortId}", method = RequestMethod.POST)
+    @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
-    public String create(@Valid BisPassPortInfo bisPassPortInfo, @PathVariable("passPortId") String passPortId, Model model, HttpServletRequest request) {
+    public String create(@Valid BisPassPortInfo bisPassPortInfo, @RequestParam("passPortId") String passPortId, Model model, HttpServletRequest request) {
         bisPassPortInfo.setPassPortId(passPortId);
         User user = UserUtil.getCurrentUser();
         bisPassPortInfo.setCreateBy(user.getName());//创建人
@@ -170,23 +200,30 @@ public class PassPortInfoController extends BaseController {
     /**
      * 关联单证列表
      */
-    @RequestMapping(value = "jsonDJ/{passPortId}", method = RequestMethod.GET)
+    @RequestMapping(value = "jsonDJ", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> getDJData(HttpServletRequest request, @PathVariable("passPortId") String passPortId) {
-        Page<BisPassPortInfoDJ> page = getPage(request);
-        List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+    public Map<String, Object> getDJData(HttpServletRequest request, @RequestParam("passPortId") String passPortId) {
+        if (passPortId == null || passPortId.trim().length() == 0) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("rows", new ArrayList<>());
+            map.put("total", 0);
+            return map;
+        } else {
+            Page<BisPassPortInfoDJ> page = getPage(request);
+            List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 
-        PropertyFilter filter = new PropertyFilter("EQS_passPortId", passPortId);
-        filters.add(filter);
-        page = passPortInfoDJService.search(page, filters);
-        return getEasyUIData(page);
+            PropertyFilter filter = new PropertyFilter("EQS_passPortId", passPortId);
+            filters.add(filter);
+            page = passPortInfoDJService.search(page, filters);
+            return getEasyUIData(page);
+        }
     }
 
     /**
      * 打开关联单证上传弹窗
      */
-    @RequestMapping(value = "createDJ/{passPortId}", method = RequestMethod.GET)
-    public String createDJ(Model model, @PathVariable("passPortId") String passPortId) {
+    @RequestMapping(value = "createDJ", method = RequestMethod.GET)
+    public String createDJ(Model model, @RequestParam("passPortId") String passPortId) {
         model.addAttribute("passPortId", passPortId);
         return "wms/passPort/passPortManagerUpload";
     }
@@ -224,43 +261,45 @@ public class PassPortInfoController extends BaseController {
         return "success";
     }
 
-//    /**
-//     * 提交关联单证
-//     */
-//    @RequestMapping(value = "submitDJinfo/{id}")
-//    @ResponseBody
-//    public String submitDJinfo(@PathVariable("id") String id) {
-//        BisPassPort bisPassPort = passPortService.get(id);
-//        if (bisPassPort != null) {
-//            List<BisPassPortInfoDJ> bisPassPortInfoDJList = passPortInfoDJService.getList(bisPassPort.getId());
-//            if (bisPassPortInfoDJList == null || bisPassPortInfoDJList.size() == 0) {
-//                return "暂无随附数据，无需提交。";
-//            } else {
-//                return "提交成功";
-//            }
-//        }
-//        return "未获取到预录入信息";
-//    }
+    /**
+     * 提交关联单证
+     */
+    @RequestMapping(value = "submitDJinfo")
+    @ResponseBody
+    public String submitDJinfo(@RequestParam("passPortId") String passPortId) {
+        BisPassPort bisPassPort = passPortService.get(passPortId);
+        if (bisPassPort != null) {
+            List<BisPassPortInfoDJ> bisPassPortInfoDJList = passPortInfoDJService.getList(bisPassPort.getId());
+            if (bisPassPortInfoDJList == null || bisPassPortInfoDJList.size() == 0) {
+                return "暂无随附数据，无需提交。";
+            } else {
+                return "提交成功";
+            }
+        }
+        return "未获取到预录入信息";
+    }
 //======================================================================================================================
+
     /**
      * 获取下拉框数据
      */
-    @RequestMapping(value="dictData/{code}",method = RequestMethod.GET)
+    @RequestMapping(value = "dictData/{code}", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> dictList(@PathVariable("code") String code) {
         Map<String, Object> map = new HashMap<String, Object>();
         List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();
         bisPreEntryDictDataList = passPortInfoService.getDictDataByCode(code);
-        if(bisPreEntryDictDataList == null || bisPreEntryDictDataList.size() == 0){
+        if (bisPreEntryDictDataList == null || bisPreEntryDictDataList.size() == 0) {
             map.put("rows", new ArrayList<>());
             map.put("total", 0);
-        }else{
+        } else {
             map.put("rows", bisPreEntryDictDataList);
             map.put("total", bisPreEntryDictDataList.size());
         }
         return map;
     }
-//======================================================================================================================
+
+    //======================================================================================================================
     //校验是否为空
     public Boolean isNotNullOrEmpty(Object object) {
         if (object == null) {
