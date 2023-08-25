@@ -48,7 +48,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 	}
 	/**
 	 * 根据账单号 确认对账信息
-	 * @param ordCode 对账id
+	 * @param sCode 对账id
 	 *
 	 */
 	public void addStingBookCodeList(String sCode){
@@ -63,7 +63,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 
 	/**
 	 * 根据账单号 删除对账信息
-	 * @param ordCode 对账id
+	 * @param sCode 对账id
 	 *
 	 */
 	public void delStingBookCodeList(String sCode){
@@ -1540,7 +1540,8 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		if(!StringUtils.isEmpty(origBizId)){
 			StringBuffer sql = new StringBuffer();
 			Map<String,Object> parems=new HashMap<>();
-			sql.append("UPDATE BIS_CHEKING_BOOK set midGroupStatic = :midGroupStatic where 1 =1 and codeNum = :codeNum");
+			//hmj 未上传的时候，把结算单号置为空值
+			sql.append("UPDATE BIS_CHEKING_BOOK set midGroupStatic = :midGroupStatic,statement_No=null where 1 =1 and codeNum = :codeNum");
 			parems.put("midGroupStatic",NOSTATU);
 			parems.put("codeNum",origBizId);
 			SQLQuery sqlQuery=createSQLQuery(sql.toString(), parems);

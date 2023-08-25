@@ -69,14 +69,13 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
     @Autowired
     private HttpGo httpGo;
 
-
-//    private final static String STANDINGBOOK_MIDGROUP_URL = "http://10.135.123.7:8080/api/cost";
-//    private static final String CUSTOMER_URL = "http://10.135.123.7:8080/api/customer/getCustomerbyCode";
-//    private static final String BISPAYORDER_URL = "http://10.135.123.7:8080/api/order";
-    private final static String STANDINGBOOK_MIDGROUP_URL = "http://kubemaster.sdlandsea.net:30156/api/cost";
-    private static final String CUSTOMER_URL = "http://kubemaster.sdlandsea.net:30156/api/customer/getCustomerbyCode";
-    private static final String BISPAYORDER_URL = "http://kubemaster.sdlandsea.net:30156/api/order";
-    private static final String BASE_URL="http://kubemaster.sdlandsea.net:30156";//撤回接口根路径配置
+    private final static String STANDINGBOOK_MIDGROUP_URL = "http://10.135.123.32:8080/api/cost";
+    private static final String CUSTOMER_URL = "http://10.135.123.32:8080/api/customer/getCustomerbyCode";
+    private static final String BISPAYORDER_URL = "http://10.135.123.32:8080/api/order";
+    private static final String TRUE_STATEMENT = "http://10.135.123.32:8080/api/statement/deleteCostByStatementNo?statementNo";
+    private static final String FALSE_STATEMENT = "http://10.135.123.32:8080/api/cost/remove?origCostId";
+    private static final String CLEINT_URL = "http://10.135.123.32:8080/api/customer/getCust调用申请单申报resultomerbyCode";
+    private static final String COSTCODE_URL = "http://10.135.123.32:8080/api/costCode/getCostCodeListByAppId";
     private static final String STATU = "已上传";
     private static final String NOTSTATU = "未上传";
     private static final String STATEMENT = "已生成结算单";
@@ -89,12 +88,13 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         return standingBookMidGroupDao;
     }
 
-    public String selectOneByCodeNum(List<String> codeNums, Boolean flag) {
+    public String selectOneByCodeNum(List<String> codeNums, Boolean flag) throws Exception {
         List<Map<String, Object>> bisCheckingBooks = standingBookMidGroupDao.selectOneByCodeNum(codeNums);
-        return bulidParam(bisCheckingBooks, codeNums, flag);
+        String message = this.bulidParam(bisCheckingBooks, codeNums, flag);
+        return message;
     }
 
-    private String bulidParam(List<Map<String, Object>> bisCheckingBooks, List<String> codeNums, Boolean flag) {
+    private String bulidParam(List<Map<String, Object>> bisCheckingBooks, List<String> codeNums, Boolean flag) throws Exception {
         NumberFormat numberFormat = NumberFormat.getInstance();
         String error = "";
         BaseClientInfo baseClientInfo = new BaseClientInfo();
@@ -116,6 +116,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
 
             Object currency = bisCheckingBook.get("CURRENCY");//计量单位
 
+
             BigDecimal origAm = (BigDecimal) bisCheckingBook.get("SHOULDRMB"); //应收  - 原始金额
             BigDecimal origAmount = origAm.setScale(2, RoundingMode.HALF_UP);
 
@@ -129,26 +130,23 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             if (!StringUtils.isEmpty(feecodes)) {
                 mapBase = baseExpenseCategoryDetailService.getCodeByFeeCode(feecodes);
             }
-            String units = standingBookMidGroupDao.queryUnitsByFeeCode(feecodes);
-
             Object detail = mapBase.get("DETAIL_CODE");
             Object detailname = mapBase.get("DETAIL_CODE_NAME");
             if (StringUtils.isEmpty(detail)) {
-                error = error + "应收费用账单编号下"+standingNum+"费用编号"+feecodes+"对应的财务中台客户费用代码为空，请联系开发人员维护;";
+                error = error + "对应的费目code为空;";
                 continue;
             }
-//            if(StringUtils.isEmpty(detailname)){
-//                error=error+"数据库中未查到该"+standingNum+"数据明细的财务中台费目名称";
-//                continue;
-//            }
+            if(StringUtils.isEmpty(detailname)){
+                error=error+"数据库中未查到该"+standingNum+"数据明细的费目名称";
+                continue;
+            }
             detailCode = detail.toString();
             detailcodename =detailname.toString();
-            //String costClassifyCode = BisPayMidGroupServeice.sendParamReturncostClassifyCode(detailcodename);
-            if(StringUtils.isEmpty(mapBase.get("WAREHOUSE"))){
-                error=error+"应收费用账单编号"+standingNum+"的财务中台客户费用代码"+detail+"对应的费目类别Warehouse为空;";
+            String costClassifyCode = BisPayMidGroupServeice.sendParamReturncostClassifyCode(detailcodename);
+            if(StringUtils.isEmpty(costClassifyCode)){
+                error=error+"原始业务编号为"+standingNum+"的客户费用代码对应的费目类别编码异常;";
                 continue;
             }
-            String warehouse = mapBase.get("WAREHOUSE").toString();
             Object pr = bisCheckingBook.get("REALRMB");
             BigDecimal price = null;
             BigDecimal pri = null;
@@ -201,11 +199,6 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             String jsonClient = gson.toJson(map);
             String encrypt = AESUtils.encrypt(jsonClient, PASSWORD);
             String responseParam = httpGo.sendRequestHeader(CUSTOMER_URL, encrypt);
-            try {
-    	        JSON.parse(responseParam);
-    	    } catch (Exception e) {
-    	    	return "解析财务中台获取客户信息接口返回异常："+responseParam;
-    	    }
             JSONObject jsonObject = JSONObject.parseObject(responseParam);
             Integer code = (Integer) jsonObject.get("code");
             if (200 != code) {
@@ -229,18 +222,15 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             } else {
                 md.setAdjAmount(new BigDecimal(0));
             }
-            md.setCostClassifyCode(warehouse);
+            md.setCostClassifyCode(costClassifyCode);
             md.setOrigAmount(subtract);
             md.setTaxRate("6");
             md.setOrigBizId(codenum.toString());
             md.setIsCash(isCashs);
             md.setOrigCostId(standingNum);
-            if(StringUtils.isEmpty(units)){
-                md.setUnit("箱");
-            }
-            if(!StringUtils.isEmpty(units)){
-                md.setUnit(units);
-            }
+
+            md.setUnit(currency.toString());
+
             if (quantity != null && quantity.equals("")) {
                 md.setQuantity(new BigDecimal(quantity.toString()));
             } else {
@@ -262,10 +252,10 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                 log.info(e + "应付时间转换格式报错");
             }
             md.setBookTime(data2);
-            md.setCurrency("CNY");
+            md.setCurrency("cny");
             md.setActAmount(origAmount);
             md.setOrgCode("080013");
-            md.setCostCenterCode("00001661");//现场生产部
+            md.setCostCenterCode("00001662002");
             md.setOperator("2550010");
             midGroupVoList.add(md);
         }
@@ -288,30 +278,33 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         String encrypt = AESUtils.encrypt(paramJson, PASSWORD);
         String code = new String();
         String  responseParam = httpGo.sendRequestHead(STANDINGBOOK_MIDGROUP_URL, map, encrypt);
-
-        if (!StringUtils.isEmpty(responseParam)) {  
-		    try {
-		        JSON.parse(responseParam);
-		    } catch (Exception e) {
-		    	return "解析财务中台上传费用接口返回异常："+responseParam;
-		    }
-		    JSONObject jsonObject = JSON.parseObject(responseParam);
+        if (!StringUtils.isEmpty(responseParam)) {
+            JSONObject jsonObject = new JSONObject();
+            try{
+                 jsonObject = JSONObject.parseObject(responseParam);
+            }catch (Exception  e){
+                throw new Exception("数据已经上传，请勿重复上传");
+            }
             code = jsonObject.getString("code");
             if ("200".equals(code)) {
                 checkingBookDao.updateStatusByPayId(codeNums);
-                if (Boolean.TRUE.equals(flag)) {
+                if (flag == true) {
                     String statementNo = "";
                     String data = jsonObject.getString("data");
                     MidGroupVo midGroupVo = midGroupVoList.get(0);
                     String decrypt = AESUtils.decrypt(data, PASSWORD);
                     //将集合转成JSONArray
-                    JSONArray jsonArray = JSON.parseArray(decrypt);
+                    JSONArray jsonArray = JSONArray.parseArray(decrypt);
                     for (int i = 0; i < jsonArray.size(); i++) {  //遍历JSONArray数组
                         JSONObject object1 = JSONArray.parseObject(jsonArray.get(i).toString()); //将JSONArray数组转成JSONObject对象
                         statementNo = object1.getString("statementNo");
                          //通过getString获取对象的属性
                         checkingBookDao.addStatementNoAndCostId(midGroupVo.getOrigBizId(), statementNo);
                     }
+                }else {
+                    //hmj 不生成结算单，更新statementNo
+                    MidGroupVo midGroupVo = midGroupVoList.get(0);
+                    checkingBookDao.addStatementNoAndCostId(midGroupVo.getOrigBizId(), "");
                 }
                 return "success";
             } else {
@@ -336,24 +329,23 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
      * 传过来的 是JSON字符串
      * */
     @Transactional
-	public String subbitJson(List<String> ids, Boolean flag) {
-		log.info("应收对账单从前端传过来的id是:{}",ids);
-		if (!CollectionUtils.isEmpty(ids)) {
-			String message = this.selectOrderByIds(ids);
-			log.info("应收对账单传订单返回的是:{}",message);
-			if ("success".equals(message)) {
-				String msg = this.selectOneByCodeNum(ids, flag);
-				log.info("应收对账单传订单详情返回的是:{}",msg);
-				return msg;
-			} else {
-				log.info("应收订单已经传过去");
-				return message;
-			}
-		} else {
-			log.error("应收对账单传过来的id为空");
-			return "应收对账单传过来的id为空";
-		}
-	}
+    public String subbitJson(List<String> ids, Boolean flag) {
+        try {
+            if (!CollectionUtils.isEmpty(ids)) {
+                String message = this.selectOrderByIds(ids);
+                if (message.equals("success") || "success" == message) {
+                    String msg = this.selectOneByCodeNum(ids, flag);
+                    return msg;
+                } else {
+                    log.info("应收订单已经传过去");
+                    return message;
+                }
+            }
+        } catch (Exception e) {
+            log.info("异常" + e);
+        }
+        return "后端报错,请看日志原因可能是（api超时）";
+    }
 
     private String selectOrderByIds(List<String> ids) {
         String error = "";
@@ -374,11 +366,11 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             }
 
             String clientCode = bisPayMidGroupServeice.sendParamReturnClientCode(map);
-            if ("".equals(clientCode)) {
+            if ("error".equals(clientCode) || "error" == clientCode) {
                 return "客户名称为:" + baseClientInfo.getClientName() + "未在天眼查中检索到数据";
             }
             BisPayVo payVo = new BisPayVo();
-            payVo.setCostCenterCode("00001661");
+            payVo.setCostCenterCode("00001662002");
             payVo.setCustomerCode(clientCode);
             String data = null;
             Date date = DateUtils.parseDate(bisCheckingBook.getYearMonth());
@@ -417,11 +409,6 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         String jsonArray = gson.toJson(bisPayVo);
         String encrypt = AESUtils.encrypt(jsonArray, PASSWORD);
         String responseParam = httpGo.sendRequestHead(BISPAYORDER_URL, map, encrypt);
-        try {
-	        JSON.parse(responseParam);
-	    } catch (Exception e) {
-	    	return "解析财务中台上传订单接口返回异常："+responseParam;
-	    }
         JSONObject jsonObject = JSONObject.parseObject(responseParam);
         Integer code = (Integer) jsonObject.get("code");
         if (200 == code) {
@@ -483,25 +470,29 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             String payId = bisPay.getCodeNum();
             String billNum = checkingBookDao.getBillNum(payId);
             if (null != bisPay.getCodeNum()) {
-                String encrypt = AESUtils.encrypt(billNum, PASSWORD);
-                cn.hutool.json.JSONObject jsonObject = this.delete(encrypt);
-                //修改上传状态
-                Object code = jsonObject.get("code");
-                Integer codes = Integer.valueOf(code.toString());
-                if (200 == codes) {
+                //根据codeNum 获取应收对账单
+                BisCheckingBook obj = checkingBookService.find("codeNum", bisPay.getCodeNum());
+                // 如果结算单号为空说明不生成结算单，撤回走未结算单接口
+                if(StringUtils.isEmpty(obj.getStatementNo())) {
+                    String encrypt = AESUtils.encrypt(billNum, PASSWORD);
+                    cn.hutool.json.JSONObject jsonObject = this.delete(encrypt);
                     //修改上传状态
-                    checkingBookDao.updateStatusByPayId(bisPay.getCodeNum());
-                    log.info("应收费用未生成结算单的已撤回：" + jsonObject);
-                    return "success";
-                }
-                String msg = jsonObject.get("msg").toString();
-                if (msg.contains("已生成结算单")) {
+                    Object code = jsonObject.get("code");
+                    Integer codes = Integer.valueOf(code.toString());
+                    if (200 == codes) {
+                        //修改上传状态
+                        checkingBookDao.updateStatusByPayId(bisPay.getCodeNum());
+                        log.info("应收费用未生成结算单的已撤回：" + jsonObject);
+                        return "success";
+                    }
+                }else {
+
                     String statementNo = checkingBookDao.selectStatementNo(ids.get(0));
                     if (StringUtils.isEmpty(statementNo)) {
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     String encryptNO = AESUtils.encrypt(statementNo, PASSWORD);
-                    String bodys = HttpUtil.createPost(BASE_URL+"/api/statement/removeCostByStatementNo?statementNo=" + encryptNO)
+                    String bodys = HttpUtil.createPost("http://10.135.123.32:8080/api/statement/removeCostByStatementNo?statementNo=" + encryptNO)
                             .header("Content-Type", "application/json")
                             .header("APPID", "7e86aa901e86de01")
                             .header("Fmp-Tenant-Data-Node", "080013")
@@ -511,26 +502,27 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                     log.info("应收撤回的响应:" + jsonObject1.toString());
                     String code1 = jsonObject1.get("code").toString();
                     if ("200".equals(code1)) {
-                        cn.hutool.json.JSONObject jsonObjectSe = this.delete(encrypt);
-                        String code2 = jsonObjectSe.get("code").toString();
+//                        cn.hutool.json.JSONObject jsonObjectSe = this.delete(encrypt);
+//                        String code2 = jsonObjectSe.get("code").toString();
                         //修改上传状态
-                        if(("200").equals(code2)){
+//                        if(("200").equals(code2)){
                             checkingBookDao.updateStatusByPayId(bisPay.getCodeNum());
                             log.info("应收费用生成结算单的已撤回");
                             return "success";
-                        }
-                        String msg1 = jsonObjectSe.get("msg").toString();
-                        if (!("200").equals(code1)) {
-                            error += msg1;
-                        }
-                        return error;
+//                        }
+//                        String msg1 = jsonObjectSe.get("msg").toString();
+//                        if (!("200").equals(code1)) {
+//                            error += msg1;
+//                        }
+//                        return error;
+
                     }
                     if(!"200".equals(code1)){
                         String msg1 = jsonObject1.get("msg").toString();
                         return  msg1;
                     }
+
                 }
-                return msg;
             }
             log.info("应收付费用该数据没有税号为空");
         }
@@ -539,7 +531,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
 
     static cn.hutool.json.JSONObject delete(String encrypt) {
 
-        String body = HttpUtil.createPost(BASE_URL+"/api/cost/remove?origCostId=" + encrypt)
+        String body = HttpUtil.createPost("http://10.135.123.32:8080/api/cost/remove?origCostId=" + encrypt)
                 .header("Content-Type", "application/json")
                 .header("APPID", "7e86aa901e86de01")
                 .header("Fmp-Tenant-Data-Node", "080013")
