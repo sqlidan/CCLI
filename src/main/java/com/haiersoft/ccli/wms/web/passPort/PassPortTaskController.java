@@ -387,21 +387,6 @@ public class PassPortTaskController implements Job {
      */
     public static void copyFile(String EtpsPreentNo, String fileName, File file, FTPFile ftpFile) throws IOException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-        //本地测试
-        if (file != null && ftpFile == null) {
-            //创建文件路径
-            File descFiledir = new File("E:/HZHZ/" + simpleDateFormat.format(new Date()) + "/" + EtpsPreentNo);
-            if (!descFiledir.exists()) {
-                Boolean result = descFiledir.mkdirs();
-            }
-            //创建空白文件
-            File descFile = new File(descFiledir + "\\" + fileName);
-            // 判断文件是否存在
-            if (!descFile.exists()) {
-                Boolean result = descFile.createNewFile();
-            }
-            FileUtils.copyFile(file, descFile);
-        }
         //FTP
         if (file == null && ftpFile != null) {
             String localPath = LOCAL_PATH + simpleDateFormat.format(new Date()) + "/" + EtpsPreentNo;
