@@ -1,25 +1,14 @@
 package com.haiersoft.ccli.wms.web.passPort;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.utils.StringUtils;
-import com.haiersoft.ccli.cost.entity.BisPay;
 import com.haiersoft.ccli.supervision.service.GetKeyService;
 import com.haiersoft.ccli.system.entity.ScheduleJob;
-import com.haiersoft.ccli.wms.entity.BisCustomsClearance;
-import com.haiersoft.ccli.wms.entity.BisCustomsClearanceInfo;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
-import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
-import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
-import com.haiersoft.ccli.wms.service.CustomsClearanceInfoService;
-import com.haiersoft.ccli.wms.service.CustomsClearanceService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortService;
-import com.haiersoft.ccli.wms.service.preEntry.PreEntryService;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPFile;
 import org.json.XML;
 import org.quartz.DisallowConcurrentExecution;
@@ -33,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,11 +42,9 @@ public class PassPortTaskController implements Job {
     private PassPortService passPortService;
     @Autowired
     GetKeyService getKeyService;
-    @Autowired
-    private BaseBoundedService baseBoundedService;
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context){
         ScheduleJob scheduleJob = (ScheduleJob) context.getMergedJobDataMap().get("scheduleJob");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
         getPassPortHZ();
@@ -88,7 +74,7 @@ public class PassPortTaskController implements Job {
         if (fileList.length > 0) {
             for (FTPFile ftpFile : fileList) {
                 String fileName = ftpFile.getName();
-                if (!fileName.contains("SAS221") && !fileName.contains("SAS222") && !fileName.contains("SAS223")) {
+                if (!fileName.contains("SAS221") && !fileName.contains("SAS222") && !fileName.contains("SAS223") && !fileName.contains("SAS224")) {
                     continue;
                 } else {
                     String xml = "";
@@ -111,7 +97,7 @@ public class PassPortTaskController implements Job {
     }
 
     //解析数据执行业务逻辑
-    public void execute(String xml, String fileName, File file, FTPFile ftpFile) throws ParseException, IOException {
+    public void execute(String xml, String fileName, File file, FTPFile ftpFile) {
         //获取回执数据
         org.json.JSONObject jsonObject = XML.toJSONObject(xml);
         if (jsonObject.get("Package") != null) {
@@ -137,6 +123,9 @@ public class PassPortTaskController implements Job {
             }
             if (BussinessData.get("SAS224") != null) {//核放单查验处置回执报文
                 SAS224Mothed(BussinessData);
+            }
+            if (BussinessData.get("SAS231") != null) {//车辆信息审核回执报文
+                SAS231Mothed(BussinessData);
             }
 
 
@@ -278,6 +267,11 @@ public class PassPortTaskController implements Job {
                 }
             }
         }
+    }
+
+    //核放单修改回执报文
+    public void SAS231Mothed(JSONObject BussinessData){
+
     }
 
 

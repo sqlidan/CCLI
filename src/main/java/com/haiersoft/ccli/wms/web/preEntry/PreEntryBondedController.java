@@ -192,4 +192,47 @@ public class PreEntryBondedController extends BaseController {
 		}
 		return resultMap;
 	}
+
+	/**
+	 * @return java.util.concurrent.Callable<com.chenay.bean.entity.customs.InvtMessage>
+	 * @Author chenp
+	 * @Description 保税核注清单详细查询服务
+	 * @Date 9:12 2021/1/30
+	 * @Param [nemsCommonSeqNoRequest]
+	 **/
+	public Map<String,Object> InvtDetailService(NemsCommonSeqNoRequest nemsCommonSeqNoRequest) {
+		Map<String,Object> resultMap = new HashMap<>();
+		InvtMessage baseResult = new InvtMessage();
+		String dataStr = "";
+		try {
+			nemsCommonSeqNoRequest.setKey(ApiKey.保税监管_保税核注清单查询服务秘钥.getValue());
+			String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_保税核注清单详细查询接口.getValue(), JSON.toJSONString(nemsCommonSeqNoRequest));
+			JSONObject jsonObject = JSON.parseObject(s);
+			String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
+			if ("200".equals(code)) {
+				Object data = jsonObject.get("data");
+
+				if (data != null) {
+					dataStr = data.toString();
+				}
+				baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), InvtMessage.class);
+				resultMap.put("code","200");
+				resultMap.put("msg","success");
+				resultMap.put("data",baseResult);
+			} else {
+				Object data = jsonObject.get("msg");
+				if (data != null) {
+					dataStr = data.toString();
+				}
+				logger.error("保税监管_保税核注清单详细查询接口"+nemsCommonSeqNoRequest.getBlsNo(),"结果"+dataStr);
+				logger.error(dataStr);
+				resultMap.put("code","500");
+				resultMap.put("msg",dataStr);
+				resultMap.put("data",null);
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		return resultMap;
+	}
 }
