@@ -40,7 +40,7 @@ public class PassPortInfoService extends BaseService<BisPassPortInfo, Integer> {
 			bisPreEntryDictData0.setValue("0");bisPreEntryDictData0.setLabel("已申请");
 			bisPreEntryDictDataList.add(bisPreEntryDictData0);
 			BisPreEntryDictData bisPreEntryDictData1 = new BisPreEntryDictData();
-			bisPreEntryDictData1.setValue("1");bisPreEntryDictData1.setLabel("已审批");
+			bisPreEntryDictData1.setValue("1");bisPreEntryDictData1.setLabel("已审批(卡口放行)");
 			bisPreEntryDictDataList.add(bisPreEntryDictData1);
 			BisPreEntryDictData bisPreEntryDictData2 = new BisPreEntryDictData();
 			bisPreEntryDictData2.setValue("2");bisPreEntryDictData2.setLabel("已过卡");
@@ -55,7 +55,7 @@ public class PassPortInfoService extends BaseService<BisPassPortInfo, Integer> {
 			bisPreEntryDictData5.setValue("5");bisPreEntryDictData5.setLabel("已删除");
 			bisPreEntryDictDataList.add(bisPreEntryDictData5);
 			BisPreEntryDictData bisPreEntryDictData6 = new BisPreEntryDictData();
-			bisPreEntryDictData6.setValue("6");bisPreEntryDictData6.setLabel("已作废");
+			bisPreEntryDictData6.setValue("6");bisPreEntryDictData6.setLabel("已作废(拒绝过卡)");
 			bisPreEntryDictDataList.add(bisPreEntryDictData6);
 		}
 		if("col1".equals(code)){

@@ -152,7 +152,7 @@ public class PassPortController extends BaseController {
                 //调用申报核放单接口
                 Map<String, Object> resultMap = passPortSave(id);
                 if ("200".equals(resultMap.get("code").toString())) {
-                    bisPassPort.setSeqNo(resultMap.get("data").toString());
+                    bisPassPort.setEtpsPreentNo2(resultMap.get("data").toString());
                 } else {
                     return resultMap.get("msg").toString();
                 }
@@ -344,10 +344,10 @@ public class PassPortController extends BaseController {
             bisPassPortHead = bisPassPortList.get(0);
         }
         SasCommonSeqNoRequest sasCommonSeqNoRequest = new SasCommonSeqNoRequest();
-        sasCommonSeqNoRequest.setBlsNo("");
-        sasCommonSeqNoRequest.setBlsType("");
-        sasCommonSeqNoRequest.setChgTmsCnt("");
-        sasCommonSeqNoRequest.setRltGdsSeqno("");
+//        sasCommonSeqNoRequest.setBlsNo(null);
+//        sasCommonSeqNoRequest.setBlsType(null);
+//        sasCommonSeqNoRequest.setChgTmsCnt(null);
+//        sasCommonSeqNoRequest.setRltGdsSeqno(null);
         sasCommonSeqNoRequest.setSeqNo(bisPassPortHead.getSeqNo());
         sasCommonSeqNoRequest.setMemberCode(memberCode);
         sasCommonSeqNoRequest.setPass(pass);

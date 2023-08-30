@@ -120,6 +120,16 @@ public class BisPassPort implements java.io.Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "DCL_TIME")
 	private Date dclTime;
+	@Column(name = "ETPS_PREENT_NO2")
+	private String etpsPreentNo2;
+
+	public String getEtpsPreentNo2() {
+		return etpsPreentNo2;
+	}
+
+	public void setEtpsPreentNo2(String etpsPreentNo2) {
+		this.etpsPreentNo2 = etpsPreentNo2;
+	}
 
 	public static long getSerialVersionUID() {
 		return serialVersionUID;

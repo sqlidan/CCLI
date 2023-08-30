@@ -20,6 +20,10 @@
 				<option value="1">暂存/申报</option>
 				<option value="2">通过</option>
 				<option value="3">作废</option>
+				<option value="4">转人工</option>
+				<option value="5">退单</option>
+				<option value="Y">入库成功</option>
+				<option value="Z">入库失败</option>
 			</select>
 			<select name="filter_EQS_bindTypecd" class="easyui-combobox" data-options="width:150,prompt: '绑定类型' " >
 				<option value=""></option>
@@ -58,12 +62,12 @@
 			<select name="filter_EQS_lockage" class="easyui-combobox" data-options="width:150,prompt: '过卡状态' " >
 				<option value=""></option>
 				<option value="0">已申请</option>
-				<option value="1">已审批</option>
+				<option value="1">已审批(卡口放行)</option>
 				<option value="2">已过卡</option>
 				<option value="3">已过一卡</option>
 				<option value="4">已过二卡</option>
 				<option value="5">已删除</option>
-				<option value="6">已作废</option>
+				<option value="6">已作废(拒绝过卡)</option>
 			</select>
 	        <input type="text" name="filter_GED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入开始日期'"/>
 	        <input type="text" name="filter_LED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入结束日期'"/>
@@ -199,6 +203,18 @@ function gridDG(){
 					if(value == '3'){
 						return "作废";
 					}
+					if(value == '4'){
+						return "转人工";
+					}
+					if(value == '5'){
+						return "退单";
+					}
+					if(value == 'Y'){
+						return "入库成功";
+					}
+					if(value == 'Z'){
+						return "入库失败";
+					}
 				}},
 			{field:'areainEtpsNm',title:'区内企业名称',sortable:true},
 			{field:'etpsPreentNo',title:'企业内部编号',sortable:true},
@@ -225,7 +241,7 @@ function gridDG(){
 						return "已申请";
 					}
 					if(value == '1'){
-						return "已审批";
+						return "已审批(卡口放行)";
 					}
 					if(value == '2'){
 						return "已过卡";
@@ -240,7 +256,7 @@ function gridDG(){
 						return "已删除";
 					}
 					if(value == '6'){
-						return "已作废";
+						return "已作废(拒绝过卡)";
 					}
 				}},
 			{field:'checkResult',title:'查验结果',sortable:true},
