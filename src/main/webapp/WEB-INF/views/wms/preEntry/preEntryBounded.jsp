@@ -23,11 +23,11 @@
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<input type="text" name="filter_LIKES_accountBook" class="easyui-validatebox" data-options="width:150,prompt: '账册商品序号'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
-	        <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="search()">搜索</a>
+	        <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
 		</form>
 		<form id="searchFrom3" action="">
 		</form>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="cx()">查询</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="search()">查询</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true"
 			   onclick="exportExcel()">导出EXCEL</a>
@@ -42,7 +42,7 @@ var d;
 var dgg
 
 
-document.onkeydown = function () {if(event.keyCode == 13){search();}};
+document.onkeydown = function () {if(event.keyCode == 13){cx();}};
 
 $(function(){   
 	gridDG();
@@ -96,14 +96,14 @@ function refresh(){
 }
 
 //创建查询对象并查询
-function search(){
+function cx(){
 	dg.datagrid('clearSelections');
 	var obj=$("#searchFrom").serializeObject();
 
 	dg.datagrid('load',obj); 
 }
 //查询
-function cx(){
+function search(){
 	parent.$.messager.prompt('提示', '请输入需要查询的核注清单号。', function(content){
 		if (content){
 			$.ajax({

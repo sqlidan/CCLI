@@ -1,5 +1,7 @@
 package com.haiersoft.ccli.wms.service.passPort;
 
+import com.haiersoft.ccli.bounded.dao.BaseBoundedDao;
+import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.wms.dao.PassPortInfoDao;
@@ -25,6 +27,8 @@ public class PassPortInfoService extends BaseService<BisPassPortInfo, Integer> {
 
 	@Autowired
 	private PassPortInfoDao passPortInfoDao;
+	@Autowired
+	private BaseBoundedDao baseBoundedDao;
 
 	@Override
     public HibernateDao<BisPassPortInfo, Integer> getEntityDao() {
@@ -33,6 +37,10 @@ public class PassPortInfoService extends BaseService<BisPassPortInfo, Integer> {
 	public List<BisPassPortInfo> getList(String id){
 		return passPortInfoDao.findBy("passPortId", id);
 	}
+	public List<BaseBounded> getGdsInfo(String rltGdsSeqno){
+		return baseBoundedDao.findBy("accountBook", rltGdsSeqno);
+	}
+
 	public List<BisPreEntryDictData> getDictDataByCode(String code){
 		List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();
 		if("lockage".equals(code)){

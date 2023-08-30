@@ -239,6 +239,10 @@
 	<div title="表体" >
 		<div data-options="region:'center'">
 			<form id="mainForm2"  >
+				<div style="height:auto" class="datagrid-toolbar">
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-disk" plain="true" data-options="disabled:false" onclick="clearIt2()">清空</a>
+						<span class="toolbar-item dialog-tool-separator"></span>
+				</div>
 				<table class="formTable" >
 					<tr>
 						<td style="text-align:right;">序号</td>
@@ -247,7 +251,7 @@
 						</td>
 						<td style="text-align:right;"><span style="color: red">*</span>关联商品序号</td>
 						<td>
-							<input type="text" id="rltGdsSeqno" name="rltGdsSeqno"  class="easyui-validatebox" data-options="width:180, required:'required'" value="${passPortInfo.rltGdsSeqno}">
+							<input type="text" id="rltGdsSeqno" name="rltGdsSeqno" onblur="getGdsInfo()"  class="easyui-validatebox" data-options="width:180, required:'required'" value="${passPortInfo.rltGdsSeqno}">
 						</td>
 						<td style="text-align:right;"><span style="color: red">*</span>商品料号</td>
 						<td>
@@ -557,6 +561,23 @@ function clearIt(){
 //表头保存
 function submitForm(){
 	if($("#mainForm").form('validate')){
+		var passportTypecd = $("#passportTypecd").combobox("getValue");
+		var areainOriactNo = $("#areainOriactNo").val();
+		if(passportTypecd !== undefined && passportTypecd !== null && passportTypecd.toString().trim().length > 0){
+			if(parseInt(passportTypecd) == 6){
+				// console.log("空车进出区")
+			}else{
+				if(areainOriactNo !== undefined && areainOriactNo !== null && areainOriactNo.toString().trim().length > 0){
+					// console.log("区内账册号有值")
+				}else{
+					parent.$.messager.show({title: "提示", msg: "核放单类型不为空车进出区时请填写区内账册号！", position: "bottomRight" });
+					return;
+				}
+			}
+		}else{
+			parent.$.messager.show({title: "提示", msg: "请选择核放单类型！", position: "bottomRight" });
+			return;
+		}
 		if(passPortId){
 			type = "update";
 			//用ajax提交form
@@ -585,6 +606,7 @@ function submitForm(){
 					if(res.msg == "success"){
 						parent.$.messager.show({ title : "提示",msg: "操作成功！ID:"+res.id, position: "bottomRight" });
 						passPortId = res.id;
+						$("#id").val(passPortId);
 					}
 				}
 			});
@@ -593,6 +615,39 @@ function submitForm(){
  	}
 }
 //================================================================================================================================
+//依据关联商品序号获取商品信息
+function getGdsInfo(){
+	var rltGdsSeqno = $("#rltGdsSeqno").val();
+	if(rltGdsSeqno !== undefined && rltGdsSeqno !== null && rltGdsSeqno.toString().trim().length > 0){
+		//用ajax提交form
+		$.ajax({
+			async: false,
+			type: 'GET',
+			url: "${ctx}/wms/passPortInfo/getGdsInfo?rltGdsSeqno="+rltGdsSeqno,
+			dataType: "text",
+			success: function(resStr){
+				var res = JSON.parse(resStr);
+				if(res.msg == "success"){
+					var data = res.data;
+					// $("#gdsMtno").val(data.gdsMtno);
+					$("#gdecd").val(data.hsCode);
+					$("#gdsNm").val(data.hsItemname);
+					$('#dclUnitcd').combobox('select',data.dclUnitcd);
+					$("#dclQty").val(data.piece);
+					$("#grossWt").val(data.hsQty);
+					$("#netWt").val(data.netWeight);
+				}
+			}
+		});
+	}else{
+		parent.$.messager.show({title: "提示", msg: "请先输入关联商品序号！", position: "bottomRight" });
+	}
+}
+//================================================================================================================================
+//清空
+function clearIt2(){
+	$('#mainForm2').form('clear');
+}
 //表体添加
 function addInfo(){
 	if($("#mainForm2").form('validate')){
@@ -667,6 +722,7 @@ function copyInfo(){
 	$("#netWt").val(copy.netWt);
 	$("#remark").val(copy.remark);
 }
+
 //================================================================================================================================
 //添加关联单证
 function addDJInfo(){
