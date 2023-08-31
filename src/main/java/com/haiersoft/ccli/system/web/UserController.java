@@ -2,7 +2,9 @@ package com.haiersoft.ccli.system.web;
 
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import com.haiersoft.ccli.common.utils.PropertiesUtil;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -239,9 +244,17 @@ public class UserController extends BaseController {
 	@ResponseBody
 	public String updatePwd(String oldPassword,@Valid @ModelAttribute @RequestBody User user, HttpSession session) {
 		if (userService.checkPassword((User) session.getAttribute("user"),oldPassword)) {
+			Date date = new Date();
+			Timestamp timestamp = new Timestamp(date.getTime());
+			user.setPasswordUpdateDate(timestamp);
 			userService.updatePwd(user);
 			session.setAttribute("user", user);
-			return "success";
+//			return "success";
+			//退出
+			Subject subject = SecurityUtils.getSubject();
+			subject.logout();
+			String ssoLogoutUrl = PropertiesUtil.getPropertiesByName("sso.ssoLogoutUrl", "sso");
+			return "redirect:"+ssoLogoutUrl;
 		} else {
 			return "false";
 		}
@@ -265,6 +278,9 @@ public class UserController extends BaseController {
 	@ResponseBody
 	public String updatePwdByAdmin(String oldPassword,@Valid @ModelAttribute @RequestBody User user) {
 		if (userService.checkPassword(userService.get(user.getId()),oldPassword)) {
+			Date date = new Date();
+			Timestamp timestamp = new Timestamp(date.getTime());
+			user.setPasswordUpdateDate(timestamp);
 			userService.updatePwd(user);
 			return "success";
 		} else {
@@ -304,7 +320,6 @@ public class UserController extends BaseController {
 	 * ajax请求校验原密码是否正确
 	 * 
 	 * @param oldPassword
-	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "checkPwd")
@@ -322,7 +337,6 @@ public class UserController extends BaseController {
 	 * ajax请求校验原密码是否正确(用户管理页面
 	 * 
 	 * @param oldPassword
-	 * @param request
 	 * @return
 	 */
 	@RequestMapping(value = "checkPwd/{id}")
@@ -374,7 +388,6 @@ public class UserController extends BaseController {
 	 * 
 	 * @author PYL
 	 * @Description: 获得所有客服
-	 * @param code
 	 * @return
 	 * @throws
 	 */

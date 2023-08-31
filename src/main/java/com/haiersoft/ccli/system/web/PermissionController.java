@@ -1,11 +1,15 @@
 package com.haiersoft.ccli.system.web;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -212,11 +216,25 @@ public class PermissionController extends BaseController{
 	@RequestMapping(value="ifzq",method = RequestMethod.GET)
 	@ResponseBody
 	public String ifzq() {
-		List<Permission> obj=permissionService.ifzq(UserUtil.getCurrentUser().getId());
-		if(!obj.isEmpty()){
-			return "success";
+		Date passwordUpdateDate = UserUtil.getCurrentUser().getPasswordUpdateDate();
+		if(passwordUpdateDate == null){
+			return "updatePwd";
 		}else{
-			return "false";
+			Date now = new Date();
+			long diffDays = DateUtil.between(passwordUpdateDate,now, DateUnit.DAY);
+			if(diffDays >= 83 & diffDays < 90){
+				return "updatePwdWarn";
+			}
+			if(diffDays >= 90){
+				return "updatePwd";
+			}else {
+				List<Permission> obj = permissionService.ifzq(UserUtil.getCurrentUser().getId());
+				if (!obj.isEmpty()) {
+					return "success";
+				} else {
+					return "false";
+				}
+			}
 		}
 	}
 }

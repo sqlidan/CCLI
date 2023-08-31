@@ -81,7 +81,18 @@ public class User implements Serializable {
 	
 	@Column(name = "USER_CODE", length = 3)
 	private String userCode;//用户代码，长度为3位
-	
+
+	@Column(name = "PASSWORD_UPDATE_DATE")
+	private Timestamp passwordUpdateDate;
+
+	public Timestamp getPasswordUpdateDate() {
+		return passwordUpdateDate;
+	}
+
+	public void setPasswordUpdateDate(Timestamp passwordUpdateDate) {
+		this.passwordUpdateDate = passwordUpdateDate;
+	}
+
 	@JsonIgnore
 	private Set<UserRole> userRoles = new HashSet<UserRole>(0);
 	

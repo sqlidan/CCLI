@@ -27,7 +27,7 @@
 		</form>
 		<form id="searchFrom3" action="">
 		</form>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="search()">查询</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="queryHZQD()">查询</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true"
 			   onclick="exportExcel()">导出EXCEL</a>
@@ -103,7 +103,7 @@ function cx(){
 	dg.datagrid('load',obj); 
 }
 //查询
-function search(){
+function queryHZQD(){
 	parent.$.messager.prompt('提示', '请输入需要查询的核注清单号。', function(content){
 		if (content){
 			$.ajax({

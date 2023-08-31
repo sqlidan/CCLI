@@ -143,13 +143,21 @@ function checkCookie(){
 		window.location.replace ( "http://sso.sdland-sea.com/sso/oauth/logout?redirect_uri=http://test.sdland-sea.com/logout?token=backend" );
 	}
 }
+
 $(function(){
 	$.ajax({
 		async:false,
 		type:'get',
 		url:"${ctx}/system/permission/ifzq",
 		success: function(data){
-			if(data == "success"){
+            if(data == "updatePwdWarn"){
+                // alert("尊敬的平台用户，您的平台登录密码即将过期，为了保障信息安全，请尽快修改平台登录密码！感谢您的配合。");
+                parent.$.messager.confirm('提示', '尊敬的平台用户，您的平台登录密码即将过期，为了保障信息安全，请尽快修改平台登录密码！感谢您的配合。', function(data){
+
+                });
+            }else if(data == "updatePwd"){
+                updatePwdForce();
+            }else if(data == "success"){
 				outWarning();
 				taskRemind();
 			} 
@@ -215,6 +223,13 @@ function updatePwd(){
 			text:'确认',
 			handler:function(){
 				if($("#pwdForm").form('validate')){
+				    //校验密码格式
+                    var plainPasswordi = $("#plainPasswordi").val();
+                    const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
+                    if(!regex.test(plainPasswordi)){
+                        parent.$.messager.show({title: "提示", msg: "密码必须包含数字,特殊字符,小写字母,大写字母其中三项！", position: "bottomRight" });
+                        return;
+                    }
 					if($("#plainPasswordi").val() == $("#confirmPasswordi").val()){
  			   			$("#pwdForm").submit(); 
 			    		pwd.panel('close');
@@ -231,6 +246,38 @@ function updatePwd(){
 			}
 		}] 
 	});
+}
+function updatePwdForce(){
+    pwd=$("#pwd").dialog({
+        closable:false,
+        title: '修改密码',
+        width: 380,
+        height: 380,
+        href:'${ctx}/system/user/updatePwd',
+        maximizable:true,
+        modal:true,
+        buttons:[{
+            text:'确认',
+            handler:function(){
+                if($("#pwdForm").form('validate')){
+                    //校验密码格式
+                    var plainPasswordi = $("#plainPasswordi").val();
+                    const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
+                    if(!regex.test(plainPasswordi)){
+                        parent.$.messager.show({title: "提示", msg: "密码必须包含数字,特殊字符,小写字母,大写字母其中三项！", position: "bottomRight" });
+                        return;
+                    }
+                    if($("#plainPasswordi").val() == $("#confirmPasswordi").val()){
+                        $("#pwdForm").submit();
+                        pwd.panel('close');
+                    }else{
+                        parent.$.messager.show({title: "提示", msg: "确认密码输入错误！", position: "bottomRight" });
+                        return;
+                    }
+                }
+            }
+        }]
+    });
 }
 </script>
     

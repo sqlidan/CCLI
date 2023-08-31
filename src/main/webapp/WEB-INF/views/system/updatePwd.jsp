@@ -25,6 +25,9 @@
 			<td>确认密码：</td>
 			<td><input id="confirmPasswordi" name="confirmPassword" type="password" class="required" equalTo="#plainPassword"/></td>
 		</tr>
+		<tr>
+			<td><span style="color: red">*</span>密码必须包含数字,特殊字符,小写字母,大写字母其中三项</td>
+		</tr>
 	</table>
 	</form>
 </div>
@@ -45,8 +48,12 @@ $('#pwdForm').form({
 		return isValid; // 返回false终止表单提交
 	},
 	success : function(data) {
-		parent.$.messager.show({title: "提示", msg: "修改成功！", position: "bottomRight" });
-	} 
+		// parent.$.messager.show({title: "提示", msg: "修改成功！", position: "bottomRight" });
+		//var url = "${ctx}/logout";
+		//window.location.href = url;
+		var url2 = "${ctx}/login";
+		window.location.href = url2;
+	}
 });
 </script>
 </body>
