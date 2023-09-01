@@ -469,26 +469,27 @@ public class PreEntryTaskController implements Job {
                                                 }catch (Exception e){
                                                     logger.error("BASE_BOUNDED添加通关底账信息失败==> "+e.getMessage());
                                                 }
-                                            } else if ("E".equals(bondInvtBscMap.get("impexpMarkcd").toString())) {//出口(报出)
-                                                //修改原底账信息中的数量字段
-                                                if (bondInvtDtMap.get("putrecSeqno") != null && bondInvtDtMap.get("putrecSeqno").toString().trim().length() > 0) {
-                                                    List<Map<String,Object>> boundedListMap = preEntryService.findOneBaseBounded(bondInvtDtMap.get("putrecSeqno").toString().trim());
-                                                    if (boundedListMap != null && boundedListMap.size() == 1) {
-                                                        try {
-                                                            BaseBounded bounded = new BaseBounded();
-                                                            bounded = baseBoundedService.find("id",boundedListMap.get(0).get("ID").toString());
-                                                            Double dclQtyOrg = bounded.getDclQty();
-                                                            bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(bondInvtDtMap.get("dclQty") == null ? "0" : bondInvtDtMap.get("dclQty").toString().trim().length() == 0?"0":bondInvtDtMap.get("dclQty").toString().trim()));//申报重量
-                                                            bounded.setUpdatedTime(new Date());
-                                                            logger.info("BASE_BOUNDED修改通关底账信息==>("+dclQtyOrg.toString()+"==>"+bounded.getDclQty()+") "+JSON.toJSONString(bounded));
-                                                            baseBoundedService.merge(bounded);
-                                                            logger.info("BASE_BOUNDED修改通关底账信息成功");
-                                                        }catch (Exception e){
-                                                            logger.error("BASE_BOUNDED修改通关底账信息失败==> "+e.getMessage());
-                                                        }
-                                                    }
-                                                }
                                             }
+//                                            else if ("E".equals(bondInvtBscMap.get("impexpMarkcd").toString())) {//出口(报出)
+//                                                //修改原底账信息中的数量字段
+//                                                if (bondInvtDtMap.get("putrecSeqno") != null && bondInvtDtMap.get("putrecSeqno").toString().trim().length() > 0) {
+//                                                    List<Map<String,Object>> boundedListMap = preEntryService.findOneBaseBounded(bondInvtDtMap.get("putrecSeqno").toString().trim());
+//                                                    if (boundedListMap != null && boundedListMap.size() == 1) {
+//                                                        try {
+//                                                            BaseBounded bounded = new BaseBounded();
+//                                                            bounded = baseBoundedService.find("id",boundedListMap.get(0).get("ID").toString());
+//                                                            Double dclQtyOrg = bounded.getDclQty();
+//                                                            bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(bondInvtDtMap.get("dclQty") == null ? "0" : bondInvtDtMap.get("dclQty").toString().trim().length() == 0?"0":bondInvtDtMap.get("dclQty").toString().trim()));//申报重量
+//                                                            bounded.setUpdatedTime(new Date());
+//                                                            logger.info("BASE_BOUNDED修改通关底账信息==>("+dclQtyOrg.toString()+"==>"+bounded.getDclQty()+") "+JSON.toJSONString(bounded));
+//                                                            baseBoundedService.merge(bounded);
+//                                                            logger.info("BASE_BOUNDED修改通关底账信息成功");
+//                                                        }catch (Exception e){
+//                                                            logger.error("BASE_BOUNDED修改通关底账信息失败==> "+e.getMessage());
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
                                         }
                                     }
                                 }

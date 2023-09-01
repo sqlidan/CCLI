@@ -89,10 +89,17 @@ public class PassPortController extends BaseController {
     @RequestMapping(value = "add", method = RequestMethod.GET)
     public String manager(Model model) {
         User user = UserUtil.getCurrentUser();
-        model.addAttribute("passPort", new BisPassPort());
+        BisPassPort bisPassPort = new BisPassPort();
+        bisPassPort.setDclEtpsno("3702631016");//申报单位编码
+        bisPassPort.setDclEtpsSccd("91370220395949850B");//申报单位社会信用代码
+        bisPassPort.setDclEtpsNm("青岛港怡之航冷链物流有限公司");//申报单位名称
+        bisPassPort.setInputCode("3702631016");//录入单位编码
+        bisPassPort.setInputSccd("91370220395949850B");//录入单位社会信用代码
+        bisPassPort.setInputName("青岛港怡之航冷链物流有限公司");//录入单位名称
+        bisPassPort.setDclTypecd("1");
+        bisPassPort.setDclBy(user.getName());
+        model.addAttribute("passPort", bisPassPort);
         model.addAttribute("date", new Date());
-        model.addAttribute("lockageTime1", new Date());
-        model.addAttribute("lockageTime2", new Date());
         model.addAttribute("dclTime", new Date());
         model.addAttribute("user", user.getName());
         model.addAttribute("action", "create");

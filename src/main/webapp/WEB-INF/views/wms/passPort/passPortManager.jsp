@@ -156,16 +156,16 @@
 				<tr>
 					<td style="text-align:right;">过卡状态</td>
 					<td>
-						<select id="lockage" name="lockage" class="easyui-combobox" data-options="width:180" value="${passPort.lockage}">
+						<select id="lockage" name="lockage" class="easyui-combobox" data-options="width:180" value="${passPort.lockage}" disabled>
 						</select>
 					</td>
 					<td style="text-align:right;">过卡时间1</td>
 					<td>
-						<input id="lockageTime1" name="lockageTime1" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${lockageTime1}" pattern="yyyy-MM-dd HH:mm:ss" />" />
+						<input id="lockageTime1" name="lockageTime1" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${lockageTime1}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 					<td style="text-align:right;">过卡时间2</td>
 					<td>
-						<input id="lockageTime2" name="lockageTime2" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${lockageTime2}" pattern="yyyy-MM-dd HH:mm:ss" />" />
+						<input id="lockageTime2" name="lockageTime2" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${lockageTime2}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 				</tr>
 				<tr>
@@ -194,7 +194,7 @@
 					</td>
 					<td style="text-align:right;">申报人</td>
 					<td>
-						<input type="text" id="dclBy" name="dclBy"  class="easyui-validatebox" value="${passPort.dclBy}" data-options="width:180" >
+						<input type="text" id="dclBy" name="dclBy"  class="easyui-validatebox" value="${passPort.dclBy}" data-options="width:180" disabled>
 					</td>
 					<td style="text-align:right;">申报日期</td>
 					<td>

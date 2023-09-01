@@ -26,7 +26,7 @@
 			<td><input id="confirmPasswordi" name="confirmPassword" type="password" class="required" equalTo="#plainPassword"/></td>
 		</tr>
 		<tr>
-			<td><span style="color: red">*</span>密码必须包含数字,特殊字符,小写字母,大写字母其中三项</td>
+			<span style="color: red">*</span>密码必须包含数字,特殊字符,小写字母,大写字母其中三项
 		</tr>
 	</table>
 	</form>

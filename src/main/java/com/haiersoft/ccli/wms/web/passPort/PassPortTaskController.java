@@ -2,13 +2,17 @@ package com.haiersoft.ccli.wms.web.passPort;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.supervision.service.GetKeyService;
 import com.haiersoft.ccli.system.entity.ScheduleJob;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
+import com.haiersoft.ccli.wms.service.passPort.PassPortInfoService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortService;
+import com.haiersoft.ccli.wms.service.preEntry.PreEntryService;
 import org.apache.commons.net.ftp.FTPFile;
 import org.json.XML;
 import org.quartz.DisallowConcurrentExecution;
@@ -36,15 +40,21 @@ import java.util.Map;
 @DisallowConcurrentExecution
 public class PassPortTaskController implements Job {
 
-    private static final Logger logger =  LoggerFactory.getLogger(PassPortTaskController.class);
+    private static final Logger logger = LoggerFactory.getLogger(PassPortTaskController.class);
 
     @Autowired
     private PassPortService passPortService;
     @Autowired
+    private PassPortInfoService passPortInfoService;
+    @Autowired
     GetKeyService getKeyService;
+    @Autowired
+    private PreEntryService preEntryService;
+    @Autowired
+    private BaseBoundedService baseBoundedService;
 
     @Override
-    public void execute(JobExecutionContext context){
+    public void execute(JobExecutionContext context) {
         ScheduleJob scheduleJob = (ScheduleJob) context.getMergedJobDataMap().get("scheduleJob");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
         getPassPortHZ();
@@ -144,14 +154,14 @@ public class PassPortTaskController implements Job {
     }
 
     //核放单回执报文
-    public void SAS221Mothed(JSONObject BussinessData){
+    public void SAS221Mothed(JSONObject BussinessData) {
         String etpsPreentNo = null;
         JSONObject SAS221 = JSONObject.parseObject(BussinessData.get("SAS221").toString());
         //清单审批回执
         if (SAS221.get("HdeApprResult") != null) {
             JSONObject HdeApprResult = JSONObject.parseObject(SAS221.get("HdeApprResult").toString());
             Map<String, Object> hdeApprResultMap = JSON.parseObject(HdeApprResult.toString());
-            if(hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0){
+            if (hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0) {
                 etpsPreentNo = hdeApprResultMap.get("etpsPreentNo").toString().trim();
             }
 
@@ -163,12 +173,12 @@ public class PassPortTaskController implements Job {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1-通过2-转人工3-退单Y-入库成功Z-入库失败
                     //2-通过;4-转人工;5-退单;Y-入库成功;Z-入库失败;
-                    if ("1".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("1".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("2");//通过
                         //反写核放单号
-                        forBisPassPort.setPassportNo(hdeApprResultMap.get("businessId")==null?"未获取到核放单号":hdeApprResultMap.get("businessId").toString());
+                        forBisPassPort.setPassportNo(hdeApprResultMap.get("businessId") == null ? "未获取到核放单号" : hdeApprResultMap.get("businessId").toString());
                     }
-                    if ("2".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("2".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("4");//转人工
                         if (SAS221.get("CheckInfo") != null && SAS221.get("CheckInfo").toString().trim().length() > 0) {
                             JSONObject CheckInfo = JSONObject.parseObject(SAS221.get("CheckInfo").toString());
@@ -178,13 +188,13 @@ public class PassPortTaskController implements Job {
                             }
                         }
                     }
-                    if ("3".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("3".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("5");//退单
                     }
-                    if ("Y".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("Y".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("Y");//入库成功
                     }
-                    if ("Z".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("Z".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("Z");//入库失败
                     }
                     forBisPassPort.setUpdateBy("SYSTEM");
@@ -196,19 +206,19 @@ public class PassPortTaskController implements Job {
     }
 
     //核放单修改回执报文
-    public void SAS222Mothed(JSONObject BussinessData){
+    public void SAS222Mothed(JSONObject BussinessData) {
 
     }
 
     //核放单过卡回执报文
-    public void SAS223Mothed(JSONObject BussinessData){
+    public void SAS223Mothed(JSONObject BussinessData) {
         String etpsPreentNo = null;
         JSONObject SAS223 = JSONObject.parseObject(BussinessData.get("SAS223").toString());
         //清单审批回执
         if (SAS223.get("HdeApprResult") != null) {
             JSONObject HdeApprResult = JSONObject.parseObject(SAS223.get("HdeApprResult").toString());
             Map<String, Object> hdeApprResultMap = JSON.parseObject(HdeApprResult.toString());
-            if(hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0){
+            if (hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0) {
                 etpsPreentNo = hdeApprResultMap.get("etpsPreentNo").toString().trim();
             }
 
@@ -220,30 +230,56 @@ public class PassPortTaskController implements Job {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1.已过卡2.未过卡
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
-                    if ("1".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("1".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setLockage("2");//已过卡
                         forBisPassPort.setLockageTime1(new Date());
+                        forBisPassPort.setUpdateBy("SYSTEM");
+                        forBisPassPort.setUpdateTime(new Date());
+                        passPortService.merge(forBisPassPort);
+
+                        //非空车出区则进行底账变更
+                        if(!"6".equals(forBisPassPort.getPassportTypecd().trim())){//非空车
+                            if ("E".equals(forBisPassPort.getIoTypecd().toString().trim())) {//出区
+                                List<BisPassPortInfo> bisPassPortInfoList = passPortInfoService.getList(forBisPassPort.getId());
+                                if (bisPassPortInfoList!=null && bisPassPortInfoList.size() > 0){
+                                    for (BisPassPortInfo forBisPassPortInfo:bisPassPortInfoList) {
+                                        try {
+                                            BaseBounded bounded = new BaseBounded();
+                                            bounded = baseBoundedService.find("id",forBisPassPortInfo.getRltGdsSeqno());
+                                            Double dclQtyOrg = bounded.getDclQty();
+                                            bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(forBisPassPortInfo.getDclQty()));//申报重量
+                                            bounded.setUpdatedTime(new Date());
+                                            logger.info("BASE_BOUNDED修改通关底账信息==>(" + dclQtyOrg.toString() + "==>" + bounded.getDclQty() + ") " + JSON.toJSONString(bounded));
+                                            baseBoundedService.merge(bounded);
+                                            logger.info("BASE_BOUNDED修改通关底账信息成功");
+                                        } catch (Exception e) {
+                                            logger.error("BASE_BOUNDED修改通关底账信息失败==> " + e.getMessage());
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-                    if ("2".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("2".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setLockage("0");//已申请
+                        forBisPassPort.setUpdateBy("SYSTEM");
+                        forBisPassPort.setUpdateTime(new Date());
+                        passPortService.merge(forBisPassPort);
                     }
-                    forBisPassPort.setUpdateBy("SYSTEM");
-                    forBisPassPort.setUpdateTime(new Date());
-                    passPortService.merge(forBisPassPort);
                 }
             }
         }
     }
 
     //核放单查验处置回执报文
-    public void SAS224Mothed(JSONObject BussinessData){
+    public void SAS224Mothed(JSONObject BussinessData) {
         String etpsPreentNo = null;
         JSONObject SAS224 = JSONObject.parseObject(BussinessData.get("SAS224").toString());
         //清单审批回执
         if (SAS224.get("HdeApprResult") != null) {
             JSONObject HdeApprResult = JSONObject.parseObject(SAS224.get("HdeApprResult").toString());
             Map<String, Object> hdeApprResultMap = JSON.parseObject(HdeApprResult.toString());
-            if(hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0){
+            if (hdeApprResultMap.get("etpsPreentNo") != null || hdeApprResultMap.get("etpsPreentNo").toString().trim().length() > 0) {
                 etpsPreentNo = hdeApprResultMap.get("etpsPreentNo").toString().trim();
             }
 
@@ -255,10 +291,10 @@ public class PassPortTaskController implements Job {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //2.拒绝过卡 3.卡口放行
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
-                    if ("2".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("2".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setLockage("6");//拒绝过卡
                     }
-                    if ("3".equals(hdeApprResultMap.get("manageResult")==null?"":hdeApprResultMap.get("manageResult").toString())) {
+                    if ("3".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setLockage("1");//卡口放行
                     }
                     forBisPassPort.setUpdateBy("SYSTEM");
@@ -270,7 +306,7 @@ public class PassPortTaskController implements Job {
     }
 
     //核放单修改回执报文
-    public void SAS231Mothed(JSONObject BussinessData){
+    public void SAS231Mothed(JSONObject BussinessData) {
 
     }
 
