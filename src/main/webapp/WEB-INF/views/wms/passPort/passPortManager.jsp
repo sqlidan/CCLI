@@ -44,9 +44,9 @@
 					</td>
 				</tr>
 				<tr>
-					<td style="text-align:right;"><span style="color: red">*</span>绑定类型</td>
+					<td style="text-align:right;">绑定类型</td>
 					<td>
-						<select id="bindTypecd" name="bindTypecd" class="easyui-combobox" data-options="width:180, required:'required'" value="${passPort.bindTypecd}">
+						<select id="bindTypecd" name="bindTypecd" class="easyui-combobox" data-options="width:180" value="${passPort.bindTypecd}">
 						</select>
 					</td>
 					<td style="text-align:right;">关联单证类型</td>
@@ -56,11 +56,11 @@
 					</td>
 					<td style="text-align:right;">关联单证编号</td>
 					<td>
-						<input type="text" id="rltNo" name="rltNo"  class="easyui-validatebox" value="${passPort.rltNo}" data-options="width:180, required:'required'"  >
+						<input type="text" id="rltNo" name="rltNo"  class="easyui-validatebox" value="${passPort.rltNo}" data-options="width:180"  >
 					</td>
-					<td style="text-align:right;"><span style="color: red">*</span>主管关区</td>
+					<td style="text-align:right;">主管关区</td>
 					<td>
-						<select id="masterCuscd" name="masterCuscd" class="easyui-combobox" data-options="width:180, required:'required'" value="${passPort.masterCuscd}">
+						<select id="masterCuscd" name="masterCuscd" class="easyui-combobox" data-options="width:180" value="${passPort.masterCuscd}" disabled>
 						</select>
 					</td>
 				</tr>
@@ -69,32 +69,32 @@
 					<td>
 						<input type="text" id="areainOriactNo" name="areainOriactNo"  class="easyui-validatebox" value="${passPort.areainOriactNo}" data-options="width:180"  >
 					</td>
-					<td style="text-align:right;"><span style="color: red">*</span>区内企业编码</td>
+					<td style="text-align:right;">区内企业编码</td>
 					<td>
-						<input type="text" id="areainEtpsno" name="areainEtpsno"  class="easyui-validatebox" value="${passPort.areainEtpsno}" data-options="width:180, required:'required'">
+						<input type="text" id="areainEtpsno" name="areainEtpsno"  class="easyui-validatebox" value="${passPort.areainEtpsno}" data-options="width:180" readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">区内企业社会信用代码</td>
 					<td>
-						<input type="text" id="areainEtpsSccd" name="areainEtpsSccd"  class="easyui-validatebox" value="${passPort.areainEtpsSccd}" data-options="width:180"  >
+						<input type="text" id="areainEtpsSccd" name="areainEtpsSccd"  class="easyui-validatebox" value="${passPort.areainEtpsSccd}" data-options="width:180"  readonly style="background:#eee">
 					</td>
-					<td style="text-align:right;"><span style="color: red">*</span>区内企业名称</td>
+					<td style="text-align:right;">区内企业名称</td>
 					<td>
-						<input type="text" id="areainEtpsNm" name="areainEtpsNm"  class="easyui-validatebox" value="${passPort.areainEtpsNm}" data-options="width:180, required:'required'">
+						<input type="text" id="areainEtpsNm" name="areainEtpsNm"  class="easyui-validatebox" value="${passPort.areainEtpsNm}" data-options="width:180" readonly style="background:#eee">
 					</td>
 				</td>
 				</tr>
 				<tr>
 					<td style="text-align:right;">申报单位编码</td>
 					<td>
-						<input type="text" id="dclEtpsno" name="dclEtpsno"  class="easyui-validatebox" value="${passPort.dclEtpsno}" data-options="width:180"  >
+						<input type="text" id="dclEtpsno" name="dclEtpsno"  class="easyui-validatebox" value="${passPort.dclEtpsno}" data-options="width:180"  readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">申报单位社会信用代码</td>
 					<td>
-						<input type="text" id="dclEtpsSccd" name="dclEtpsSccd"  class="easyui-validatebox" value="${passPort.dclEtpsSccd}" data-options="width:180"  >
+						<input type="text" id="dclEtpsSccd" name="dclEtpsSccd"  class="easyui-validatebox" value="${passPort.dclEtpsSccd}" data-options="width:180"  readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">申报单位名称</td>
 					<td>
-						<input type="text" id="dclEtpsNm" name="dclEtpsNm"  class="easyui-validatebox" value="${passPort.dclEtpsNm}" data-options="width:180"  >
+						<input type="text" id="dclEtpsNm" name="dclEtpsNm"  class="easyui-validatebox" value="${passPort.dclEtpsNm}" data-options="width:180"  readonly style="background:#eee">
 					</td>
 				</tr>
 				<tr>
@@ -171,15 +171,15 @@
 				<tr>
 					<td style="text-align:right;">录入单位编码</td>
 					<td>
-						<input type="text" id="inputCode" name="inputCode"  class="easyui-validatebox" value="${passPort.inputCode}" data-options="width:180" >
+						<input type="text" id="inputCode" name="inputCode"  class="easyui-validatebox" value="${passPort.inputCode}" data-options="width:180" readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">录入单位社会信用代码</td>
 					<td>
-						<input type="text" id="inputSccd" name="inputSccd"  class="easyui-validatebox" value="${passPort.inputSccd}" data-options="width:180" >
+						<input type="text" id="inputSccd" name="inputSccd"  class="easyui-validatebox" value="${passPort.inputSccd}" data-options="width:180" readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">录入单位名称</td>
 					<td>
-						<input type="text" id="inputName" name="inputName"  class="easyui-validatebox" value="${passPort.inputName}" data-options="width:180" >
+						<input type="text" id="inputName" name="inputName"  class="easyui-validatebox" value="${passPort.inputName}" data-options="width:180" readonly style="background:#eee">
 					</td>
 				</tr>
 				<tr>
@@ -189,16 +189,16 @@
 					</td>
 					<td style="text-align:right;">申报类型</td>
 					<td>
-						<select id="dclTypecd" name="dclTypecd" class="easyui-combobox" data-options="width:180" value="${passPort.dclTypecd}">
+						<select id="dclTypecd" name="dclTypecd" class="easyui-combobox" data-options="width:180" value="${passPort.dclTypecd}" disabled>
 						</select>
 					</td>
 					<td style="text-align:right;">申报人</td>
 					<td>
-						<input type="text" id="dclBy" name="dclBy"  class="easyui-validatebox" value="${passPort.dclBy}" data-options="width:180" disabled>
+						<input type="text" id="dclBy" name="dclBy"  class="easyui-validatebox" value="${passPort.dclBy}" data-options="width:180" readonly style="background:#eee">
 					</td>
 					<td style="text-align:right;">申报日期</td>
 					<td>
-						<input id="dclTime" name="dclTime" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${dclTime}" pattern="yyyy-MM-dd HH:mm:ss" />" />
+						<input id="dclTime" name="dclTime" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${dclTime}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 				</tr>
 				<tr>

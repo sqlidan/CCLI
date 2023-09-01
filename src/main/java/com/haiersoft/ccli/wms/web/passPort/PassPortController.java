@@ -90,17 +90,21 @@ public class PassPortController extends BaseController {
     public String manager(Model model) {
         User user = UserUtil.getCurrentUser();
         BisPassPort bisPassPort = new BisPassPort();
+        bisPassPort.setMasterCuscd("4230");//主管关区
+        bisPassPort.setAreainEtpsno("3702631016");//区内企业编码
+        bisPassPort.setAreainEtpsSccd("91370220395949850B");//区内企业社会信用代码
+        bisPassPort.setAreainEtpsNm("青岛港怡之航冷链物流有限公司");//区内企业名称
         bisPassPort.setDclEtpsno("3702631016");//申报单位编码
         bisPassPort.setDclEtpsSccd("91370220395949850B");//申报单位社会信用代码
         bisPassPort.setDclEtpsNm("青岛港怡之航冷链物流有限公司");//申报单位名称
         bisPassPort.setInputCode("3702631016");//录入单位编码
         bisPassPort.setInputSccd("91370220395949850B");//录入单位社会信用代码
         bisPassPort.setInputName("青岛港怡之航冷链物流有限公司");//录入单位名称
-        bisPassPort.setDclTypecd("1");
+        bisPassPort.setDclTypecd("1");//申报类型
         bisPassPort.setDclBy(user.getName());
         model.addAttribute("passPort", bisPassPort);
         model.addAttribute("date", new Date());
-        model.addAttribute("dclTime", new Date());
+//        model.addAttribute("dclTime", new Date());
         model.addAttribute("user", user.getName());
         model.addAttribute("action", "create");
         return "wms/passPort/passPortManager";
@@ -332,7 +336,7 @@ public class PassPortController extends BaseController {
         System.out.println("passPortMessage== "+JSON.toJSONString(passPortMessage));
 //        resultMap = PassPortSaveService(passPortMessage);
 //        //核放单申报
-//        resultMap = PassPortDeclearService(passPortMessage);
+        resultMap = PassPortDeclearService(passPortMessage);
 
         return resultMap;
     }
@@ -361,7 +365,7 @@ public class PassPortController extends BaseController {
         sasCommonSeqNoRequest.setIcCode(icCode);
         //核放单作废
         System.out.println("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
-//        resultMap = PassPortNullifyService(sasCommonSeqNoRequest);
+        resultMap = PassPortNullifyService(sasCommonSeqNoRequest);
 
         return resultMap;
     }
