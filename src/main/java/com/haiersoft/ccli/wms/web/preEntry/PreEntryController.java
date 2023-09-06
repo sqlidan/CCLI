@@ -452,7 +452,7 @@ public class PreEntryController extends BaseController {
      */
     @RequestMapping(value = "UpdateState/{forId}/{type}", method = RequestMethod.GET)
     @ResponseBody
-    public String jlUpdateOkContractForm(Model model, @PathVariable("forId") String forId, @PathVariable("type") String type) throws RemoteException, ServiceException {
+    public String jlUpdateOkContractForm(Model model, @PathVariable("forId") String forId, @PathVariable("type") String type, HttpServletRequest request) throws RemoteException, ServiceException {
         User user = UserUtil.getCurrentUser();
         BisPreEntry bisPreEntry = preEntryService.get(forId);
         if (bisPreEntry != null) {
@@ -462,6 +462,11 @@ public class PreEntryController extends BaseController {
                 bisPreEntry.setJlAuditTime(new Date());
             } else if ("jlUpdateNo".equals(type)) {//经理驳回
                 bisPreEntry.setState("0");
+                if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
+                    bisPreEntry.setJlRejectReason(request.getParameter("reason").toString().trim());
+                }else{
+                    bisPreEntry.setJlRejectReason(null);
+                }
                 bisPreEntry.setJlAudit(user.getName());
                 bisPreEntry.setJlAuditTime(new Date());
             } else if ("zgUpdateOk".equals(type)) {//主管通过
@@ -470,6 +475,11 @@ public class PreEntryController extends BaseController {
                 bisPreEntry.setZgAuditTime(new Date());
             } else if ("zgUpdateNo".equals(type)) {//主管驳回
                 bisPreEntry.setState("2");
+                if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
+                    bisPreEntry.setZgRejectReason(request.getParameter("reason").toString().trim());
+                }else{
+                    bisPreEntry.setZgRejectReason(null);
+                }
                 bisPreEntry.setZgAudit(user.getName());
                 bisPreEntry.setZgAuditTime(new Date());
             } else if ("bghSubmit".equals(type)) {//报关行提交

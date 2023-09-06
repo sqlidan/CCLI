@@ -19,8 +19,8 @@
 			</select>
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '状态' " >
 				<option  value=""></option>
-				<option  value="0">新增</option>
-				<option  value="1">提交</option>
+				<option  value="0">新增(待完善)</option>
+				<option  value="1">提交(待审核)</option>
 				<option  value="2">经理审核</option>
 				<option  value="3">主管审核</option>
 				<option  value="4">申报核注清单中</option>
@@ -36,11 +36,11 @@
 		</form>
 
       	<shiro:hasPermission name="wms:preEntryBGH:edit">
-	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">编辑</a>
+	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">完善</a>
 	      	<span class="toolbar-item dialog-tool-separator"></span>
       	</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntryBGH:submit">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="submit()">提交</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="submit()">提交审核</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntryBGH:declarationCheckList">
@@ -109,11 +109,8 @@ function gridDG(){
 		pageSize : 20,
 		pageList : [ 20, 50, 100, 200, 500 ],
 		singleSelect:true,
-	    columns:[[   
-	    	{field:'forId',title:'预报单ID',sortable:true},
-	        {field:'billNum',title:'提单号',sortable:true},
- 	        {field:'clientName',title:'客户名称',sortable:true},
- 	        {field:'ctnCont',title:'箱量',sortable:true},
+		frozenColumns: [[
+			{field:'forId',title:'预报单ID',sortable:true},
 			{field:'serviceProject',title:'服务项目',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
@@ -126,10 +123,10 @@ function gridDG(){
 			{field:'state',title:'状态',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
-						return "新增";
+						return "新增(待完善)";
 					}
 					if(value == '1'){
-						return "提交";
+						return "提交(待审核)";
 					}
 					if(value == '2'){
 						return "经理审核";
@@ -150,6 +147,14 @@ function gridDG(){
 						return "报关通过";
 					}
 				}},
+		]],
+	    columns:[[
+			{field:'jlAudit',title:'经理审核',sortable:true},
+			{field:'jlAuditTime',title:'经理审核时间',sortable:true},
+			{field:'jlRejectReason',title:'经理驳回原因',sortable:true},
+			{field:'zgAudit',title:'主管审核',sortable:true},
+			{field:'zgAuditTime',title:'主管审核时间',sortable:true},
+			{field:'zgRejectReason',title:'主管驳回原因',sortable:true},
 			{field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			{field:'tradeMode',title:'贸易方式',sortable:true},
@@ -166,14 +171,6 @@ function gridDG(){
 			{field:'checkListNo',title:'核注清单号',sortable:true},
 			{field:'cdNum',title:'报关单号',sortable:true},
 			{field:'remark',title:'备注',sortable:true},
-			{field:'createBy',title:'创建人',sortable:true},
-			{field:'createTime',title:'创建时间',sortable:true},
-			{field:'updateBy',title:'修改人',sortable:true},
-			{field:'updateTime',title:'修改时间',sortable:true},
-			{field:'jlAudit',title:'经理审核',sortable:true},
-			{field:'jlAuditTime',title:'经理审核时间',sortable:true},
-			{field:'zgAudit',title:'主管审核',sortable:true},
-			{field:'zgAuditTime',title:'主管审核时间',sortable:true},
 			{field:'cdBy',title:'报关人',sortable:true},
 			{field:'cdTime',title:'报关时间',sortable:true},
 			{field:'upAndDown',title:'是否上传报关单',sortable:true,
@@ -203,6 +200,10 @@ function gridDG(){
 						return "已下载";
 					}
 				}},
+			{field:'createBy',title:'创建人',sortable:true},
+			{field:'createTime',title:'创建时间',sortable:true},
+			{field:'updateBy',title:'修改人',sortable:true},
+			{field:'updateTime',title:'修改时间',sortable:true},
 	    ]],
 	    // onClickRow:function(rowIndex, rowData){
 	    // 	info(rowData.forId);
@@ -214,7 +215,7 @@ function gridDG(){
 	});
 }
 
-//修改
+//完善
 function update(){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)) return;

@@ -26,8 +26,8 @@ public class BisPreEntry implements java.io.Serializable {
 
 	/**
 	 * 状态
-	 * 0-新增预录入信息，状态为0
-	 * 1-交完善信息后点击提交，状态为1
+	 * 0-新增(待完善)，状态为0
+	 * 1-提交(待审核)，状态为1
 	 * 2-经理审核，状态为2
 	 * 3-主管审核，状态为3
 	 * 4-申报核注清单中，状态为4
@@ -55,12 +55,18 @@ public class BisPreEntry implements java.io.Serializable {
 	@Column(name = "JL_AUDIT")
 	private String jlAudit; //经理审核
 
+	@Column(name = "JL_REJECT_REASON")
+	private String jlRejectReason; //经理驳回原因
+
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "JL_AUDIT_TIME")
 	private Date jlAuditTime;  //经理审核时间
 
 	@Column(name = "ZG_AUDIT")
 	private String zgAudit; //主管审核
+
+	@Column(name = "ZG_REJECT_REASON")
+	private String zgRejectReason; //主管驳回原因
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "ZG_AUDIT_TIME")
@@ -353,6 +359,22 @@ public class BisPreEntry implements java.io.Serializable {
 
 	public void setJlAuditTime(Date jlAuditTime) {
 		this.jlAuditTime = jlAuditTime;
+	}
+
+	public String getJlRejectReason() {
+		return jlRejectReason;
+	}
+
+	public void setJlRejectReason(String jlRejectReason) {
+		this.jlRejectReason = jlRejectReason;
+	}
+
+	public String getZgRejectReason() {
+		return zgRejectReason;
+	}
+
+	public void setZgRejectReason(String zgRejectReason) {
+		this.zgRejectReason = zgRejectReason;
 	}
 
 	public String getZgAudit() {
