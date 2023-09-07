@@ -19,14 +19,14 @@
 			</select>
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '状态' " >
 				<option  value=""></option>
-				<option  value="0">新增(待完善)</option>
-				<option  value="1">提交(待审核)</option>
-				<option  value="2">经理审核</option>
-				<option  value="3">主管审核</option>
+				<option  value="0">待完善</option>
+				<option  value="1">待初审</option>
+				<option  value="2">待复审</option>
+				<option  value="3">待申报</option>
 				<option  value="4">申报核注清单中</option>
 				<option  value="5">核注清单通过</option>
-				<option  value="6">报关中</option>
-				<option  value="7">报关通过</option>
+				<%--				<option  value="6">报关中</option>--%>
+				<%--				<option  value="7">报关通过</option>--%>
 			</select>
 			<input type="text" name="filter_LIKES_declarationUnit" class="easyui-validatebox" data-options="width:150,prompt: '报关公司'"/>
 	        <input type="text" name="filter_GED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '创建开始日期'"/>
@@ -44,7 +44,7 @@
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntryBGH:declarationCheckList">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="declarationCheckList()">申报核注清单</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="declarationCheckList()">申报</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 <%--		<shiro:hasPermission name="wms:preEntryBGH:customsDeclaration">--%>
@@ -123,16 +123,16 @@ function gridDG(){
 			{field:'state',title:'状态',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
-						return "新增(待完善)";
+						return "待完善";
 					}
 					if(value == '1'){
-						return "提交(待审核)";
+						return "待初审";
 					}
 					if(value == '2'){
-						return "经理审核";
+						return "待复审";
 					}
 					if(value == '3'){
-						return "主管审核";
+						return "待申报";
 					}
 					if(value == '4'){
 						return "申报核注清单中";
@@ -149,12 +149,12 @@ function gridDG(){
 				}},
 		]],
 	    columns:[[
-			{field:'jlAudit',title:'经理审核',sortable:true},
-			{field:'jlAuditTime',title:'经理审核时间',sortable:true},
-			{field:'jlRejectReason',title:'经理驳回原因',sortable:true},
-			{field:'zgAudit',title:'主管审核',sortable:true},
-			{field:'zgAuditTime',title:'主管审核时间',sortable:true},
-			{field:'zgRejectReason',title:'主管驳回原因',sortable:true},
+			{field:'jlAudit',title:'初审人',sortable:true},
+			{field:'jlAuditTime',title:'初审时间',sortable:true},
+			{field:'jlRejectReason',title:'初审驳回原因',sortable:true},
+			{field:'zgAudit',title:'复审人',sortable:true},
+			{field:'zgAuditTime',title:'复审时间',sortable:true},
+			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
 			{field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			{field:'tradeMode',title:'贸易方式',sortable:true},
@@ -219,9 +219,13 @@ function gridDG(){
 function update(){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)) return;
+	if(parseInt(row.state) > 0){
+		parent.$.messager.show({ title : "提示",msg: "预报单信息已完善提交，不能再次修改。", position: "bottomRight" });
+		return;
+	}
 	window.parent.mainpage.mainTabs.addModule('预报单编辑','wms/preEntry/updateBGH/' + row.forId);
 }
-//提交
+//提交审核
 function submit(){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
@@ -259,25 +263,25 @@ function declarationCheckList(){
 		}
 	});
 }
-//报关申报
-function customsDeclaration(){
-	var row = dg.datagrid('getSelected');
-	if(rowIsNull(row)){
-		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });
-		return;
-	}
-	parent.$.messager.confirm('提示', '您确定要将选中的预报单信息进行报关申报吗？', function(data){
-		if (data){
-			$.ajax({
-				type:'get',
-				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/bghCustomsDeclaration",
-				success: function(data){
-					successTip(data,dg);
-				},
-			});
-		}
-	});
-}
+<%--//报关申报--%>
+<%--function customsDeclaration(){--%>
+<%--	var row = dg.datagrid('getSelected');--%>
+<%--	if(rowIsNull(row)){--%>
+<%--		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });--%>
+<%--		return;--%>
+<%--	}--%>
+<%--	parent.$.messager.confirm('提示', '您确定要将选中的预报单信息进行报关申报吗？', function(data){--%>
+<%--		if (data){--%>
+<%--			$.ajax({--%>
+<%--				type:'get',--%>
+<%--				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/bghCustomsDeclaration",--%>
+<%--				success: function(data){--%>
+<%--					successTip(data,dg);--%>
+<%--				},--%>
+<%--			});--%>
+<%--		}--%>
+<%--	});--%>
+<%--}--%>
 
 //货物信息
 function info(forId){

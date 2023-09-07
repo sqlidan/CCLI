@@ -293,7 +293,7 @@ public class PreEntryController extends BaseController {
      * 预报单修改
      */
     @RequestMapping(value = "updateBGH/{forId}", method = RequestMethod.GET)
-    public String updateBGHContractForm(Model model, @PathVariable("forId") String forId) {
+    public String updateBGH(Model model, @PathVariable("forId") String forId) {
         BisPreEntry bisPreEntry = preEntryService.get(forId);
         //录入单位编码
         if(!isNotNullOrEmpty(bisPreEntry.getLRDWBM())){
@@ -448,7 +448,21 @@ public class PreEntryController extends BaseController {
     }
 
     /**
-     * 经理审核预报单通过
+     * 预报单查看
+     */
+    @RequestMapping(value = "updateCK/{forId}", method = RequestMethod.GET)
+    public String updateCK(Model model, @PathVariable("forId") String forId) {
+        BisPreEntry bisPreEntry = preEntryService.get(forId);
+        model.addAttribute("bisPreEntry", bisPreEntry);
+        BisPreEntryInfo bisPreEntryInfo = new BisPreEntryInfo();
+        bisPreEntryInfo.setForId(forId);
+        model.addAttribute("bisPreEntryInfo", bisPreEntryInfo);
+        model.addAttribute("date", new Date());
+        return "wms/preEntry/preEntryManagerDetail";
+    }
+
+    /**
+     * 状态修改
      */
     @RequestMapping(value = "UpdateState/{forId}/{type}", method = RequestMethod.GET)
     @ResponseBody
@@ -456,11 +470,18 @@ public class PreEntryController extends BaseController {
         User user = UserUtil.getCurrentUser();
         BisPreEntry bisPreEntry = preEntryService.get(forId);
         if (bisPreEntry != null) {
-            if ("jlUpdateOk".equals(type)) {//经理通过
+            String state = bisPreEntry.getState();
+            if ("jlUpdateOk".equals(type)) {//初审通过
+                if(!"1".equals(state)){
+                    return "预报单信息暂未完善提交，不能初审。";
+                }
                 bisPreEntry.setState("2");
                 bisPreEntry.setJlAudit(user.getName());
                 bisPreEntry.setJlAuditTime(new Date());
-            } else if ("jlUpdateNo".equals(type)) {//经理驳回
+            } else if ("jlUpdateNo".equals(type)) {//初审驳回
+                if(!"1".equals(state)){
+                    return "预报单信息暂未完善提交，不能初审。";
+                }
                 bisPreEntry.setState("0");
                 if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
                     bisPreEntry.setJlRejectReason(request.getParameter("reason").toString().trim());
@@ -469,12 +490,18 @@ public class PreEntryController extends BaseController {
                 }
                 bisPreEntry.setJlAudit(user.getName());
                 bisPreEntry.setJlAuditTime(new Date());
-            } else if ("zgUpdateOk".equals(type)) {//主管通过
+            } else if ("zgUpdateOk".equals(type)) {//复审通过
+                if(!"2".equals(state)){
+                    return "预报单信息暂未初审通过，不能复审。";
+                }
                 bisPreEntry.setState("3");
                 bisPreEntry.setZgAudit(user.getName());
                 bisPreEntry.setZgAuditTime(new Date());
-            } else if ("zgUpdateNo".equals(type)) {//主管驳回
-                bisPreEntry.setState("2");
+            } else if ("zgUpdateNo".equals(type)) {//复审驳回
+                if(!"2".equals(state)){
+                    return "预报单信息暂未初审通过，不能复审。";
+                }
+                bisPreEntry.setState("1");
                 if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
                     bisPreEntry.setZgRejectReason(request.getParameter("reason").toString().trim());
                 }else{
@@ -482,9 +509,18 @@ public class PreEntryController extends BaseController {
                 }
                 bisPreEntry.setZgAudit(user.getName());
                 bisPreEntry.setZgAuditTime(new Date());
-            } else if ("bghSubmit".equals(type)) {//报关行提交
+            } else if ("bghSubmit".equals(type)) {//提交审核
+                if(Integer.parseInt(state) > 0){
+                    return "预报单信息已提交审核，不能再次提交。";
+                }
                 bisPreEntry.setState("1");
             } else if ("bghDeclarationCheckList".equals(type)) {//申报核注清单
+                if(Integer.parseInt(state) < 3){
+                    return "预报单信息暂未复审通过，不能申报。";
+                }
+                if(Integer.parseInt(state) > 3){
+                    return "预报单信息已进行申报，不能再次申报。";
+                }
                 bisPreEntry.setState("4");
                 //调用申报核注清单接口
                 Map<String, Object> resultMap = getHZQDPort(forId);

@@ -26,10 +26,10 @@ public class BisPreEntry implements java.io.Serializable {
 
 	/**
 	 * 状态
-	 * 0-新增(待完善)，状态为0
-	 * 1-提交(待审核)，状态为1
-	 * 2-经理审核，状态为2
-	 * 3-主管审核，状态为3
+	 * 0-待完善，状态为0
+	 * 1-待除核，状态为1
+	 * 2-待复审，状态为2
+	 * 3-待申报，状态为3
 	 * 4-申报核注清单中，状态为4
 	 * 5-申报核注清单通过，状态为5
 	 * 6-申报报关中，状态为6
@@ -53,24 +53,24 @@ public class BisPreEntry implements java.io.Serializable {
 	private Date updateTime;  //修改日期
 
 	@Column(name = "JL_AUDIT")
-	private String jlAudit; //经理审核
+	private String jlAudit; //初审人
 
 	@Column(name = "JL_REJECT_REASON")
-	private String jlRejectReason; //经理驳回原因
+	private String jlRejectReason; //初审驳回原因
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "JL_AUDIT_TIME")
-	private Date jlAuditTime;  //经理审核时间
+	private Date jlAuditTime;  //初审时间
 
 	@Column(name = "ZG_AUDIT")
-	private String zgAudit; //主管审核
+	private String zgAudit; //复审审核
 
 	@Column(name = "ZG_REJECT_REASON")
-	private String zgRejectReason; //主管驳回原因
+	private String zgRejectReason; //复审驳回原因
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "ZG_AUDIT_TIME")
-	private Date zgAuditTime;  //主管审核时间
+	private Date zgAuditTime;  //复审时间
 
 	@Column(name = "CD_BY")
 	private String cdBy; //报关人
