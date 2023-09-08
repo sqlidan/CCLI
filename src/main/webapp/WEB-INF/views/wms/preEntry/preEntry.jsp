@@ -231,7 +231,7 @@ function gridDG(){
 	    toolbar:'#tb'
 	});
 }
-//清添加
+//添加
 function add(){
 	window.parent.mainpage.mainTabs.addModule('预报单添加','wms/preEntry/manager');
 }
