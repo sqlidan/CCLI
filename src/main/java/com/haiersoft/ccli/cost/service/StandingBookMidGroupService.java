@@ -507,7 +507,8 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                         //修改上传状态
 //                        if(("200").equals(code2)){
                             checkingBookDao.updateStatusByPayId(bisPay.getCodeNum());
-                            log.info("应收费用生成结算单的已撤回");
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            log.info(simpleDateFormat.format(new Date())+" 应收费用生成结算单的已撤回,编号:"+bisPay.getCodeNum()+";上传状态修改为:未上传; 结算单号:"+encryptNO+"修改为空。");
                             return "success";
 //                        }
 //                        String msg1 = jsonObjectSe.get("msg").toString();

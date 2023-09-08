@@ -25,7 +25,7 @@
                    data-options="width:200,prompt: '接口同步:陆海通平台客户名称'"/>
             <input type="text" name="syncTaxAccount" class="easyui-validatebox"
                    data-options="width:200,prompt: '接口同步:税号'"/>
-            <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-help" plain="true" onclick=" ()">陆海通平台客户同步</a>
+            <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-help" plain="true" onclick="tb()">陆海通平台客户同步</a>
         </form>
 
         <shiro:hasPermission name="base:client:add">
