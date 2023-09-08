@@ -479,8 +479,8 @@ public class PreEntryController extends BaseController {
                 bisPreEntry.setJlAudit(user.getName());
                 bisPreEntry.setJlAuditTime(new Date());
             } else if ("jlUpdateNo".equals(type)) {//初审驳回
-                if(!"1".equals(state)){
-                    return "预报单信息暂未完善提交，不能初审。";
+                if(!"1".equals(state) && !"2".equals(state)){
+                    return "当前预报单信息不可初审驳回。";
                 }
                 bisPreEntry.setState("0");
                 if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
@@ -498,8 +498,8 @@ public class PreEntryController extends BaseController {
                 bisPreEntry.setZgAudit(user.getName());
                 bisPreEntry.setZgAuditTime(new Date());
             } else if ("zgUpdateNo".equals(type)) {//复审驳回
-                if(!"2".equals(state)){
-                    return "预报单信息暂未初审通过，不能复审。";
+                if(!"2".equals(state) && !"3".equals(state)){
+                    return "当前预报单信息不可复审驳回。";
                 }
                 bisPreEntry.setState("1");
                 if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
@@ -1062,14 +1062,13 @@ public class PreEntryController extends BaseController {
      * @Param [invtVo]
      **/
     public Map<String,Object> InvtSaveService(InvtMessage invtVo) {
+        logger.info("核注清单暂存:"+JSON.toJSONString(invtVo));
         Map<String,Object> resultMap = new HashMap<>();
         InvtCommonResponse baseResult = new InvtCommonResponse();
         String dataStr = "";
         try {
             invtVo.setKey(ApiKey.保税监管_保税核注清单保存服务秘钥.getValue());
             String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_保税核注清单暂存接口.getValue(), JSON.toJSONString(invtVo));
-            //{"code":200,"msg":null,"data":{"seqNo":"I29232300000000001","etpsPreentNo":null,"checkInfo":null,"dealFlag":null,"invtDclTime":"20230731"}}
-            System.out.println("保税核注清单暂存接口结果："+s);
             JSONObject jsonObject = JSON.parseObject(s);
             String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
             if ("200".equals(code)) {
@@ -1106,6 +1105,7 @@ public class PreEntryController extends BaseController {
 //     * @Param [invtVo]
 //     **/
 //    public Map<String,Object> InvtDeclareService(InvtMessage invtVo) {
+//    logger.info("保税核注清单申报接口:"+JSON.toJSONString(invtVo));
 //        Map<String,Object> resultMap = new HashMap<>();
 //        InvtCommonResponse baseResult = new InvtCommonResponse();
 //        String dataStr = "";

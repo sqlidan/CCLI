@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -161,31 +163,40 @@ public class PreEntryInvtQueryController extends BaseController {
 	}
 
 //================================================================================================================================
+	private static BisPreEntryInvtQuery bisPreEntryInvtQueryTemp;
 	/**
 	 * 查看核注清单详情
 	 */
 	@RequestMapping(value = "invtDetail/{id}", method = RequestMethod.GET)
-	public String invtDetail(Model model, @PathVariable("id") String id) {
+	public String invtDetail(Model model, @PathVariable("id") String id) throws ParseException {
 		BisPreEntryInvtQuery bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
+		bisPreEntryInvtQueryTemp = bisPreEntryInvtQuery;
 		model.addAttribute("ID", bisPreEntryInvtQuery.getId());
 		if(bisPreEntryInvtQuery.getInvtHeadType() != null){
 			InvtHeadType invtHeadType = JSON.parseObject(bisPreEntryInvtQuery.getInvtHeadType(),InvtHeadType.class);
 			model.addAttribute("bisPreEntry", invtHeadType);
-			model.addAttribute("inputTime", invtHeadType.getInputTime());//录入日期
-			model.addAttribute("invtDclTime", invtHeadType.getInvtDclTime());//清单申报日期
-			model.addAttribute("entryDclTime", invtHeadType.getEntryDclTime());//报关单申报日期
+			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+			if(invtHeadType.getInputTime()!=null && invtHeadType.getInputTime().toString().trim().length() >0){
+				model.addAttribute("inputTime", sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInputTime()))));//录入日期
+			}
+			if(invtHeadType.getInputTime()!=null && invtHeadType.getInputTime().toString().trim().length() >0){
+				model.addAttribute("invtDclTime", sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));//清单申报日期
+			}
+			if(invtHeadType.getInputTime()!=null && invtHeadType.getInputTime().toString().trim().length() >0){
+				model.addAttribute("entryDclTime", sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getEntryDclTime()))));//报关单申报日期
+			}
 		}
 		return "wms/preEntryInvtQuery/preEntryInvtDetail";
 	}
 
-	@RequestMapping(value = "jsonInvtList/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "jsonInvtList", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> jsonInvtList(HttpServletRequest request, @PathVariable("id") String id) {
+	public Map<String, Object> jsonInvtList(HttpServletRequest request) {
 		Page<InvtListType> page = getPage(request);
-		BisPreEntryInvtQuery bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
 		List<InvtListType> invtListType = new ArrayList<>();
-		if(bisPreEntryInvtQuery.getInvtListType() != null){
-			invtListType = JSON.parseArray(bisPreEntryInvtQuery.getInvtListType(),InvtListType.class);
+		if(bisPreEntryInvtQueryTemp.getInvtListType() != null){
+			invtListType = JSON.parseArray(bisPreEntryInvtQueryTemp.getInvtListType(),InvtListType.class);
 			page.setResult(invtListType);
 			page.setTotalCount(invtListType.size());
 		}else{
@@ -213,6 +224,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * @Param [invtQueryListRequest]
 	 **/
 	public Map<String,Object> InvtQueryListService(InvtQueryListRequest invtQueryListRequest) {
+		logger.info("保税核注清单列表查询服务:"+JSON.toJSONString(invtQueryListRequest));
 		Map<String,Object> resultMap = new HashMap<>();
 		InvtQueryListResponse baseResult = new InvtQueryListResponse();
 		String dataStr = "";
@@ -256,6 +268,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * @Param [nemsCommonSeqNoRequest]
 	 **/
 	public Map<String,Object> InvtDetailService(NemsCommonSeqNoRequest nemsCommonSeqNoRequest) {
+		logger.info("保税核注清单详细查询服务:"+JSON.toJSONString(nemsCommonSeqNoRequest));
 		Map<String,Object> resultMap = new HashMap<>();
 		InvtMessage baseResult = new InvtMessage();
 		String dataStr = "";
@@ -299,6 +312,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * @Param [bwlQueryListRequest]
 	 **/
 	public Map<String,Object> BwlQueryListService(BwlQueryListRequest bwlQueryListRequest) {
+		logger.info("物流账册列表查询服务:"+JSON.toJSONString(bwlQueryListRequest));
 		Map<String,Object> resultMap = new HashMap<>();
 		BwlQueryListResponse baseResult = new BwlQueryListResponse();
 		try {
@@ -344,6 +358,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * @Param [sasCommonSeqNoRequest]
 	 **/
 	public Map<String,Object> BwlDetailService(SasCommonSeqNoRequest sasCommonSeqNoRequest) {
+		logger.info("物流账册详细数据查询服务:"+JSON.toJSONString(sasCommonSeqNoRequest));
 		Map<String,Object> resultMap = new HashMap<>();
 		BwlMessage baseResult = new BwlMessage();
 		try {

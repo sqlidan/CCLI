@@ -100,6 +100,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         BaseClientInfo baseClientInfo = new BaseClientInfo();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<MidGroupVo> midGroupVoList = new ArrayList<>();
+        BigDecimal allOrigAm = new BigDecimal(0.000000);
         for (Map<String, Object> bisCheckingBook : bisCheckingBooks) {
             int client = 0;
             String detailCode ="";
@@ -157,10 +158,15 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                 pri = (BigDecimal) pr;
                 price = pri.setScale(2, RoundingMode.HALF_UP);
             }
+            BigDecimal subtractOrigAm = new BigDecimal(0.000000);
             BigDecimal subtract = BigDecimal.ZERO;  //调整金额
             if (price != null) {
+                subtractOrigAm = origAm.subtract(pri);
+                allOrigAm = allOrigAm.add(subtractOrigAm);
                 subtract = origAmount.subtract(price);//应收  - 实收=调整金额
             } else {
+                subtractOrigAm = origAm;
+                allOrigAm = allOrigAm.add(subtractOrigAm);
                 subtract = origAmount;
             }
             Object direction = "R";//应付 P
@@ -258,6 +264,19 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             md.setCostCenterCode("00001662002");
             md.setOperator("2550010");
             midGroupVoList.add(md);
+        }
+        BigDecimal allOrigAmTemp = BigDecimal.ZERO;
+        BigDecimal allSubtract = BigDecimal.ZERO;
+        allOrigAmTemp = allOrigAm.setScale(2, RoundingMode.HALF_UP);
+        if(midGroupVoList !=null && midGroupVoList.size() > 0){
+            for (int i = 1; i <= midGroupVoList.size(); i++) {
+                MidGroupVo md = midGroupVoList.get(i);
+                if(i < midGroupVoList.size()){
+                    allSubtract = allSubtract.add(md.getOrigAmount());
+                }else{
+                    md.setOrigAmount((allOrigAmTemp.subtract(allSubtract)));
+                }
+            }
         }
         if (CollectionUtils.isEmpty(midGroupVoList)) {
             log.info("应收费用传过去的数据为空");

@@ -400,6 +400,7 @@ public class PassPortController extends BaseController {
      * @Param [passPortMessage]
      **/
     public Map<String,Object> PassPortSaveService(PassPortMessage passPortMessage) {
+        logger.info("核放单暂存:"+JSON.toJSONString(passPortMessage));
         Map<String,Object> resultMap = new HashMap<>();
         SasCommonResponse baseResult = new SasCommonResponse();
         String dataStr = "";
@@ -444,6 +445,7 @@ public class PassPortController extends BaseController {
      * @Param [passPortMessage]
      **/
     public Map<String,Object> PassPortDeclearService(PassPortMessage passPortMessage) {
+        logger.info("核放单申报接口:"+JSON.toJSONString(passPortMessage));
         Map<String,Object> resultMap = new HashMap<>();
         SasCommonResponse baseResult = new SasCommonResponse();
         String dataStr = "";
@@ -488,6 +490,7 @@ public class PassPortController extends BaseController {
      * @Param [sasCommonSeqNoRequest]
      **/
     public Map<String,Object> PassPortNullifyService(SasCommonSeqNoRequest sasCommonSeqNoRequest) {
+        logger.info("核放单作废服务:"+JSON.toJSONString(sasCommonSeqNoRequest));
         Map<String,Object> resultMap = new HashMap<>();
         CommonResponeMessage commonResponeMessage = new CommonResponeMessage();
         try {
