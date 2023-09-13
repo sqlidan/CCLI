@@ -169,8 +169,8 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             }
             Object pr = bisCheckingBook.get("REALRMB");
             log.info("生成接口11");
-            BigDecimal price = null;
-            BigDecimal pri = null;
+            BigDecimal price = BigDecimal.ZERO;
+            BigDecimal pri = BigDecimal.ZERO;
 
             if (StringUtils.isEmpty(pr)) {
                 price = new BigDecimal("0.00");
@@ -227,7 +227,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             String encrypt = AESUtils.encrypt(jsonClient, PASSWORD);
             log.info("生成接口15");
             String responseParam = httpGo.sendRequestHeader(CUSTOMER_URL, encrypt);
-            log.info("生成接口16");
+            log.info("生成接口16 "+responseParam);
             JSONObject jsonObject = JSONObject.parseObject(responseParam);
             log.info("生成接口17"+jsonObject.toJSONString());
             Integer code = (Integer) jsonObject.get("code");
@@ -287,7 +287,8 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             md.setCurrency("cny");
             md.setActAmount(origAmount);
             md.setOrgCode("080013");
-            md.setCostCenterCode("00001662002");
+            md.setCostCenterCode("00001661");//业务开发部
+//            md.setCostCenterCode("00001662002");//客服操作部
             md.setOperator("2550010");
             midGroupVoList.add(md);
         }
@@ -325,6 +326,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         String encrypt = AESUtils.encrypt(paramJson, PASSWORD);
         String code = new String();
         String  responseParam = httpGo.sendRequestHead(STANDINGBOOK_MIDGROUP_URL, map, encrypt);
+        log.info("生成接口2121 "+responseParam);
         if (!StringUtils.isEmpty(responseParam)) {
             JSONObject jsonObject = new JSONObject();
             try{
@@ -414,8 +416,10 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         for (String id : ids) {
             log.info("生成接口1111");
             Map<String, String> map = new HashMap<>();
+            log.info("生成接口id "+id);
             BisCheckingBook bisCheckingBook = checkingBookService.get(id);
             String customID = bisCheckingBook.getCustomID();
+            log.info("生成接口customID "+customID);
             int clinetCode = Integer.parseInt(customID);
             BaseClientInfo baseClientInfo = clientService.get(clinetCode);
             String cCode = baseClientInfo.getClientCode();
@@ -431,7 +435,8 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                 return "客户名称为:" + baseClientInfo.getClientName() + "未在天眼查中检索到数据";
             }
             BisPayVo payVo = new BisPayVo();
-            payVo.setCostCenterCode("00001662002");
+            payVo.setCostCenterCode("00001661");//业务开发部
+//            payVo.setCostCenterCode("00001662002");//客服操作部
             payVo.setCustomerCode(clientCode);
             String data = null;
             Date date = DateUtils.parseDate(bisCheckingBook.getYearMonth());
@@ -444,7 +449,16 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             payVo.setOrigBizId(bisCheckingBook.getCodeNum());
             payVo.setOperator("2550010");
             payVo.setOrgCode("080013");
-            payVo.setStatus(bisCheckingBook.getMidGroupStatic());
+
+            if(bisCheckingBook.getMidGroupStatic() == null){
+                payVo.setStatus(null);
+            }else{
+                if("未上传".equals(bisCheckingBook.getMidGroupStatic()) || bisCheckingBook.getMidGroupStatic().trim().length() == 0){
+                    payVo.setStatus(null);
+                }else{
+                    payVo.setStatus(bisCheckingBook.getMidGroupStatic());
+                }
+            }
             bisPayVo.add(payVo);
         }
         /*
@@ -471,6 +485,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         String encrypt = AESUtils.encrypt(jsonArray, PASSWORD);
         log.info("生成接口2222");
         String responseParam = httpGo.sendRequestHead(BISPAYORDER_URL, map, encrypt);
+        log.info("生成接口2222 "+responseParam);
         JSONObject jsonObject = JSONObject.parseObject(responseParam);
         log.info("生成接口3333");
         log.info("jsonObject"+jsonObject.toJSONString());
@@ -537,6 +552,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         for (BisCheckingBook bisPay : bisPaysArrayList) {
             String payId = bisPay.getCodeNum();
             String billNum = checkingBookDao.getBillNum(payId);
+            log.info("billNum "+billNum);
             if (null != bisPay.getCodeNum()) {
                 log.info("撤回接口3333");
                 //根据codeNum 获取应收对账单
@@ -561,8 +577,9 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     log.info("撤回接口5555");
+                    String encrypt = AESUtils.encrypt(billNum, PASSWORD);
                     String encryptNO = AESUtils.encrypt(statementNo, PASSWORD);
-                    String bodys = HttpUtil.createPost("http://kubemaster.sdlandsea.net:30156/api/statement/removeCostByStatementNo?statementNo=" + encryptNO)
+                    String bodys = HttpUtil.createPost("http://kubemaster.sdlandsea.net:30156/api/statement/deleteCostByStatementNo?statementNo=" + encryptNO)
                             .header("Content-Type", "application/json")
                             .header("APPID", "7e86aa901e86de01")
                             .header("Fmp-Tenant-Data-Node", "080013")
@@ -580,7 +597,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                             log.info("撤回接口7777");
                             checkingBookDao.updateStatusByPayId(bisPay.getCodeNum());
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            log.info(simpleDateFormat.format(new Date())+" 应收费用生成结算单的已撤回,编号:"+bisPay.getCodeNum()+";上传状态修改为:未上传; 结算单号:"+encryptNO+"修改为空。");
+                            log.info(simpleDateFormat.format(new Date())+" 应收费用生成结算单的已撤回,编号:"+bisPay.getCodeNum()+";上传状态修改为:未上传; 结算单号:"+statementNo+"修改为空。");
                             return "success";
 //                        }
 //                        String msg1 = jsonObjectSe.get("msg").toString();

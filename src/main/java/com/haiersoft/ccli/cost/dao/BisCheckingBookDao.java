@@ -1541,8 +1541,10 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			StringBuffer sql = new StringBuffer();
 			Map<String,Object> parems=new HashMap<>();
 			//hmj 未上传的时候，把结算单号置为空值
-			sql.append("UPDATE BIS_CHEKING_BOOK set midGroupStatic = :midGroupStatic,statement_No=null where 1 =1 and codeNum = :codeNum");
-			parems.put("midGroupStatic",NOSTATU);
+			sql.append("UPDATE BIS_CHEKING_BOOK set midGroupStatic = :midGroupStatic,statement_No= :statementNo where 1 =1 and codeNum = :codeNum");
+//			parems.put("midGroupStatic",NOSTATU);
+			parems.put("midGroupStatic",null);
+			parems.put("statementNo",null);
 			parems.put("codeNum",origBizId);
 			SQLQuery sqlQuery=createSQLQuery(sql.toString(), parems);
 			sqlQuery.executeUpdate();
