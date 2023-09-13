@@ -19,6 +19,10 @@
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="ck()">查看核注清单详情</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+			<shiro:hasPermission name="wms:preEntryInvtQuery:synchronization">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="synchronization()">同步核注清单数据</a>
+				<span class="toolbar-item dialog-tool-separator"></span>
+			</shiro:hasPermission>
         </div>
 	<table id="dg"></table> 
 </div>
@@ -154,6 +158,22 @@ function queryHZQD(){
 			});
 		}else{
 			parent.$.messager.show({ title : "提示",msg: "请输入核注清单号！", position: "bottomRight" });
+			return;
+		}
+	});
+}
+//同步核注清单数据
+function synchronization(){
+	parent.$.messager.confirm('提示', '确定进行核注清单的数据同步吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/synchronizationInvtQuery",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}else{
 			return;
 		}
 	});

@@ -33,4 +33,8 @@ public class PreEntryInvtQueryService extends BaseService<BisPreEntryInvtQuery, 
 	public List<BisPreEntryInvtQuery> getList(String bondInvtNo){
 		return preEntryInvtQueryDao.findBy("bondInvtNo", bondInvtNo);
 	}
+
+	public List<BisPreEntryInvtQuery> getListBySynchronization(){
+		return preEntryInvtQueryDao.findBy("synchronization", "0");
+	}
 }

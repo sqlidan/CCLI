@@ -245,13 +245,15 @@ public class PassPortTaskController implements Job {
                                     for (BisPassPortInfo forBisPassPortInfo:bisPassPortInfoList) {
                                         try {
                                             BaseBounded bounded = new BaseBounded();
-                                            bounded = baseBoundedService.find("id",forBisPassPortInfo.getRltGdsSeqno());
-                                            Double dclQtyOrg = bounded.getDclQty();
-                                            bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(forBisPassPortInfo.getDclQty()));//申报重量
-                                            bounded.setUpdatedTime(new Date());
-                                            logger.info("BASE_BOUNDED修改通关底账信息==>(" + dclQtyOrg.toString() + "==>" + bounded.getDclQty() + ") " + JSON.toJSONString(bounded));
-                                            baseBoundedService.merge(bounded);
-                                            logger.info("BASE_BOUNDED修改通关底账信息成功");
+                                            bounded = baseBoundedService.find("accountBook",forBisPassPortInfo.getRltGdsSeqno());
+                                            if(bounded!=null && bounded.getDclQty() != null){
+                                                Double dclQtyOrg = bounded.getDclQty();
+                                                bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(forBisPassPortInfo.getDclQty()));//申报重量
+                                                bounded.setUpdatedTime(new Date());
+                                                logger.info("BASE_BOUNDED修改通关底账信息==>(" + dclQtyOrg.toString() + "==>" + bounded.getDclQty() + ") " + JSON.toJSONString(bounded));
+                                                baseBoundedService.merge(bounded);
+                                                logger.info("BASE_BOUNDED修改通关底账信息成功");
+                                            }
                                         } catch (Exception e) {
                                             logger.error("BASE_BOUNDED修改通关底账信息失败==> " + e.getMessage());
                                         }

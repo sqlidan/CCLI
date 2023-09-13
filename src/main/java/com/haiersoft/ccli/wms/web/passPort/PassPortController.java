@@ -189,6 +189,7 @@ public class PassPortController extends BaseController {
 
     //暂存/申报核放单
     public Map<String, Object> passPortSave(String id) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         Map<String, Object> resultMap = new HashMap<String, Object>();
         //获取表头数据
         BisPassPort bisPassPortHead = new BisPassPort();
@@ -237,6 +238,7 @@ public class PassPortController extends BaseController {
         String seqNo = isNullOrEmpty(bisPassPortHead.getSeqNo());
         String passportNo = isNullOrEmpty(bisPassPortHead.getPassportNo());
 
+
         //核放单表头
         PassPortHead passPortHead = new PassPortHead();
         passPortHead.setSeqNo(seqNo);
@@ -254,19 +256,19 @@ public class PassPortController extends BaseController {
         passPortHead.setDclEtpsNm(isNullOrEmpty(bisPassPortHead.getDclEtpsNm()));
         passPortHead.setDclEtpsno(isNullOrEmpty(bisPassPortHead.getDclEtpsno()));
         passPortHead.setDclEtpsSccd(isNullOrEmpty(bisPassPortHead.getDclEtpsSccd()));
-        passPortHead.setDclTime(isNullOrEmpty(bisPassPortHead.getDclTime()));
+        passPortHead.setDclTime(simpleDateFormat.format(bisPassPortHead.getDclTime() == null ? (new Date()) : bisPassPortHead.getDclTime()));
         passPortHead.setDclTypecd(isNullOrEmpty(bisPassPortHead.getDclTypecd()));
         passPortHead.setEtpsPreentNo(isNullOrEmpty(bisPassPortHead.getEtpsPreentNo()));
         passPortHead.setInputCode(isNullOrEmpty(bisPassPortHead.getInputCode()));
-        passPortHead.setInputDate(isNullOrEmpty(bisPassPortHead.getCreateTime()));
+        passPortHead.setInputDate(simpleDateFormat.format(bisPassPortHead.getCreateTime() == null ? (new Date()) : bisPassPortHead.getCreateTime()));
         passPortHead.setInputName(isNullOrEmpty(bisPassPortHead.getInputName()));
         passPortHead.setInputSccd(isNullOrEmpty(bisPassPortHead.getInputSccd()));
         passPortHead.setIoTypecd(isNullOrEmpty(bisPassPortHead.getIoTypecd()));
         passPortHead.setMasterCuscd(isNullOrEmpty(bisPassPortHead.getMasterCuscd()));
         passPortHead.setPassportTypecd(isNullOrEmpty(bisPassPortHead.getPassportTypecd()));
-        passPortHead.setPassStatus(isNullOrEmpty(bisPassPortHead.getLockage()));
-        passPortHead.setPassTime1(isNullOrEmpty(bisPassPortHead.getLockageTime1()));
-        passPortHead.setPassTime2(isNullOrEmpty(bisPassPortHead.getLockageTime2()));
+//        passPortHead.setPassStatus(isNullOrEmpty(bisPassPortHead.getLockage()));
+//        passPortHead.setPassTime1(isNullOrEmpty(bisPassPortHead.getLockageTime1()));
+//        passPortHead.setPassTime2(isNullOrEmpty(bisPassPortHead.getLockageTime2()));
         passPortHead.setRltNo(isNullOrEmpty(bisPassPortHead.getRltNo()));
         passPortHead.setRltTbTypecd(isNullOrEmpty(bisPassPortHead.getRltTbTypecd()));
         passPortHead.setRmk(isNullOrEmpty(bisPassPortHead.getRmk()));

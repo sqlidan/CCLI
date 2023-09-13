@@ -612,8 +612,8 @@ public class PreEntryController extends BaseController {
         invtHeadType.setDclEtpsSccd(isNullOrEmpty(bisPreEntryHead.getSBDWSHXYDM()));//(选填)申报企业社会信用代码
         invtHeadType.setDclEtpsNm(isNullOrEmpty(bisPreEntryHead.getSBDWMC()));//(必填)申报企业名称
         invtHeadType.setDclPlcCuscd(isNullOrEmpty(bisPreEntryHead.getZGHG()));//(必填)主管海关-申报地关区代码
-        invtHeadType.setEntryDclTime(simpleDateFormat.format(bisPreEntryHead.getBGDSBRQ() == null ? (new Date()) : bisPreEntryHead.getBGDSBRQ()));//(选填)报关单申报日期
-        invtHeadType.setEntryDclTime("");//(选填)报关单申报日期
+//        invtHeadType.setEntryDclTime(simpleDateFormat.format(bisPreEntryHead.getBGDSBRQ() == null ? (new Date()) : bisPreEntryHead.getBGDSBRQ()));//(选填)报关单申报日期
+//        invtHeadType.setEntryDclTime("");//(选填)报关单申报日期
         invtHeadType.setDclcusFlag(isNullOrEmpty(bisPreEntryHead.getBGBZ()));//(必填)是否报关标志
         invtHeadType.setDecType(isNullOrEmpty(bisPreEntryHead.getBGDLX()));//(必填)报关单类型
         if(isNullOrEmpty(bisPreEntryHead.getDYBGDBH()).length() > 0) {

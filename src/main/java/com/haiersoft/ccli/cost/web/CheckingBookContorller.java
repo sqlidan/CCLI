@@ -10,6 +10,11 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.alibaba.fastjson.JSON;
+import com.haiersoft.ccli.wms.web.PreEntryInvtQuery.PreEntryInvtQueryController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -34,7 +39,7 @@ import com.itextpdf.text.PageSize;
 @Controller
 @RequestMapping("cost/checkingbook")
 public class CheckingBookContorller extends BaseController {
-	
+	private static final Logger logger = LoggerFactory.getLogger(CheckingBookContorller.class);
 		 @Autowired
 		private BisCheckingBookService  bisCheckingBookService;//对账单
 		//excel导出对账单明细sql统一处理
@@ -42,11 +47,15 @@ public class CheckingBookContorller extends BaseController {
 		@ResponseBody
 		public void down(@Valid @ModelAttribute @RequestBody BisCheckingBook obj,HttpServletRequest request, HttpServletResponse response) throws Exception{
 			BisCheckingBook bisCheckingBook=bisCheckingBookService.find("codeNum",obj.getCodeNum());
+			logger.info("bisCheckingBook1:"+ JSON.toJSONString(bisCheckingBook));
 			List<Map<String,Object>> gethead=bisCheckingBookService.getRepCheckingBookHead11(obj.getCodeNum());
+			logger.info("gethead1:"+ JSON.toJSONString(gethead));
     		List<Map<String,Object>> getlist=bisCheckingBookService.getCheckingBookInfos(obj.getCodeNum(),gethead,obj.getnType()+"",obj.getType());
+			logger.info("getlist1:"+ JSON.toJSONString(getlist));
     		Map<String,Object> hsMap=new HashMap<String,Object>();
     		if(1==obj.getnType()||3==obj.getnType()){
     			hsMap=bisCheckingBookService.getBookRows(obj.getCodeNum(),gethead,obj.getnType()+"",obj.getType());
+				logger.info("hsMap1:"+ JSON.toJSONString(hsMap));
     		}
 			if(null==getlist||getlist.size()==0){
 				return;
@@ -864,7 +873,9 @@ public class CheckingBookContorller extends BaseController {
 		public void exportPDF(@Valid @ModelAttribute @RequestBody BisCheckingBook obj,HttpServletRequest request, HttpServletResponse response) throws Exception{
 	    	if(obj.getCodeNum()!=null && !"".equals(obj.getCodeNum()) && obj.getnType()!=null && obj.getnType()>0){
 	    		List<Map<String,Object>> getlist=bisCheckingBookService.getRepCheckingBookInfo(obj.getCodeNum(),(obj.getnType()==1||obj.getnType()==3)?"1":"2");
+				logger.info("getlist2:"+ JSON.toJSONString(getlist));
 	    		List<Map<String,Object>> gethead=bisCheckingBookService.getRepCheckingBookHead(obj.getCodeNum());
+				logger.info("gethead2:"+ JSON.toJSONString(getlist));
 	    		if(obj.getnType()==2||obj.getnType()==4){
 	    			List<Map<String,Object>> newList=bisCheckingBookService.getRepCheckingBookInfo2(obj.getCodeNum());
 	    			if(!newList.isEmpty()&&getlist.isEmpty()){
@@ -888,6 +899,7 @@ public class CheckingBookContorller extends BaseController {
 	    				}//end for 
 	    			}
 	    		}
+				logger.info("getlist3:"+ JSON.toJSONString(getlist));
 	    		String[] headCN={"入/出库提单号","入/出","计费起始日期","品名","件数","净重","毛重","在库天数","截止日期"};
 	       		String[] headEN={"B/L","in/out","Date in","name","pcs","Net KG","Gross KG","storage days","Date out"};
 	       		String pdfTitle = "对账单明细";

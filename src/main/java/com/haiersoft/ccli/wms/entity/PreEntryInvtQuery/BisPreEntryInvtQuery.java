@@ -49,6 +49,20 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "UPDATE_TIME")
 	private Date updateTime;// 修改日期
+	@Column(name = "SYNCHRONIZATION")
+	private String synchronization;// 同步标识 0-未同步；1-已同步
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public String getSynchronization() {
+		return synchronization;
+	}
+
+	public void setSynchronization(String synchronization) {
+		this.synchronization = synchronization;
+	}
 
 	public String getId() {
 		return id;
