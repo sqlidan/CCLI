@@ -104,13 +104,44 @@ public class ApprController extends BaseController {
 			 * jsonObject.put("DeclType", "1"); jsonObject.put("SaveType", "0");
 			 * System.out.println(jsonObject);
 			 */
-			
+
 			//拼装Json
 			Map<String,Object> map = new HashMap<String, Object>();
 			map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
 			map.put("DeclType", "1");
-			map.put("ApprLists", apprInfoList);
-			map.put("ApprHead", apprheadList.get(0));		
+
+			//入区不用调整，出区需要调整
+			if("2".equals(apprheadList.get(0).getIoType())){
+				//依据出区获取入区
+				List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
+				filtersIn.add(new PropertyFilter("EQS_itemNum", apprheadList.get(0).getItemNum()));
+				filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
+				List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
+				//依据入区完善出区申报信息
+				if (!apprheadInList.isEmpty()) {
+					List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
+					infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
+					List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
+					logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
+					logger.error("apprInfoInList1： "+JSON.toJSONString(apprInfoInList));
+					for (ApprInfo forApprInfo:apprInfoList) {
+						for (ApprInfo forApprInfoIn:apprInfoInList) {
+							if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
+								forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
+								forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
+								forApprInfo.setgUnit("035");//申报计量单位
+							}
+						}
+						apprInfoService.merge(forApprInfo);
+					}
+				}
+				logger.error("apprInfoList2： "+JSON.toJSONString(apprInfoList));
+				map.put("ApprLists", apprInfoList);
+				map.put("ApprHead", apprheadList.get(0));
+			}else{
+				map.put("ApprLists", apprInfoList);
+				map.put("ApprHead", apprheadList.get(0));
+			}
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			//String json = objectMapper.writeValueAsString(apprheadList.get(0));

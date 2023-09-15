@@ -133,9 +133,6 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             }
             String standingNum = billnum.toString();
 
-            Object currency = bisCheckingBook.get("CURRENCY");//计量单位
-
-
             BigDecimal origAm = (BigDecimal) bisCheckingBook.get("SHOULDRMB"); //应收  - 原始金额
             BigDecimal origAmount = origAm.setScale(2, RoundingMode.HALF_UP);
 
@@ -150,23 +147,19 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                 log.info("生成接口1010");
                 mapBase = baseExpenseCategoryDetailService.getCodeByFeeCode(feecodes);
             }
+
             Object detail = mapBase.get("DETAIL_CODE");
-            Object detailname = mapBase.get("DETAIL_CODE_NAME");
             if (StringUtils.isEmpty(detail)) {
-                error = error + "对应的费目code为空;";
+                error = error + "应收费用账单编号下"+standingNum+"费用编号"+feecodes+"对应的财务中台客户费用代码为空，请联系开发人员维护;";
                 continue;
             }
-            if(StringUtils.isEmpty(detailname)){
-                error=error+"数据库中未查到该"+standingNum+"数据明细的费目名称";
-                continue;
-            }
+
             detailCode = detail.toString();
-            detailcodename =detailname.toString();
-            String costClassifyCode = BisPayMidGroupServeice.sendParamReturncostClassifyCode(detailcodename);
-            if(StringUtils.isEmpty(costClassifyCode)){
-                error=error+"原始业务编号为"+standingNum+"的客户费用代码对应的费目类别编码异常;";
+            if(StringUtils.isEmpty(mapBase.get("WAREHOUSE"))){
+                error=error+"应收费用账单编号"+standingNum+"的财务中台客户费用代码"+detail+"对应的费目类别Warehouse为空;";
                 continue;
             }
+            String warehouse = mapBase.get("WAREHOUSE").toString();
             Object pr = bisCheckingBook.get("REALRMB");
             log.info("生成接口11");
             BigDecimal price = BigDecimal.ZERO;
@@ -228,6 +221,11 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             log.info("生成接口15");
             String responseParam = httpGo.sendRequestHeader(CUSTOMER_URL, encrypt);
             log.info("生成接口16 "+responseParam);
+            try{
+                JSON.parse(responseParam);
+            } catch (Exception e) {
+                return "解析财务中台获取客户信息接口返回异常："+responseParam;
+            }
             JSONObject jsonObject = JSONObject.parseObject(responseParam);
             log.info("生成接口17"+jsonObject.toJSONString());
             Integer code = (Integer) jsonObject.get("code");
@@ -253,14 +251,21 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             } else {
                 md.setAdjAmount(new BigDecimal(0));
             }
-            md.setCostClassifyCode(costClassifyCode);
+            md.setCostClassifyCode(warehouse);
             md.setOrigAmount(subtract);
             md.setTaxRate("6");
             md.setOrigBizId(codenum.toString());
             md.setIsCash(isCashs);
             md.setOrigCostId(standingNum);
 
-            md.setUnit(currency.toString());
+            String units = standingBookMidGroupDao.queryUnitsByFeeCode(feecodes);
+            log.info("units "+units);
+            if(StringUtils.isEmpty(units)){
+                md.setUnit("箱");
+            }
+            if(!StringUtils.isEmpty(units)){
+                md.setUnit(units);
+            }
 
             if (quantity != null && quantity.equals("")) {
                 md.setQuantity(new BigDecimal(quantity.toString()));
@@ -284,11 +289,10 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             }
             log.info("生成接口19");
             md.setBookTime(data2);
-            md.setCurrency("cny");
+            md.setCurrency("CNY");
             md.setActAmount(origAmount);
             md.setOrgCode("080013");
             md.setCostCenterCode("00001661");//业务开发部
-//            md.setCostCenterCode("00001662002");//客服操作部
             md.setOperator("2550010");
             midGroupVoList.add(md);
         }
@@ -303,6 +307,7 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
                     allSubtract = allSubtract.add(md.getOrigAmount());
                 }else{
                     md.setOrigAmount((allOrigAmTemp.subtract(allSubtract)));
+                    md.setActAmount(md.getOrigAmount());
                 }
             }
         }
@@ -328,14 +333,14 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         String  responseParam = httpGo.sendRequestHead(STANDINGBOOK_MIDGROUP_URL, map, encrypt);
         log.info("生成接口2121 "+responseParam);
         if (!StringUtils.isEmpty(responseParam)) {
-            JSONObject jsonObject = new JSONObject();
-            try{
+            try {
                 log.info("生成接口22");
-                 jsonObject = JSONObject.parseObject(responseParam);
-            }catch (Exception  e){
-                log.info("生成接口23");
-                throw new Exception("数据已经上传，请勿重复上传");
+                JSON.parse(responseParam);
+            } catch (Exception e) {
+                return "解析财务中台上传费用接口返回异常："+responseParam;
             }
+            log.info("生成接口23");
+            JSONObject jsonObject = JSONObject.parseObject(responseParam);
             log.info("生成接口24");
             code = jsonObject.getString("code");
             if ("200".equals(code)) {
@@ -436,7 +441,6 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
             }
             BisPayVo payVo = new BisPayVo();
             payVo.setCostCenterCode("00001661");//业务开发部
-//            payVo.setCostCenterCode("00001662002");//客服操作部
             payVo.setCustomerCode(clientCode);
             String data = null;
             Date date = DateUtils.parseDate(bisCheckingBook.getYearMonth());
@@ -486,6 +490,11 @@ public class StandingBookMidGroupService extends BaseService<BisStandingBook, In
         log.info("生成接口2222");
         String responseParam = httpGo.sendRequestHead(BISPAYORDER_URL, map, encrypt);
         log.info("生成接口2222 "+responseParam);
+        try {
+            JSON.parse(responseParam);
+        } catch (Exception e) {
+            return "解析财务中台上传订单接口返回异常："+responseParam;
+        }
         JSONObject jsonObject = JSONObject.parseObject(responseParam);
         log.info("生成接口3333");
         log.info("jsonObject"+jsonObject.toJSONString());

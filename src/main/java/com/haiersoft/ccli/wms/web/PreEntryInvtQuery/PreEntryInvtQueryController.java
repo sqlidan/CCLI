@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.google.common.primitives.Bytes;
 import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.Page;
@@ -30,8 +31,11 @@ import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.BaseBoundedListService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.CustomsClearanceInfoSService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.CustomsClearanceListService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
+import com.haiersoft.ccli.wms.service.preEntry.PreEntryInfoService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryService;
 import com.haiersoft.ccli.wms.web.preEntry.HttpUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.SQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,6 +62,8 @@ public class PreEntryInvtQueryController extends BaseController {
 	private PreEntryInvtQueryService preEntryInvtQueryService;
 	@Autowired
 	private PreEntryService preEntryService;
+	@Autowired
+	private PreEntryInfoService preEntryInfoService;
 	@Autowired
 	private CustomsClearanceListService customsClearanceListService;
 	@Autowired
@@ -84,6 +91,7 @@ public class PreEntryInvtQueryController extends BaseController {
 		PropertyFilter filter = new PropertyFilter("EQS_synchronization", "1");
 		filters.add(filter);
 		page = preEntryInvtQueryService.search(page, filters);
+
 		return getEasyUIData(page);
 	}
 
@@ -96,7 +104,13 @@ public class PreEntryInvtQueryController extends BaseController {
 		}
 
 		//查询
-		String result = invtQuery(bondInvtNo,false);
+		String result = null;
+		try {
+			result = invtQuery(bondInvtNo,false);
+		} catch (IOException | ClassNotFoundException e) {
+			logger.info("单个核注清单查询异常:"+e.getMessage());
+			e.printStackTrace();
+		}
 		if ("success".equals(result)){
 			return "success";
 		}else{
@@ -113,11 +127,20 @@ public class PreEntryInvtQueryController extends BaseController {
 		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
 		bisPreEntryInvtQueryList = preEntryInvtQueryService.getListBySynchronization();
 		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
-			int count = 0;
 			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
 				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+					String bondInvtNo = "";
+					if(forBisPreEntryInvtQuery.getBondInvtNo() == null || forBisPreEntryInvtQuery.getBondInvtNo().trim().length() == 0){
+						bondInvtNo = "";
+					}
 					//查询
-					String result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
+					String result = null;
+					try {
+						result = invtQuery(bondInvtNo,true);
+					} catch (IOException | ClassNotFoundException e) {
+						logger.info("批量核注清单同步异常:"+e.getMessage());
+						e.printStackTrace();
+					}
 					if ("success".equals(result)){
 						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 同步成功");
 					}else{
@@ -130,7 +153,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	}
 
 	//查询核注清单信息
-	public String invtQuery(String bondInvtNo,Boolean createInfo){
+	public String invtQuery(String bondInvtNo,Boolean createInfo) throws IOException, ClassNotFoundException {
 		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
 
 		//查询保税核注清单列表
@@ -173,13 +196,13 @@ public class PreEntryInvtQueryController extends BaseController {
 					}else{
 						//处理结果
 						InvtMessage invtMessage = (InvtMessage) invtDetailMap.get("data");
-						insertBisPreEntryInvtQuery.setInvtQueryList(JSON.toJSONString(forInvtQueryListResponseResultList));
-						insertBisPreEntryInvtQuery.setInvtDecHeadType(JSON.toJSONString(invtMessage.getInvtDecHeadType()));
-						insertBisPreEntryInvtQuery.setInvtDecListType(JSON.toJSONString(invtMessage.getInvtDecListType()));
-						insertBisPreEntryInvtQuery.setInvtGoodsType(JSON.toJSONString(invtMessage.getInvtGoodsType()));
-						insertBisPreEntryInvtQuery.setInvtHeadType(JSON.toJSONString(invtMessage.getInvtHeadType()));
-						insertBisPreEntryInvtQuery.setInvtListType(JSON.toJSONString(invtMessage.getInvtListType()));
-						insertBisPreEntryInvtQuery.setInvtWarehouseType(JSON.toJSONString(invtMessage.getInvtWarehouseType()));
+						insertBisPreEntryInvtQuery.setInvtQueryList(ObjectToByteAry(forInvtQueryListResponseResultList));
+						insertBisPreEntryInvtQuery.setInvtDecHeadType(ObjectToByteAry(invtMessage.getInvtDecHeadType()));
+						insertBisPreEntryInvtQuery.setInvtDecListType(ObjectToByteAry(invtMessage.getInvtDecListType()));
+						insertBisPreEntryInvtQuery.setInvtGoodsType(ObjectToByteAry(invtMessage.getInvtGoodsType()));
+						insertBisPreEntryInvtQuery.setInvtHeadType(ObjectToByteAry(invtMessage.getInvtHeadType()));
+						insertBisPreEntryInvtQuery.setInvtListType(ObjectToByteAry(invtMessage.getInvtListType()));
+						insertBisPreEntryInvtQuery.setInvtWarehouseType(ObjectToByteAry(invtMessage.getInvtWarehouseType()));
 						insertBisPreEntryInvtQuery.setListStat(JSON.toJSONString(invtMessage.getListStat()));
 						insertBisPreEntryInvtQuery.setOperCusRegCode(JSON.toJSONString(invtMessage.getOperCusRegCode()));
 						insertBisPreEntryInvtQuery.setSysId(JSON.toJSONString(invtMessage.getSysId()));
@@ -245,19 +268,310 @@ public class PreEntryInvtQueryController extends BaseController {
 		return "success";
 	}
 
+//================================================================================================================================
+	public static byte[] ObjectToByteAry(Object object) throws IOException{
+		if(object == null){
+			return null;
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		ObjectOutputStream sOut = null;
+		sOut = new ObjectOutputStream(out);
+		sOut.writeObject(object);
+		sOut.flush();
+		byte[] bytes = out.toByteArray();
+		return bytes;
+	}
+	public static Object ByteAryToObject(byte[] bytes) throws IOException, ClassNotFoundException {
+		if(bytes == null){
+			return null;
+		}
+		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+		ObjectInputStream sIn = null;
+		Object obj = null;
+		sIn = new ObjectInputStream(in);
+		obj = sIn.readObject();
+		return obj;
+	}
+//	//测试
+//	public static void main(String[] args) throws IOException, ClassNotFoundException {
+////		String a1 = "{\"bizopEtpsNM\":\"青岛港怡之航冷链物流有限公司\",\"bondInvtNo\":\"QD423023I000001047\",\"bondInvtType\":\"0\",\"dclTypecd\":\"1\",\"dclcusFlag\":\"1\",\"dclcusTypeCD\":\"1\",\"impexpMarkcd\":\"I\",\"impexpPortCD\":\"4258\",\"invtDclTime\":\"20230907\",\"invtStucd\":\"0\",\"listStat\":\"P\",\"mtpckEndprdMarkcd\":\"I\",\"putrecNo\":\"T4230W000036\",\"rcvgdEtpsNM\":\"青岛港怡之航冷链物流有限公司\",\"seqNo\":\"I42302300000002395\",\"singleNo\":\"202300000101857246\",\"supvModeCD\":\"5000\",\"trspModecd\":\"9\",\"vrfdedMarkcd\":\"1\"}";
+////		InvtQueryListResponseResultList invtQueryListResponseResultList1 = new InvtQueryListResponseResultList();
+////		invtQueryListResponseResultList1 = JSON.parseObject(a1,InvtQueryListResponseResultList.class);
+////		Object obj1 = changeObject(invtQueryListResponseResultList1);
+////		invtQueryListResponseResultList1 = JSONObject.parseObject(JSON.toJSONString(obj1),InvtQueryListResponseResultList.class);
+////		System.out.println("invtQueryListResponseResultList1 "+invtQueryListResponseResultList1);
+////
+////
+////		String a2 = "{\"bizopEtpsNm\":\"青岛港怡之航冷链物流有限公司\",\"bizopEtpsSccd\":\"91370220395949850B\",\"bizopEtpsno\":\"3702631016\",\"bondInvtNo\":\"QD423023I000001047\",\"chgTmsCnt\":\"0\",\"dclEtpsNm\":\"青岛三坤物流有限公司\",\"dclEtpsSccd\":\"913702110530754601\",\"dclEtpsno\":\"3702289916\",\"dclPlcCuscd\":\"4230\",\"dclTypecd\":\"1\",\"dclcusFlag\":\"1\",\"dclcusTypecd\":\"1\",\"impexpMarkcd\":\"I\",\"impexpPortcd\":\"4258\",\"inputTime\":\"20230907\",\"invtDclTime\":\"20230907\",\"invtIochkptStucd\":\"1\",\"invtType\":\"0\",\"levyBlAmt\":\"0\",\"listStat\":\"0\",\"mtpckEndprdMarkcd\":\"I\",\"passportUsedTypeCd\":\"1\",\"prevdTime\":\"20230907\",\"putrecNo\":\"T4230W000036\",\"rcvgdEtpsNm\":\"青岛港怡之航冷链物流有限公司\",\"rcvgdEtpsno\":\"3702631016\",\"rltEntryBizopEtpsNm\":\"威海威东日综合食品有限公司\",\"rltEntryBizopEtpsSccd\":\"91371000613752889J\",\"rltEntryBizopEtpsno\":\"3710947212\",\"rvsngdEtpsSccd\":\"91370220395949850B\",\"seqNo\":\"I42302300000002395\",\"stshipTrsarvNatcd\":\"142\",\"supvModecd\":\"5000\",\"trspModecd\":\"9\",\"vrfdedMarkcd\":\"1\"}";
+////		InvtHeadType invtHeadType1 = new InvtHeadType();
+////		invtHeadType1 = JSON.parseObject(a2,InvtHeadType.class);
+////		Object obj2 = changeObject(invtHeadType1);
+////		invtHeadType1 = JSONObject.parseObject(JSON.toJSONString(obj2),InvtHeadType.class);
+////		System.out.println("invtHeadType2 "+invtHeadType1);
+//
+//
+////		String jsonString = "[{\"clyMarkcd\":\"0\",\"dclCurrcd\":\"502\",\"dclQty\":\"1500\",\"dclTotalAmt\":\"38250\",\"dclUnitcd\":\"120\",\"dclUprcAmt\":\"25.5\",\"destinationNatcd\":\"142\",\"entryGdsSeqno\":\"1\",\"gdecd\":\"1605550000\",\"gdsMtno\":\"威海威东日20230904\",\"gdsNm\":\"冻章鱼丸\",\"gdsSeqno\":\"1\",\"gdsSpcfModelDesc\":\"冻\",\"lawfQty\":\"7200\",\"lawfUnitcd\":\"035\",\"lvyrlfModecd\":\"1\",\"modfMarkcd\":\"0\",\"natcd\":\"142\",\"seqNo\":\"I42302300000002395\"}]";
+////		List<InvtListType> aaList = new ArrayList<>();
+////		aaList = JSONArray.parseArray(jsonString,InvtListType.class);
+////		Object obj = changeObject(aaList);
+////		List<InvtListType> bbList = new ArrayList<>();
+////		bbList = JSONArray.parseArray(JSON.toJSONString(obj),InvtListType.class);
+////		System.out.println("bbList"+JSON.toJSONString(bbList));
+//
+//	}
+
+	//批量生成预报单
+	@RequestMapping(value="createPreEntry",method = RequestMethod.GET)
+	@ResponseBody
+	public String createPreEntry() {
+		String msg = "success";
+		//获取要同步的核注清单号
+		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+		bisPreEntryInvtQueryList = preEntryInvtQueryService.getListByCreatePreEntry();
+		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
+			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+					//查询
+					String result = null;
+					try {
+						result = createPreEntry(forBisPreEntryInvtQuery);
+					} catch (IOException | ClassNotFoundException | ParseException e) {
+						logger.info("批量生成预报单异常:"+e.getMessage());
+						e.printStackTrace();
+					}
+					if ("success".equals(result)){
+						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 生成预报单成功");
+					}else{
+						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+					}
+				}
+			}
+		}
+		return msg;
+	}
+
+	//生成预报单
+	public String createPreEntry(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException, ParseException {
+		//获取核注清单数据
+		InvtHeadType invtHeadType = new InvtHeadType();
+		List<InvtListType> invtListType = new ArrayList<>();
+		if (bisPreEntryInvtQuery.getInvtHeadType() == null){
+			return "生成预报单时未获取到表头信息";
+		}else{
+			invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+		}
+		if (bisPreEntryInvtQuery.getInvtListType() == null || "[]".equals(bisPreEntryInvtQuery.getInvtListType())){
+			return "生成预报单时未获取到表体信息";
+		}else{
+			invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+		}
+
+		//创建预报单对象
+		BisPreEntry bisPreEntry = new BisPreEntry();
+		List<BisPreEntryInfo> bisPreEntryInfoList = new ArrayList<>();
+
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+
+		String linkId = "FYZH" + StringUtils.timeToString();
+		bisPreEntry.setForId(linkId);
+		bisPreEntry.setState("5");//状态 5-申报核注清单通过，状态为5
+
+		//服务项目
+		if (invtHeadType.getImpexpMarkcd() == null || "I".equals(invtHeadType.getImpexpMarkcd())){
+			bisPreEntry.setServiceProject("0");
+		}else{
+			bisPreEntry.setServiceProject("1");
+		}
+		User user = UserUtil.getCurrentUser();
+		bisPreEntry.setCreateBy(user.getName());
+		if(invtHeadType.getInputTime()!=null){
+			bisPreEntry.setCreateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInputTime()))));
+		}
+		bisPreEntry.setUpdateBy(user.getName());
+		if(invtHeadType.getInvtDclTime()!=null){
+			bisPreEntry.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
+		}
+		bisPreEntry.setJlAudit(user.getName());
+		bisPreEntry.setJlAuditTime(bisPreEntry.getUpdateTime());
+		bisPreEntry.setZgAudit(user.getName());
+		bisPreEntry.setZgAuditTime(bisPreEntry.getUpdateTime());
+		bisPreEntry.setUpAndDown("0");
+		bisPreEntry.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
+		bisPreEntry.setCdNum(invtHeadType.getEntryNo() == null ? "" : invtHeadType.getEntryNo());//报关单号
+		bisPreEntry.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
+		bisPreEntry.setBillNum(invtHeadType.getApplyNo() == null ? "" : invtHeadType.getApplyNo().trim());//提单号
+		bisPreEntry.setCtnCont(0);//箱量
+		bisPreEntry.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
+		bisPreEntry.setCdSign(Integer.parseInt(invtHeadType.getDclcusFlag()));//报关标志
+		if(invtListType.size() > 0){
+			//品名
+			bisPreEntry.setProductName(invtListType.get(0).getGdsNm());
+			//件数
+			if(invtListType.get(0).getDclQty() == null || invtListType.get(0).getDclQty().trim().length() == 0){
+				bisPreEntry.setPrice(0);
+			}else{
+				bisPreEntry.setPrice(Integer.parseInt(invtListType.get(0).getDclQty()));
+			}
+			//重量
+			if(invtListType.get(0).getNetWt() == null || invtListType.get(0).getNetWt().trim().length() == 0){
+				bisPreEntry.setNetWeight(Double.parseDouble("0"));
+			}else{
+				bisPreEntry.setNetWeight(Double.parseDouble(invtListType.get(0).getNetWt()));
+			}
+		}
+		bisPreEntry.setConsignee(invtHeadType.getRcvgdEtpsNm() == null ? "" : invtHeadType.getRcvgdEtpsNm());//收货人
+		bisPreEntry.setConsignor(invtHeadType.getRltEntryBizopEtpsno());//发货人
+		bisPreEntry.setContryOragin(invtHeadType.getStshipTrsarvNatcd());//原产国
+
+		bisPreEntry.setYLRTYBH(invtHeadType.getSeqNo());//预录入统一编号
+		bisPreEntry.setQDBH(invtHeadType.getBondInvtNo());//清单编号
+		bisPreEntry.setQDLX(invtHeadType.getInvtType());//清单类型
+		bisPreEntry.setZCBH(invtHeadType.getPutrecNo());//账册编号
+		bisPreEntry.setJYDWBM(invtHeadType.getBizopEtpsno());//经营单位编码
+		bisPreEntry.setJYDWSHXYDM(invtHeadType.getBizopEtpsSccd());//经营单位社会信用代码
+		bisPreEntry.setJYDWMC(invtHeadType.getBizopEtpsNm());//经营单位名称
+		bisPreEntry.setJGDWBM(invtHeadType.getRcvgdEtpsno());//加工单位编码
+		bisPreEntry.setJGDWSHXYDM(invtHeadType.getRvsngdEtpsSccd());//加工单位社会信用代码
+		bisPreEntry.setJGDWMC(invtHeadType.getRcvgdEtpsNm());//加工单位名称
+		bisPreEntry.setSBDWBM(invtHeadType.getDclEtpsno());//申报单位编码
+		bisPreEntry.setSBDWSHXYDM(invtHeadType.getDclEtpsSccd());//申报单位社会信用代码
+		bisPreEntry.setSBDWMC(invtHeadType.getDclEtpsNm());//申报单位名称
+		bisPreEntry.setLRDWBM(invtHeadType.getInputCode());//录入单位编码
+		bisPreEntry.setLRDWSHXYDM(invtHeadType.getInputCreditCode());//录入单位社会信用代码
+		bisPreEntry.setLRDWMC(invtHeadType.getInputName());//录入单位名称
+		bisPreEntry.setQYNBBH(invtHeadType.getEtpsInnerInvtNo());//企业内部编号
+		bisPreEntry.setSBLX(invtHeadType.getDclTypecd());//申报类型
+		if(invtHeadType.getInputTime()!=null){
+			bisPreEntry.setLRRQ(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInputTime()))));//录入日期
+		}
+		if(invtHeadType.getInvtDclTime()!=null){
+			bisPreEntry.setQDSBRQ(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));//清单申报日期
+		}
+		bisPreEntry.setLJCPBZ(invtHeadType.getMtpckEndprdMarkcd());//料件、成品标志
+		bisPreEntry.setJGFS(invtHeadType.getSupvModecd());//监管方式
+		bisPreEntry.setYSFS(invtHeadType.getTrspModecd());//运输方式
+		bisPreEntry.setJCJGB(invtHeadType.getImpexpPortcd());//进出境关别
+		bisPreEntry.setZGHG(invtHeadType.getDclPlcCuscd());//主管海关
+		bisPreEntry.setHKBZ(invtHeadType.getVrfdedMarkcd());//核扣标志
+		bisPreEntry.setQYG(invtHeadType.getStshipTrsarvNatcd());//起运国(地区)
+		bisPreEntry.setQGJCKKZT(invtHeadType.getInvtIochkptStucd());//清单进出卡口状态
+		bisPreEntry.setSBBBH(invtHeadType.getApplyNo());//申报表编号
+		bisPreEntry.setLZLX(invtHeadType.getListType());//流转类型
+		bisPreEntry.setBGBZ(invtHeadType.getDclcusFlag());//报关标志
+		bisPreEntry.setSFXTSCBGD(invtHeadType.getGenDecFlag());//是否系统生成报关单
+		bisPreEntry.setBGDLX(invtHeadType.getDecType());//报关单类型
+		bisPreEntry.setBGLX(invtHeadType.getDclcusTypecd());//报关类型
+		bisPreEntry.setDYBGDBH(invtHeadType.getEntryNo());//对应报关单编号
+		bisPreEntry.setDYBGDDWBM(invtHeadType.getCorrEntryDclEtpsNo());//对应报关单申报单位编码
+		bisPreEntry.setDYBGDDWSHXYDM(invtHeadType.getCorrEntryDclEtpsSccd());//对应报关单申报单位社会信用代码
+		bisPreEntry.setDYBGDDWMC(invtHeadType.getCorrEntryDclEtpsNm());//对应报关单申报单位名称
+		bisPreEntry.setGLBGDBH(invtHeadType.getRltEntryNo());//关联报关单编号
+		bisPreEntry.setGLQDBH(invtHeadType.getRltInvtNo());//关联清单编号
+		bisPreEntry.setGLSCBAH(invtHeadType.getRltPutrecNo());//关联手(账)册备案号
+		bisPreEntry.setBLBGDJNSFHRBM(invtHeadType.getRltEntryBizopEtpsno());//关联报关单境内收发货人编码
+		bisPreEntry.setBLBGDJNSFHRSHXYDM(invtHeadType.getRltEntryBizopEtpsSccd());//关联报关单境内收发货人社会信用代码
+		bisPreEntry.setBLBGDJNSFHRMC(invtHeadType.getRltEntryBizopEtpsNm());//关联报关单境内收发货人名称
+		bisPreEntry.setGLBGDSCXSDWBM(invtHeadType.getRltEntryRcvgdEtpsno());//关联报关单生产销售(消费使用)单位编码
+		bisPreEntry.setGLBGDSCXSDWSHXYDM(invtHeadType.getRltEntryRvsngdEtpsSccd());//关联报关单生产销售(消费使用)单位社会信用代码
+		bisPreEntry.setGLBGDSCXSDWMC(invtHeadType.getRltEntryRcvgdEtpsNm());//关联报关单生产销售(消费使用)单位名称
+		bisPreEntry.setBLBGDSBDWBM(invtHeadType.getRltEntryDclEtpsno());//关联报关单申报单位编码
+		bisPreEntry.setBLBGDSBDWSHXYDM(invtHeadType.getRltEntryDclEtpsSccd());//关联报关单申报单位社会信用代码
+		bisPreEntry.setBLBGDSBDWMC(invtHeadType.getRltEntryDclEtpsNm());//关联报关单申报单位名称
+		if(invtHeadType.getEntryDclTime()!=null){
+			bisPreEntry.setBGDSBRQ(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getEntryDclTime()))));//报关单申报日期
+		}
+		bisPreEntry.setBZ(invtHeadType.getRmk());//备注
+		bisPreEntry.setBGDTYBH(invtHeadType.getEntrySeqNo());//报关单统一编号
+		bisPreEntry.setCZYKH(invtHeadType.getIcCardNo());//操作员卡号
+
+		for (InvtListType forInvtListType:invtListType) {
+			BisPreEntryInfo bisPreEntryInfo = new BisPreEntryInfo();
+			bisPreEntryInfo.setForId(linkId);
+			bisPreEntryInfo.setXh(forInvtListType.getGdsSeqno());//序号
+			bisPreEntryInfo.setBaxh(forInvtListType.getPutrecSeqno());//备案序号
+			bisPreEntryInfo.setSplh(forInvtListType.getGdsMtno());//商品料号
+			bisPreEntryInfo.setBgdspxh(forInvtListType.getEntryGdsSeqno());//报关单商品序号
+			bisPreEntryInfo.setLzsbbxh(forInvtListType.getApplyTbSeqno());//流转申报表序号
+			bisPreEntryInfo.setSpxh(forInvtListType.getGdecd());//商品编号
+			bisPreEntryInfo.setSpmc(forInvtListType.getGdsNm());//商品名称
+			bisPreEntryInfo.setGgxh(forInvtListType.getGdsSpcfModelDesc());//规格型号
+			bisPreEntryInfo.setBzt(forInvtListType.getDclCurrcd());//币制
+			bisPreEntryInfo.setSbjldw(forInvtListType.getDclUnitcd());//申报计量单位
+			bisPreEntryInfo.setFdjldw(forInvtListType.getLawfUnitcd());//法定计量单位
+			bisPreEntryInfo.setFddejldw(forInvtListType.getSecdLawfUnitcd());//法定第二计量单位
+			if(forInvtListType.getDclQty() == null || forInvtListType.getDclQty().trim().length() == 0){
+				bisPreEntryInfo.setSbsl(Double.parseDouble("0"));//申报数量
+			}else{
+				bisPreEntryInfo.setSbsl(Double.parseDouble(forInvtListType.getDclQty()));//申报数量
+			}
+			if(forInvtListType.getLawfQty() == null || forInvtListType.getLawfQty().trim().length() == 0){
+				bisPreEntryInfo.setFdsl(Double.parseDouble("0"));//法定数量
+			}else{
+				bisPreEntryInfo.setFdsl(Double.parseDouble(forInvtListType.getLawfQty()));//法定数量
+			}
+			bisPreEntryInfo.setDefdsl(forInvtListType.getSecdLawfQty());//第二法定数量
+			if(forInvtListType.getDclUprcAmt() == null || forInvtListType.getDclUprcAmt().trim().length() == 0){
+				bisPreEntryInfo.setQysbdj(Double.parseDouble("0"));//企业申报单价
+			}else{
+				bisPreEntryInfo.setQysbdj(Double.parseDouble(forInvtListType.getDclUprcAmt()));//企业申报单价
+			}
+			if(forInvtListType.getDclTotalAmt() == null || forInvtListType.getDclTotalAmt().trim().length() == 0){
+				bisPreEntryInfo.setQysbzj(Double.parseDouble("0"));//企业申报总价
+			}else{
+				bisPreEntryInfo.setQysbzj(Double.parseDouble(forInvtListType.getDclTotalAmt()));//企业申报总价
+			}
+			if(forInvtListType.getUsdStatTotalAmt() == null || forInvtListType.getUsdStatTotalAmt().trim().length() == 0){
+				bisPreEntryInfo.setMytjzje(Double.parseDouble("0"));//美元统计总金额
+			}else{
+				bisPreEntryInfo.setMytjzje(Double.parseDouble(forInvtListType.getUsdStatTotalAmt()));//美元统计总金额
+			}
+			bisPreEntryInfo.setYcg(forInvtListType.getNatcd());//原产国(地区)
+			bisPreEntryInfo.setZlblyz(forInvtListType.getWtSfVal());//重量比例因子
+			bisPreEntryInfo.setDyblyz(forInvtListType.getFstSfVal());//第一比例因子
+			bisPreEntryInfo.setDeblyz(forInvtListType.getSecdSfVal());//第二比例因子
+			if(forInvtListType.getGrossWt() == null || forInvtListType.getGrossWt().trim().length() == 0){
+				bisPreEntryInfo.setMz(Double.parseDouble("0"));//毛重
+			}else{
+				bisPreEntryInfo.setMz(Double.parseDouble(forInvtListType.getGrossWt()));//毛重
+			}
+			if(forInvtListType.getNetWt() == null || forInvtListType.getNetWt().trim().length() == 0){
+				bisPreEntryInfo.setJz(Double.parseDouble("0"));//净重
+			}else{
+				bisPreEntryInfo.setJz(Double.parseDouble(forInvtListType.getNetWt()));//净重
+			}
+			bisPreEntryInfo.setZmfs(forInvtListType.getLvyrlfModecd());//征免方式
+			bisPreEntryInfo.setDhbbh(forInvtListType.getUcnsVerno());//单耗版本号
+			bisPreEntryInfo.setZzmdg(forInvtListType.getDestinationNatcd());//最终目的国
+			bisPreEntryInfo.setXgbz(forInvtListType.getModfMarkcd());//修改标志
+			bisPreEntryInfo.setRemark(forInvtListType.getRmk());//备注
+
+			bisPreEntryInfoList.add(bisPreEntryInfo);
+		}
+
+		preEntryService.save(bisPreEntry);
+		if (bisPreEntryInfoList.size() > 0){
+			for (BisPreEntryInfo forBisPreEntryInfo:bisPreEntryInfoList) {
+				preEntryInfoService.save(forBisPreEntryInfo);
+			}
+		}
+		return "success";
+	}
+
+//================================================================================================================================
 	//生成台账底账
-	public String createInfo(BisPreEntryInvtQuery bisPreEntryInvtQuery){
+	public String createInfo(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException {
 		InvtHeadType invtHeadType = new InvtHeadType();
 		List<InvtListType> invtListType = new ArrayList<>();
 		if (bisPreEntryInvtQuery.getInvtHeadType() == null){
 			return "生成台账时未获取到表头信息";
 		}else{
-			invtHeadType = JSON.parseObject(bisPreEntryInvtQuery.getInvtHeadType(),InvtHeadType.class);
+			invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
 		}
 		if (bisPreEntryInvtQuery.getInvtListType() == null || "[]".equals(bisPreEntryInvtQuery.getInvtListType())){
 			return "生成台账时未获取到表体信息";
 		}else{
-			invtListType = JSONArray.parseArray(bisPreEntryInvtQuery.getInvtListType(),InvtListType.class);
+			invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
 		}
 
 		//业务单号
@@ -459,12 +773,12 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * 查看核注清单详情
 	 */
 	@RequestMapping(value = "invtDetail/{id}", method = RequestMethod.GET)
-	public String invtDetail(Model model, @PathVariable("id") String id) throws ParseException {
+	public String invtDetail(Model model, @PathVariable("id") String id) throws ParseException, IOException, ClassNotFoundException {
 		BisPreEntryInvtQuery bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
 		bisPreEntryInvtQueryTemp = bisPreEntryInvtQuery;
 		model.addAttribute("ID", bisPreEntryInvtQuery.getId());
 		if(bisPreEntryInvtQuery.getInvtHeadType() != null){
-			InvtHeadType invtHeadType = JSON.parseObject(bisPreEntryInvtQuery.getInvtHeadType(),InvtHeadType.class);
+			InvtHeadType invtHeadType = JSON.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
 			model.addAttribute("bisPreEntry", invtHeadType);
 			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
@@ -483,11 +797,11 @@ public class PreEntryInvtQueryController extends BaseController {
 
 	@RequestMapping(value = "jsonInvtList", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> jsonInvtList(HttpServletRequest request) {
+	public Map<String, Object> jsonInvtList(HttpServletRequest request) throws IOException, ClassNotFoundException {
 		Page<InvtListType> page = getPage(request);
 		List<InvtListType> invtListType = new ArrayList<>();
 		if(bisPreEntryInvtQueryTemp.getInvtListType() != null){
-			invtListType = JSON.parseArray(bisPreEntryInvtQueryTemp.getInvtListType(),InvtListType.class);
+			invtListType = JSON.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQueryTemp.getInvtListType())),InvtListType.class);
 			page.setResult(invtListType);
 			page.setTotalCount(invtListType.size());
 		}else{

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.sql.Clob;
 import java.util.Date;
 
 @Entity
@@ -20,19 +21,19 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@Column(name = "BOND_INVT_NO")
 	private String bondInvtNo;// 保税清单编号
 	@Column(name = "INVT_QUERY_LIST")
-	private String InvtQueryList;// 保税核注清单列表查询结果
+	private byte[] InvtQueryList;// 保税核注清单列表查询结果
 	@Column(name = "INVT_DEC_HEAD_TYPE")
-	private String invtDecHeadType;// 核注清单报关单表头
+	private byte[] invtDecHeadType;// 核注清单报关单表头
 	@Column(name = "INVT_DEC_LIST_TYPE")
-	private String invtDecListType;// 核注清单报关单商品表体
+	private byte[] invtDecListType;// 核注清单报关单商品表体
 	@Column(name = "INVT_GOODS_TYPE")
-	private String invtGoodsType;// 简单加工、一纳成品内销成品明细[核注清单商品表体(保存集报清单料件信息)]
+	private byte[] invtGoodsType;// 简单加工、一纳成品内销成品明细[核注清单商品表体(保存集报清单料件信息)]
 	@Column(name = "INVT_HEAD_TYPE")
-	private String invtHeadType;// 核注清单表头
+	private byte[] invtHeadType;// 核注清单表头
 	@Column(name = "INVT_LIST_TYPE")
-	private String invtListType;// 核注清单表体
+	private byte[] invtListType;// 核注清单表体
 	@Column(name = "INVT_WAREHOUSE_TYPE")
-	private String invtWarehouseType;// 核注清单出入库单集报表体
+	private byte[] invtWarehouseType;// 核注清单出入库单集报表体
 	@Column(name = "LIST_STAT")
 	private String listStat;// 清单状态
 	@Column(name = "OPER_CUS_REG_CODE")
@@ -51,17 +52,19 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	private Date updateTime;// 修改日期
 	@Column(name = "SYNCHRONIZATION")
 	private String synchronization;// 同步标识 0-未同步；1-已同步
+	@Column(name = "CREATE_PREENTRY")
+	private String createPreEntry;// 生成标识 0-未生成；1-已生成
+
+	public String getCreatePreEntry() {
+		return createPreEntry;
+	}
+
+	public void setCreatePreEntry(String createPreEntry) {
+		this.createPreEntry = createPreEntry;
+	}
 
 	public static long getSerialVersionUID() {
 		return serialVersionUID;
-	}
-
-	public String getSynchronization() {
-		return synchronization;
-	}
-
-	public void setSynchronization(String synchronization) {
-		this.synchronization = synchronization;
 	}
 
 	public String getId() {
@@ -80,59 +83,59 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 		this.bondInvtNo = bondInvtNo;
 	}
 
-	public String getInvtQueryList() {
+	public byte[] getInvtQueryList() {
 		return InvtQueryList;
 	}
 
-	public void setInvtQueryList(String invtQueryList) {
+	public void setInvtQueryList(byte[] invtQueryList) {
 		InvtQueryList = invtQueryList;
 	}
 
-	public String getInvtDecHeadType() {
+	public byte[] getInvtDecHeadType() {
 		return invtDecHeadType;
 	}
 
-	public void setInvtDecHeadType(String invtDecHeadType) {
+	public void setInvtDecHeadType(byte[] invtDecHeadType) {
 		this.invtDecHeadType = invtDecHeadType;
 	}
 
-	public String getInvtDecListType() {
+	public byte[] getInvtDecListType() {
 		return invtDecListType;
 	}
 
-	public void setInvtDecListType(String invtDecListType) {
+	public void setInvtDecListType(byte[] invtDecListType) {
 		this.invtDecListType = invtDecListType;
 	}
 
-	public String getInvtGoodsType() {
+	public byte[] getInvtGoodsType() {
 		return invtGoodsType;
 	}
 
-	public void setInvtGoodsType(String invtGoodsType) {
+	public void setInvtGoodsType(byte[] invtGoodsType) {
 		this.invtGoodsType = invtGoodsType;
 	}
 
-	public String getInvtHeadType() {
+	public byte[] getInvtHeadType() {
 		return invtHeadType;
 	}
 
-	public void setInvtHeadType(String invtHeadType) {
+	public void setInvtHeadType(byte[] invtHeadType) {
 		this.invtHeadType = invtHeadType;
 	}
 
-	public String getInvtListType() {
+	public byte[] getInvtListType() {
 		return invtListType;
 	}
 
-	public void setInvtListType(String invtListType) {
+	public void setInvtListType(byte[] invtListType) {
 		this.invtListType = invtListType;
 	}
 
-	public String getInvtWarehouseType() {
+	public byte[] getInvtWarehouseType() {
 		return invtWarehouseType;
 	}
 
-	public void setInvtWarehouseType(String invtWarehouseType) {
+	public void setInvtWarehouseType(byte[] invtWarehouseType) {
 		this.invtWarehouseType = invtWarehouseType;
 	}
 
@@ -190,5 +193,13 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getSynchronization() {
+		return synchronization;
+	}
+
+	public void setSynchronization(String synchronization) {
+		this.synchronization = synchronization;
 	}
 }
