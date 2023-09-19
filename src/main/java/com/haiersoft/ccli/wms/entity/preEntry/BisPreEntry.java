@@ -135,7 +135,7 @@ public class BisPreEntry implements java.io.Serializable {
 	private String hsNo;  //HS编码
 
 	@Column(name = "PRICE")
-	private Integer price;  //件数
+	private String price;  //件数
 
 	@Column(name = "NET_WEIGHT")
 	private Double netWeight;  //重量
@@ -553,11 +553,11 @@ public class BisPreEntry implements java.io.Serializable {
 		this.hsNo = hsNo;
 	}
 
-	public Integer getPrice() {
+	public String getPrice() {
 		return price;
 	}
 
-	public void setPrice(Integer price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 

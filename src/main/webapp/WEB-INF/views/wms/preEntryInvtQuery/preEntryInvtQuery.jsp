@@ -6,15 +6,14 @@
 <%@ include file="/WEB-INF/views/include/easyui.jsp"%>
 </head>
 <body class="easyui-layout" style="font-family: '微软雅黑'">
-<div data-options="region:'center'" title="核注清单查询">
+<div id="tb" style="padding:5px;height:auto">
+	<div data-options="region:'center'" title="核注清单查询">
 		<div style="padding:5px;height:auto" class="datagrid-toolbar">
 			<form id="searchFrom" action="">
-			<input type="text" name="filter_LIKES_bondInvtNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
-	        <span class="toolbar-item dialog-tool-separator"></span>
-	        <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
-		</form>
-		<form id="searchFrom3" action="">
-		</form>
+				<input type="text" name="filter_LIKES_bondInvtNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
+				<span class="toolbar-item dialog-tool-separator"></span>
+				<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
+			</form>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" data-options="disabled:false" onclick="queryHZQD()">查询核注清单</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="ck()">查看核注清单详情</a>
@@ -28,25 +27,78 @@
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
         </div>
-	<table id="dg"></table> 
+	</div>
 </div>
-
-<div id="dlg"></div>  
+<table id="dg"></table>
+<div id="dlg"></div>
 <script type="text/javascript">
 var dg;
 var d;
 var dgg
 
+var qdlxAry;//清单类型
+var bglxAry;//报关类型代码
+var jgfsAry;//监管方式代码
+var sblxAry;//申报类型
+var ysfsAry;//运输方式
+var qdshztAry;//清单审批状态
 
 document.onkeydown = function () {if(event.keyCode == 13){cx();}};
 
-$(function(){   
+$(function(){
 	gridDG();
+	selectAjax();
 });
-
+function selectAjax(){
+	//清单类型
+	$.ajax({
+		type : "GET",
+		async : false,
+		url : "${ctx}/wms/preEntry/dictData/CUS_INVT_TYPE",
+		success : function(date) {
+			qdlxAry = date.rows;
+		}
+	});
+	//报关类型代码
+	$.ajax({
+		type : "GET",
+		async : false,
+		url : "${ctx}/wms/preEntry/dictData/CUS_DCLCUSFLAG",
+		success : function(date) {
+			bglxAry = date.rows;
+		}
+	});
+	//监管方式
+	$.ajax({
+		type : "GET",
+		async : false,
+		url : "${ctx}/wms/preEntry/dictData/CUS_SUPVMODECD",
+		success : function(date) {
+			jgfsAry = date.rows;
+		}
+	});
+	//申报类型
+	$.ajax({
+		type : "GET",
+		async : false,
+		url : "${ctx}/wms/preEntry/dictData/CUS_DCLTYPECD",
+		success : function(date) {
+			sblxAry = date.rows;
+		}
+	});
+	//运输方式
+	$.ajax({
+		type : "GET",
+		async : false,
+		url : "${ctx}/wms/preEntry/dictData/CUS_TRSPMODECD",
+		success : function(date) {
+			ysfsAry = date.rows;
+		}
+	});
+}
 //入库报关单列表
-function gridDG(){	
-	dg=$('#dg').datagrid({    
+function gridDG(){
+	dg=$('#dg').datagrid({
 		method: "get",
 	    url:'${ctx}/wms/preEntryInvtQuery/json',
 	    fit : true,
@@ -62,12 +114,22 @@ function gridDG(){
 		pageList : [20, 30, 50, 100 ],
 		singleSelect:true,
 		frozenColumns: [[
-			{field: 'id', title: 'id',sortable:true},
 			{field: 'bondInvtNo', title: '核注清单号',sortable:true},
 		]],
 	    columns:[[
-	        {field:'bizopEtpsNM',title:'经营企业名称',sortable:true},
-			{field:'bondInvtType',title:'清单类型',sortable:true},
+	        {field:'bizopEtpsNm',title:'经营企业名称',sortable:true},
+			{field:'invtType',title:'清单类型',sortable:true,
+				formatter : function(value, row, index) {
+					var lbelStr;
+					for (let i = 0; i < qdlxAry.length; i++) {
+						let row = qdlxAry[i];
+						if(row.value == value){
+							lbelStr = row.label;
+							break;
+						}
+					}
+					return lbelStr;
+				}},
 			{field:'dclcusFlag',title:'是否报关',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '1'){
@@ -77,13 +139,79 @@ function gridDG(){
 						return "非报关";
 					}
 				}},
-			{field:'dclcusTypeCD',title:'报关类型代码',sortable:true},
+			{field:'dclcusTypecd',title:'报关类型代码',sortable:true,
+				formatter : function(value, row, index) {
+					var lbelStr;
+					for (let i = 0; i < bglxAry.length; i++) {
+						let row = bglxAry[i];
+						if(row.value == value){
+							lbelStr = row.label;
+							break;
+						}
+					}
+					return lbelStr;
+				}},
 			{field:'invtDclTime',title:'清单申报时间',sortable:true},
-			{field:'listStat',title:'清单状态',sortable:true},
+			{field:'listStat',title:'清单状态',sortable:true,
+				formatter : function(value, row, index) {
+					if(value == '0'){
+						return "暂存";
+					}
+					if(value == '1'){
+						return "申报成功";
+					}
+					if(value == '4'){
+						return "成功发送海关";
+					}
+					if(value == '5'){
+						return "海关接收成功";
+					}
+					if(value == '6'){
+						return "海关接收失败";
+					}
+					if(value == 'B'){
+						return "海关终审通过";
+					}
+					// if(value == 'C'){
+					// 	return "退单";
+					// }
+					// if(value == 'E'){
+					// 	return "删除";
+					// }
+					// if(value == 'T'){
+					// 	return "转人工";
+					// }
+					// if(value == 'N'){
+					// 	return "待导入其他报文";
+					// }
+					// if(value == 'P'){
+					// 	return "预审核通过";
+					// }
+					// if(value == 'R'){
+					// 	return "待复审";
+					// }
+					// if(value == 'Y'){
+					// 	return "复审通过";
+					// }
+					// if(value == 'Q'){
+					// 	return "复审不通过";
+					// }
+				}},
 			{field:'putrecNo',title:'账册号',sortable:true},
-			{field:'rcvgdEtpsNM',title:'收货企业名称',sortable:true},
+			{field:'rcvgdEtpsNm',title:'收货企业名称',sortable:true},
 			{field:'seqNo',title:'预录入统一编号',sortable:true},
-			{field:'supvModeCD',title:'监管方式代码',sortable:true},
+			{field:'supvModecd',title:'监管方式代码',sortable:true,
+				formatter : function(value, row, index) {
+					var lbelStr;
+					for (let i = 0; i < jgfsAry.length; i++) {
+						let row = jgfsAry[i];
+						if(row.value == value){
+							lbelStr = row.label;
+							break;
+						}
+					}
+					return lbelStr;
+				}},
 			{field:'vrfdedMarkcd',title:'核扣标记',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
@@ -100,10 +228,21 @@ function gridDG(){
 					}
 				}},
 			{field:'entryNo',title:'报关单号',sortable:true},
-			{field:'putrecSeqno',title:'备案编号',sortable:true},
-			{field:'dclTypecd',title:'申报类型',sortable:true},
-			{field:'invtStucd',title:'清单审批状态',sortable:true},
-			{field:'singleNo',title:'单一窗口编号',sortable:true},
+			{field:'putrecNo',title:'备案编号',sortable:true},
+			{field:'dclTypecd',title:'申报类型',sortable:true,
+				formatter : function(value, row, index) {
+					var lbelStr;
+					for (let i = 0; i < sblxAry.length; i++) {
+						let row = sblxAry[i];
+						if(row.value == value){
+							lbelStr = row.label;
+							break;
+						}
+					}
+					return lbelStr;
+				}},
+			// {field:'invtIochkptStucd',title:'清单审批状态',sortable:true},
+			{field:'seqNo',title:'单一窗口编号',sortable:true},
 			{field:'impexpMarkcd',title:'进出口标记',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == 'I'){
@@ -122,10 +261,21 @@ function gridDG(){
 						return "成品";
 					}
 				}},
-			{field:'trspModecd',title:'运输方式',sortable:true},
+			{field:'trspModecd',title:'运输方式',sortable:true,
+				formatter : function(value, row, index) {
+					var lbelStr;
+					for (let i = 0; i < ysfsAry.length; i++) {
+						let row = ysfsAry[i];
+						if(row.value == value){
+							lbelStr = row.label;
+							break;
+						}
+					}
+					return lbelStr;
+				}},
 			{field:'gdsSeqno',title:'商品序号',sortable:true},
 			{field:'dclQty',title:'申报数量',sortable:true},
-			{field:'dclUnitcd',title:'申报单位',sortable:true},
+			{field:'corrEntryDclEtpsNm',title:'申报单位',sortable:true},
 			{field:'gdsMtno',title:'商品料号',sortable:true},
 			{field:'bizopEtpsno',title:'经营企业编号',sortable:true},
 			{field:'dclEtpsNm',title:'申报企业名称',sortable:true},
@@ -147,7 +297,7 @@ function cx(){
 	dg.datagrid('clearSelections');
 	var obj=$("#searchFrom").serializeObject();
 
-	dg.datagrid('load',obj); 
+	dg.datagrid('load',obj);
 }
 //查询核注清单信息
 function queryHZQD(){

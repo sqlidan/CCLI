@@ -38,6 +38,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.SQLQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -85,14 +86,38 @@ public class PreEntryInvtQueryController extends BaseController {
 	@ResponseBody
 	public Map<String, Object> getData(HttpServletRequest request) {
 		Page<BisPreEntryInvtQuery> page = getPage(request);
+
 		page.setOrder("asc");
 		page.setOrderBy("createTime");
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		PropertyFilter filter = new PropertyFilter("EQS_synchronization", "1");
 		filters.add(filter);
 		page = preEntryInvtQueryService.search(page, filters);
+		//解析数据
+		List<InvtHeadTypeVo> invtHeadTypeVoList = new ArrayList<>();
+		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+		bisPreEntryInvtQueryList = page.getResult();
+		for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+			InvtHeadType invtHeadType = new InvtHeadType();
+			try {
+				invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			InvtHeadTypeVo invtHeadTypeVo = new InvtHeadTypeVo();
+			BeanUtils.copyProperties(invtHeadType,invtHeadTypeVo);
+			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
+			invtHeadTypeVo.setCreateTime(forBisPreEntryInvtQuery.getCreateTime());
+			invtHeadTypeVo.setUpdateBy(forBisPreEntryInvtQuery.getUpdateBy());
+			invtHeadTypeVo.setUpdateTime(forBisPreEntryInvtQuery.getUpdateTime());
+			invtHeadTypeVoList.add(invtHeadTypeVo);
+		}
 
-		return getEasyUIData(page);
+		Page<InvtHeadTypeVo> page2 = getPage(request);
+		page2.setResult(invtHeadTypeVoList);
+		return getEasyUIData(page2);
 	}
 
 	//单个核注清单查询
@@ -336,6 +361,11 @@ public class PreEntryInvtQueryController extends BaseController {
 						e.printStackTrace();
 					}
 					if ("success".equals(result)){
+						forBisPreEntryInvtQuery.setCreatePreEntry("1");
+						User user = UserUtil.getCurrentUser();
+						forBisPreEntryInvtQuery.setUpdateBy(user.getName());
+						forBisPreEntryInvtQuery.setUpdateTime(new Date());
+						preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
 						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 生成预报单成功");
 					}else{
 						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
@@ -405,9 +435,9 @@ public class PreEntryInvtQueryController extends BaseController {
 			bisPreEntry.setProductName(invtListType.get(0).getGdsNm());
 			//件数
 			if(invtListType.get(0).getDclQty() == null || invtListType.get(0).getDclQty().trim().length() == 0){
-				bisPreEntry.setPrice(0);
+				bisPreEntry.setPrice("0");
 			}else{
-				bisPreEntry.setPrice(Integer.parseInt(invtListType.get(0).getDclQty()));
+				bisPreEntry.setPrice(invtListType.get(0).getDclQty());
 			}
 			//重量
 			if(invtListType.get(0).getNetWt() == null || invtListType.get(0).getNetWt().trim().length() == 0){
