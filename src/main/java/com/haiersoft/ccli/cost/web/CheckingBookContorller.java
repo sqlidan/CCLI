@@ -221,10 +221,10 @@ public class CheckingBookContorller extends BaseController {
 							xjcols = 9;
 						}
 						for (int j = 0; j < gethead.size(); j++) {
-							excelUtil.setCellSumValue(hjrow,xjcols,getCellName((row+1),xjcols),getCellName(hjrow,xjcols));
+							excelUtil.setCellSumValue(hjrow,xjcols,getCellName((row+1),xjcols),getCellName(hjrow,xjcols),null);
 							xjcols++;
 						}
-						excelUtil.setCellSumValue(hjrow,xjcols,getCellName((row+1),xjcols),getCellName(hjrow,xjcols));
+						excelUtil.setCellSumValue(hjrow,xjcols,getCellName((row+1),xjcols),getCellName(hjrow,xjcols),"合计");
 	        		}
 				}
 				bill_num=(detailMap.get("BILL_NUM")!=null?detailMap.get("BILL_NUM").toString():"");
@@ -266,16 +266,16 @@ public class CheckingBookContorller extends BaseController {
     		}
     		if((1==obj.getnType()||3==obj.getnType())){
 				for (int j = 0; j <gethead.size(); j++) {
-					excelUtil.setCellSumIfTotal(row+2,sumcol,4+"",(row+2)+"",getCellName(4,sumcol),getCellName((row+2),sumcol),obj.getnType().toString());
+					excelUtil.setCellSumIfTotal(row+2,sumcol,4+"",(row+2)+"",getCellName(4,sumcol),getCellName((row+2),sumcol),obj.getnType().toString(),null);
 					sumcol++;
 				}
-				excelUtil.setCellSumIfTotal(row+2,sumcol,4+"",(row+2)+"",getCellName(4,sumcol),getCellName((row+2),sumcol),obj.getnType().toString());
+				excelUtil.setCellSumIfTotal(row+2,sumcol,4+"",(row+2)+"",getCellName(4,sumcol),getCellName((row+2),sumcol),obj.getnType().toString(),"合计");
     		}else{
     			for (int j = 0; j <gethead.size(); j++) {
-    				excelUtil.setCellSumValue(row+2,sumcol,this.getCellName(4,sumcol),this.getCellName(row,sumcol));
+    				excelUtil.setCellSumValue(row+2,sumcol,this.getCellName(4,sumcol),this.getCellName(row,sumcol),null);
     				sumcol++;
     			}
-    		    excelUtil.setCellSumValue(row+2,sumcol,this.getCellName(4,sumcol),this.getCellName(row,sumcol));
+    		    excelUtil.setCellSumValue(row+2,sumcol,this.getCellName(4,sumcol),this.getCellName(row,sumcol),"合计");
     		}
 			////////////////////////////////////////////////////////////////////////
     		if(1==obj.getnType() || 2==obj.getnType()){
@@ -501,7 +501,7 @@ public class CheckingBookContorller extends BaseController {
 		        				keyMap.put(keys,1);
 			        			isHave=false;
 			        			if(myNum>0){
-			        				excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow,9),this.getCellName(myNum+3+addRow,nLrow-1));
+			        				excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow,9),this.getCellName(myNum+3+addRow,nLrow-1),null);
 			        			}
 	        				}else if(oldKeys.split(":").length>3 ){
 	        					if(oldKeys.equals(keys)){
@@ -512,7 +512,7 @@ public class CheckingBookContorller extends BaseController {
 		        					keyMap.put(keys,1);
 			        				isHave=false;
 			        				if(myNum>0){
-			        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1));
+			        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1),null);
 			        				}
 	        					}else{
 	        						myNum--;
@@ -523,7 +523,7 @@ public class CheckingBookContorller extends BaseController {
 	        						keyMap.put(keys,1);
 			        				isHave=false;
 			        				if(myNum>0){
-			        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1));
+			        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1),null);
 			        				}
 	        					}else{
 			        				myNum--;
@@ -534,7 +534,7 @@ public class CheckingBookContorller extends BaseController {
 	        				keyMap.put(keys,1);
 	        				isHave=false;
 	        				if(myNum>0){
-	        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1));
+	        					excelUtil.setCellSumValue(myNum+3+addRow-1,nLrow,this.getCellName(myNum+3+addRow, 9),this.getCellName(myNum+3+addRow, nLrow-1),null);
 	        				}
 	        			}
 	        			/*************************************/
@@ -556,7 +556,7 @@ public class CheckingBookContorller extends BaseController {
 		        			excelUtil.setCellStrValue(myNum+3+addRow,8," ");
 		        			int j=0;
 		        			for(Map<String,Object> gmap:gethead){
-		        				excelUtil.setCellSumValue(myNum+3+addRow,Integer.valueOf(gmap.get("nlrow").toString()),this.getCellName(begin, Integer.valueOf(gmap.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmap.get("nlrow").toString())));
+		        				excelUtil.setCellSumValue(myNum+3+addRow,Integer.valueOf(gmap.get("nlrow").toString()),this.getCellName(begin, Integer.valueOf(gmap.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmap.get("nlrow").toString())),null);
 		        				sunLRMB+=Double.valueOf(gmap.get("hrowsum").toString());
 		        				if(allInfo[j]==null){
 		        					allInfo[j] =Double.valueOf(gmap.get("hrowsum").toString());
@@ -568,7 +568,7 @@ public class CheckingBookContorller extends BaseController {
 		        			}
 		        			//添加小计竖向计算总和
 		        			allRMB += sunLRMB;
-		        			excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(begin, nLrow),this.getCellName(end, nLrow));
+		        			excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(begin, nLrow),this.getCellName(end, nLrow),"合计");
 		        			objList.add(begin.toString());
 		        			objList.add(end.toString());
 		        			begin = end+2;
@@ -692,11 +692,11 @@ public class CheckingBookContorller extends BaseController {
 //		        			allNet+=sumNet;
 //		        			allGross+=sumSross;
 //		        			excelUtil.setCellDoubleValue(myNum+3+addRow,nLrow,sunRMB);
-		        			excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(myNum+3+addRow+1, 9),this.getCellName(myNum+3+addRow+1, nLrow-1));
+		        			excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(myNum+3+addRow+1, 9),this.getCellName(myNum+3+addRow+1, nLrow-1),null);
 		        			int jj=0;
 		        			for(Map<String,Object> gmap:gethead){
 //		        				excelUtil.setCellDoubleValue(myNum+3+addRow+1,Integer.valueOf(gmap.get("nlrow").toString()),Double.valueOf(gmap.get("hrowsum").toString()));
-		        				excelUtil.setCellSumValue(myNum+3+addRow+1,Integer.valueOf(gmap.get("nlrow").toString()),this.getCellName(begin, Integer.valueOf(gmap.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmap.get("nlrow").toString())));
+		        				excelUtil.setCellSumValue(myNum+3+addRow+1,Integer.valueOf(gmap.get("nlrow").toString()),this.getCellName(begin, Integer.valueOf(gmap.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmap.get("nlrow").toString())),null);
 		        				sunLRMB+=Double.valueOf(gmap.get("hrowsum").toString());
 		        				if(allInfo[jj]==null){
 		        					allInfo[jj] =Double.valueOf(gmap.get("hrowsum").toString());
@@ -708,13 +708,13 @@ public class CheckingBookContorller extends BaseController {
 		        			allRMB += sunLRMB;
 		        			//添加小计竖向计算总和
 //		        			excelUtil.setCellDoubleValue(myNum+3+addRow+1,nLrow,sunLRMB);
-		        			excelUtil.setCellSumValue(myNum+3+addRow+1,nLrow,this.getCellName(begin, nLrow),this.getCellName(end, nLrow));
+		        			excelUtil.setCellSumValue(myNum+3+addRow+1,nLrow,this.getCellName(begin, nLrow),this.getCellName(end, nLrow),null);
 		        			objList.add(begin.toString());
 		        			objList.add(end.toString());
 	        			}
 	        			if((2==obj.getnType()||4==obj.getnType()) && i==getlist.size()-1){
 //	        				excelUtil.setCellDoubleValue(myNum+3+addRow,nLrow,sunRMB);
-	        				excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(myNum+3+addRow+1, 9),this.getCellName(myNum+3+addRow+1, nLrow-1));
+	        				excelUtil.setCellSumValue(myNum+3+addRow,nLrow,this.getCellName(myNum+3+addRow+1, 9),this.getCellName(myNum+3+addRow+1, nLrow-1),"合计");
 	        				end=myNum+3+addRow+1;
 	        			}
 	        			myNum++;
@@ -739,11 +739,11 @@ public class CheckingBookContorller extends BaseController {
 //	        			int k=0;
 		        		for(Map<String,Object> gmaps:gethead){
 //	        				excelUtil.setCellDoubleValue(myNum+3+addRow+2,Integer.valueOf(gmaps.get("nlrow").toString()),allInfo[k]);
-	        				excelUtil.setCellSumValue(myNum+3+addRow+2, Integer.valueOf(gmaps.get("nlrow").toString()), objList,obj.getnType().toString());
+	        				excelUtil.setCellSumValue(myNum+3+addRow+2, Integer.valueOf(gmaps.get("nlrow").toString()), objList,obj.getnType().toString(),null);
 //	        				k++;
 	        			}
 //		        		excelUtil.setCellDoubleValue(myNum+3+addRow+2,nLrow,allRMB);
-		        		excelUtil.setCellSumValue(myNum+3+addRow+2, nLrow, objList,obj.getnType().toString());
+		        		excelUtil.setCellSumValue(myNum+3+addRow+2, nLrow, objList,obj.getnType().toString(),"合计");
 		        	}else{
 		        		for(int kong=0;kong<nLrow+1;kong++){
 		        			excelUtil.setCellStrValue(myNum+3+addRow+0,kong," ");
@@ -765,11 +765,11 @@ public class CheckingBookContorller extends BaseController {
 	        			excelUtil.setCellStrValue(myNum+3+addRow+2,8," ");
 	        			for(Map<String,Object> gmaps:gethead){
 // 	        				excelUtil.setCellDoubleValue(myNum+3+addRow+2,Integer.valueOf(gmaps.get("nlrow").toString()),Double.valueOf(gmaps.get("hrowsum").toString()));
-	        				excelUtil.setCellSumValue(myNum+3+addRow+2,Integer.valueOf(gmaps.get("nlrow").toString()),this.getCellName(4, Integer.valueOf(gmaps.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmaps.get("nlrow").toString())));
+	        				excelUtil.setCellSumValue(myNum+3+addRow+2,Integer.valueOf(gmaps.get("nlrow").toString()),this.getCellName(4, Integer.valueOf(gmaps.get("nlrow").toString())),this.getCellName(end, Integer.valueOf(gmaps.get("nlrow").toString())),null);
 	        				allRMB +=Double.valueOf(gmaps.get("hrowsum").toString());
 	        			}
 //		        		excelUtil.setCellDoubleValue(myNum+3+addRow+2,nLrow,allRMB);
-	        			excelUtil.setCellSumValue(myNum+3+addRow+2,nLrow,this.getCellName(4, nLrow),this.getCellName(end,nLrow));
+	        			excelUtil.setCellSumValue(myNum+3+addRow+2,nLrow,this.getCellName(4, nLrow),this.getCellName(end,nLrow),"合计");
 		        	}
 	        	}
 	        	////////////////////////////////////////////////////////////////////////

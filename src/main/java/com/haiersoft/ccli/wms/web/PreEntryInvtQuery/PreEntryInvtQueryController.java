@@ -129,14 +129,10 @@ public class PreEntryInvtQueryController extends BaseController {
 		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
 			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
 				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
-					String bondInvtNo = "";
-					if(forBisPreEntryInvtQuery.getBondInvtNo() == null || forBisPreEntryInvtQuery.getBondInvtNo().trim().length() == 0){
-						bondInvtNo = "";
-					}
 					//查询
 					String result = null;
 					try {
-						result = invtQuery(bondInvtNo,true);
+						result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
 					} catch (IOException | ClassNotFoundException e) {
 						logger.info("批量核注清单同步异常:"+e.getMessage());
 						e.printStackTrace();

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.xml.rpc.ServiceException;
 
+import com.haiersoft.ccli.wms.entity.BisOutStockInfo;
+import com.haiersoft.ccli.wms.service.OutStockInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,9 @@ public class ApprController extends BaseController {
 	GetKeyService getKeyService;
 	@Autowired
 	FljgWsClient fljgWsClient;
+
+	@Autowired
+	private OutStockInfoService outStockInfoService;
 
 	/**
 	 * 默认页面
@@ -112,33 +117,74 @@ public class ApprController extends BaseController {
 
 			//入区不用调整，出区需要调整
 			if("2".equals(apprheadList.get(0).getIoType())){
-				//依据出区获取入区
-				List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
-				filtersIn.add(new PropertyFilter("EQS_itemNum", apprheadList.get(0).getItemNum()));
-				filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
-				List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
-				//依据入区完善出区申报信息
-				if (!apprheadInList.isEmpty()) {
-					List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
-					infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
-					List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
-					logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
-					logger.error("apprInfoInList1： "+JSON.toJSONString(apprInfoInList));
-					for (ApprInfo forApprInfo:apprInfoList) {
-						for (ApprInfo forApprInfoIn:apprInfoInList) {
-							if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
-								forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
-								forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
-								forApprInfo.setgUnit("035");//申报计量单位
+				if(apprInfoList!=null && apprInfoList.size() > 1){//多个
+					String linkId = apprheadList.get(0).getLinkId();
+
+					List<BisOutStockInfo> outStockInfos = new ArrayList<BisOutStockInfo>();
+					BisOutStockInfo outStockInfo = new BisOutStockInfo();
+					outStockInfo.setOutLinkId(linkId);
+					outStockInfos = outStockInfoService.searchBillCodeByLinkId(outStockInfo);
+					if(outStockInfos!=null && outStockInfos.size() >0){
+						for (BisOutStockInfo forBisOutStockInfo:outStockInfos) {
+							//依据出区获取入区
+							List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
+							filtersIn.add(new PropertyFilter("EQS_itemNum", forBisOutStockInfo.getBillNum()));
+							filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
+							List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
+							//依据入区完善出区申报信息
+							if (!apprheadInList.isEmpty()) {
+								List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
+								infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
+								List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
+								logger.error("apprInfoList： "+JSON.toJSONString(apprInfoList));
+								logger.error("apprInfoInList： "+JSON.toJSONString(apprInfoInList));
+								for (ApprInfo forApprInfo:apprInfoList) {
+									for (ApprInfo forApprInfoIn:apprInfoInList) {
+										if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
+											forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
+											forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
+										}
+									}
+									apprInfoService.merge(forApprInfo);
+								}
 							}
 						}
-						apprInfoService.merge(forApprInfo);
 					}
+				}else{//一个
+					//依据出区获取入区
+					List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
+					filtersIn.add(new PropertyFilter("EQS_itemNum", apprheadList.get(0).getItemNum()));
+					filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
+					List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
+					//依据入区完善出区申报信息
+					if (!apprheadInList.isEmpty()) {
+						List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
+						infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
+						List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
+						logger.error("apprInfoList： "+JSON.toJSONString(apprInfoList));
+						logger.error("apprInfoInList： "+JSON.toJSONString(apprInfoInList));
+						for (ApprInfo forApprInfo:apprInfoList) {
+							for (ApprInfo forApprInfoIn:apprInfoInList) {
+								if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
+									forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
+									forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
+								}
+							}
+							apprInfoService.merge(forApprInfo);
+						}
+					}
+				}
+				for (ApprInfo forApprInfo:apprInfoList) {
+					forApprInfo.setgUnit("035");//申报计量单位
 				}
 				logger.error("apprInfoList2： "+JSON.toJSONString(apprInfoList));
 				map.put("ApprLists", apprInfoList);
 				map.put("ApprHead", apprheadList.get(0));
 			}else{
+				for (ApprInfo forApprInfo:apprInfoList) {
+					forApprInfo.setgUnit("035");//申报计量单位
+				}
+				logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
 				map.put("ApprLists", apprInfoList);
 				map.put("ApprHead", apprheadList.get(0));
 			}

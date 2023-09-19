@@ -216,7 +216,7 @@ public class ExcelUtil {
      * @param objList--存放单元格位置的List
      * @param type--判断是中文还是英文
      */
-    public void setCellSumValue(int rowIndex, int cellnum, List<String> objList, String type) {
+    public void setCellSumValue(int rowIndex, int cellnum, List<String> objList, String type, String type2) {
         HSSFRow row = sheet.getRow(rowIndex);
         if (null == row) {
             row = sheet.createRow(rowIndex);
@@ -237,12 +237,21 @@ public class ExcelUtil {
         cell.setCellStyle(style);
         cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
         StringBuffer sb = new StringBuffer();
-        if ("1".equals(type) || "2".equals(type)) {
-            sb.append("SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"在库\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"入库\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"出\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + ")");
-        } else {
-            sb.append("SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"pre_in\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"in\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"out\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + ")");
+        if(type2 !=null && "合计".equals(type2)){
+            if ("1".equals(type) || "2".equals(type)) {
+                sb.append("ROUND(SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"在库\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"入库\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"出\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + "),2)");
+            } else {
+                sb.append("ROUND(SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"pre_in\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"in\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"out\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + "),2)");
+            }
+            cell.setCellFormula(sb.toString());
+        }else{
+            if ("1".equals(type) || "2".equals(type)) {
+                sb.append("SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"在库\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"入库\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"出\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + ")");
+            } else {
+                sb.append("SUMPRODUCT( ( (B4:B" + String.valueOf(rowIndex - 1) + "=\"pre_in\") + (B4:B" + String.valueOf(rowIndex - 1) + "=\"in\")+(B4:B" + String.valueOf(rowIndex - 1) + "=\"out\"))*" + this.getCellName(4, cellnum) + ":" + this.getCellName(rowIndex - 1, cellnum) + ")");
+            }
+            cell.setCellFormula(sb.toString());
         }
-        cell.setCellFormula(sb.toString());
     }
 
 
@@ -312,7 +321,7 @@ public class ExcelUtil {
      * @param cellnum--列值
      * @param objList--存放单元格位置的List
      */
-    public void setCellSumValue(int rowIndex, int cellnum, String begin, String end) {
+    public void setCellSumValue(int rowIndex, int cellnum, String begin, String end,String type) {
         HSSFRow row = sheet.getRow(rowIndex);
         if (null == row) {
             row = sheet.createRow(rowIndex);
@@ -333,7 +342,11 @@ public class ExcelUtil {
         }
         cell.setCellStyle(style);
         cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
-        cell.setCellFormula("SUM(" + begin + ":" + end + ")");
+        if(type !=null && "合计".equals(type)){
+            cell.setCellFormula("ROUND(SUM(" + begin + ":" + end + "),2)");
+        }else{
+            cell.setCellFormula("SUM(" + begin + ":" + end + ")");
+        }
     }
     
     /**
@@ -379,7 +392,7 @@ public class ExcelUtil {
         }
     }
     
-    public void setCellSumIfTotal(int rowIndex, int cellnum,String ifBegin,String ifEnd,String begin,String end,String ntype) {
+    public void setCellSumIfTotal(int rowIndex, int cellnum,String ifBegin,String ifEnd,String begin,String end,String ntype,String type) {
         HSSFRow row = sheet.getRow(rowIndex);
         if (null == row) {
             row = sheet.createRow(rowIndex);
@@ -400,10 +413,19 @@ public class ExcelUtil {
         }
         cell.setCellStyle(style);
         cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
-        if ("1".equals(ntype) || "2".equals(ntype)) {
-           cell.setCellFormula("SUMIF(A"+ifBegin+":A"+ifEnd+",\"小计 ：\","+begin+":"+end+")");
+
+        if(type !=null && "合计".equals(type)){
+            if ("1".equals(ntype) || "2".equals(ntype)) {
+                cell.setCellFormula("ROUND(SUMIF(A"+ifBegin+":A"+ifEnd+",\"小计 ：\","+begin+":"+end+"),2)");
+            }else{
+                cell.setCellFormula("ROUND(SUMIF(A"+ifBegin+":A"+ifEnd+",\"SubTotal：\","+begin+":"+end+"),2)");
+            }
         }else{
-           cell.setCellFormula("SUMIF(A"+ifBegin+":A"+ifEnd+",\"SubTotal：\","+begin+":"+end+")");
+            if ("1".equals(ntype) || "2".equals(ntype)) {
+                cell.setCellFormula("SUMIF(A"+ifBegin+":A"+ifEnd+",\"小计 ：\","+begin+":"+end+")");
+            }else{
+                cell.setCellFormula("SUMIF(A"+ifBegin+":A"+ifEnd+",\"SubTotal：\","+begin+":"+end+")");
+            }
         }
     }
     
