@@ -54,6 +54,17 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	private String synchronization;// 同步标识 0-未同步；1-已同步
 	@Column(name = "CREATE_PREENTRY")
 	private String createPreEntry;// 生成标识 0-未生成；1-已生成
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "ORDER_TIME")
+	private Date orderTime;
+
+	public Date getOrderTime() {
+		return orderTime;
+	}
+
+	public void setOrderTime(Date orderTime) {
+		this.orderTime = orderTime;
+	}
 
 	public String getCreatePreEntry() {
 		return createPreEntry;

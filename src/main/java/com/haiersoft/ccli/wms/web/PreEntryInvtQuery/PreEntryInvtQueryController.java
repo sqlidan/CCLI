@@ -89,9 +89,8 @@ public class PreEntryInvtQueryController extends BaseController {
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		Page<BisPreEntryInvtQuery> page = getPage(request);
-
-		page.setOrder("asc");
-		page.setOrderBy("createTime");
+		page.setOrder("desc");
+		page.setOrderBy("orderTime");
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		PropertyFilter filter = new PropertyFilter("EQS_synchronization", "1");
 		filters.add(filter);
@@ -372,6 +371,8 @@ public class PreEntryInvtQueryController extends BaseController {
 	@RequestMapping(value="createPreEntry",method = RequestMethod.GET)
 	@ResponseBody
 	public String createPreEntry() {
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		String msg = "success";
 		//获取要同步的核注清单号
 		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
@@ -383,6 +384,9 @@ public class PreEntryInvtQueryController extends BaseController {
 					String result = null;
 					try {
 						result = createPreEntry(forBisPreEntryInvtQuery);
+						//获取核注清单数据
+						InvtHeadType invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())), InvtHeadType.class);
+						forBisPreEntryInvtQuery.setOrderTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 					} catch (IOException | ClassNotFoundException | ParseException e) {
 						logger.info("批量生成预报单异常:"+e.getMessage());
 						e.printStackTrace();
@@ -426,7 +430,8 @@ public class PreEntryInvtQueryController extends BaseController {
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 
-		String linkId = "FYZH" + StringUtils.timeToString();
+//		String linkId = "FYZH" + StringUtils.timeToString();
+		String linkId = UUID.randomUUID().toString();
 		bisPreEntry.setForId(linkId);
 		bisPreEntry.setState("5");//状态 5-申报核注清单通过，状态为5
 
