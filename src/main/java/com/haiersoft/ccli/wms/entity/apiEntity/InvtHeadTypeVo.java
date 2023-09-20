@@ -9,9 +9,9 @@ import java.util.Date;
 public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable{
     private String id;// ID
     private String createBy;// 创建人
-    private Date createTime;// 下单日期
+    private String createTime;// 下单日期
     private String updateBy;// 修改人
-    private Date updateTime;// 修改日期
+    private String updateTime;// 修改日期
 
     public String getId() {
         return id;
@@ -29,11 +29,11 @@ public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable
         this.createBy = createBy;
     }
 
-    public Date getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
@@ -45,11 +45,11 @@ public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable
         this.updateBy = updateBy;
     }
 
-    public Date getUpdateTime() {
+    public String getUpdateTime() {
         return updateTime;
     }
 
-    public void setUpdateTime(Date updateTime) {
+    public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
     }
 }

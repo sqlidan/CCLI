@@ -85,6 +85,9 @@ public class PreEntryInvtQueryController extends BaseController {
 	@RequestMapping(value = "json", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getData(HttpServletRequest request) {
+//		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		Page<BisPreEntryInvtQuery> page = getPage(request);
 
 		page.setOrder("asc");
@@ -123,10 +126,18 @@ public class PreEntryInvtQueryController extends BaseController {
 				invtHeadTypeVo.setEtpsInnerInvtNo(etpsInnerInvtNo);
 			}
 			invtHeadTypeVo.setListStat(forBisPreEntryInvtQuery.getListStat().replaceAll("\"","").replaceAll("'",""));
+
 			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
-			invtHeadTypeVo.setCreateTime(forBisPreEntryInvtQuery.getCreateTime());
-			invtHeadTypeVo.setUpdateBy(forBisPreEntryInvtQuery.getUpdateBy());
-			invtHeadTypeVo.setUpdateTime(forBisPreEntryInvtQuery.getUpdateTime());
+//			invtHeadTypeVo.setUpdateBy(forBisPreEntryInvtQuery.getUpdateBy());
+			if(invtHeadType.getInvtDclTime()!=null && invtHeadType.getInvtDclTime().trim().length() > 0){
+				try {
+					invtHeadTypeVo.setCreateTime(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime())));
+//					invtHeadTypeVo.setUpdateTime(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime())));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+
 			invtHeadTypeVoList.add(invtHeadTypeVo);
 		}
 
