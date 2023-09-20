@@ -108,6 +108,21 @@ public class PreEntryInvtQueryController extends BaseController {
 			}
 			InvtHeadTypeVo invtHeadTypeVo = new InvtHeadTypeVo();
 			BeanUtils.copyProperties(invtHeadType,invtHeadTypeVo);
+			invtHeadTypeVo.setId(forBisPreEntryInvtQuery.getId());
+			if(invtHeadTypeVo.getEtpsInnerInvtNo()!= null && invtHeadTypeVo.getEtpsInnerInvtNo().trim().length() >0){
+				String etpsInnerInvtNo = invtHeadTypeVo.getEtpsInnerInvtNo();
+				if(etpsInnerInvtNo.contains("入库")){
+					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("入库","");
+				}
+				if(etpsInnerInvtNo.contains("出库")){
+					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("出库","");
+				}
+				if(etpsInnerInvtNo.contains("入库出库")){
+					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("入库出库","");
+				}
+				invtHeadTypeVo.setEtpsInnerInvtNo(etpsInnerInvtNo);
+			}
+			invtHeadTypeVo.setListStat(forBisPreEntryInvtQuery.getListStat().replaceAll("\"","").replaceAll("'",""));
 			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
 			invtHeadTypeVo.setCreateTime(forBisPreEntryInvtQuery.getCreateTime());
 			invtHeadTypeVo.setUpdateBy(forBisPreEntryInvtQuery.getUpdateBy());
@@ -117,6 +132,7 @@ public class PreEntryInvtQueryController extends BaseController {
 
 		Page<InvtHeadTypeVo> page2 = getPage(request);
 		page2.setResult(invtHeadTypeVoList);
+		page2.setTotalCount(page.getTotalCount());
 		return getEasyUIData(page2);
 	}
 

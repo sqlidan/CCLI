@@ -114,6 +114,7 @@ function gridDG(){
 		pageList : [20, 30, 50, 100 ],
 		singleSelect:true,
 		frozenColumns: [[
+			{field: 'id', title: 'ID',sortable:true},
 			{field: 'bondInvtNo', title: '核注清单号',sortable:true},
 		]],
 	    columns:[[
@@ -172,30 +173,30 @@ function gridDG(){
 					if(value == 'B'){
 						return "海关终审通过";
 					}
-					// if(value == 'C'){
-					// 	return "退单";
-					// }
-					// if(value == 'E'){
-					// 	return "删除";
-					// }
-					// if(value == 'T'){
-					// 	return "转人工";
-					// }
-					// if(value == 'N'){
-					// 	return "待导入其他报文";
-					// }
-					// if(value == 'P'){
-					// 	return "预审核通过";
-					// }
-					// if(value == 'R'){
-					// 	return "待复审";
-					// }
-					// if(value == 'Y'){
-					// 	return "复审通过";
-					// }
-					// if(value == 'Q'){
-					// 	return "复审不通过";
-					// }
+					if(value == 'C'){
+						return "退单";
+					}
+					if(value == 'E'){
+						return "删除";
+					}
+					if(value == 'T'){
+						return "转人工";
+					}
+					if(value == 'N'){
+						return "待导入其他报文";
+					}
+					if(value == 'P'){
+						return "预审核通过";
+					}
+					if(value == 'R'){
+						return "待复审";
+					}
+					if(value == 'Y'){
+						return "复审通过";
+					}
+					if(value == 'Q'){
+						return "复审不通过";
+					}
 				}},
 			{field:'putrecNo',title:'账册号',sortable:true},
 			{field:'rcvgdEtpsNm',title:'收货企业名称',sortable:true},
