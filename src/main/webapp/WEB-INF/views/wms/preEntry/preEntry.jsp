@@ -219,8 +219,8 @@ function gridDG(){
 				}},
 			{field:'createBy',title:'创建人',sortable:true},
 			{field:'createTime',title:'创建时间',sortable:true},
-			{field:'updateBy',title:'修改人',sortable:true},
-			{field:'updateTime',title:'修改时间',sortable:true},
+			// {field:'updateBy',title:'修改人',sortable:true},
+			// {field:'updateTime',title:'修改时间',sortable:true},
 	    ]],
 	    // onClickRow:function(rowIndex, rowData){
 	    // 	info(rowData.forId);
