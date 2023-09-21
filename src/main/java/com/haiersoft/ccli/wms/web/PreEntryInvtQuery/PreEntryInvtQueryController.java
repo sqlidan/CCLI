@@ -462,22 +462,6 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntry.setCtnCont(0);//箱量
 		bisPreEntry.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
 		bisPreEntry.setCdSign(Integer.parseInt(invtHeadType.getDclcusFlag()));//报关标志
-		if(invtListType.size() > 0){
-			//品名
-			bisPreEntry.setProductName(invtListType.get(0).getGdsNm());
-			//件数
-			if(invtListType.get(0).getDclQty() == null || invtListType.get(0).getDclQty().trim().length() == 0){
-				bisPreEntry.setPrice("0");
-			}else{
-				bisPreEntry.setPrice(invtListType.get(0).getDclQty());
-			}
-			//重量
-			if(invtListType.get(0).getNetWt() == null || invtListType.get(0).getNetWt().trim().length() == 0){
-				bisPreEntry.setNetWeight(Double.parseDouble("0"));
-			}else{
-				bisPreEntry.setNetWeight(Double.parseDouble(invtListType.get(0).getNetWt()));
-			}
-		}
 		bisPreEntry.setConsignee(invtHeadType.getRcvgdEtpsNm() == null ? "" : invtHeadType.getRcvgdEtpsNm());//收货人
 		bisPreEntry.setConsignor(invtHeadType.getRltEntryBizopEtpsno());//发货人
 		bisPreEntry.setContryOragin(invtHeadType.getStshipTrsarvNatcd());//原产国
@@ -543,7 +527,25 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntry.setBGDTYBH(invtHeadType.getEntrySeqNo());//报关单统一编号
 		bisPreEntry.setCZYKH(invtHeadType.getIcCardNo());//操作员卡号
 
+		String productName = "";
+		String hsNo = "";
+		Double price = 0.00;
+		Double netWeight = 0.00;
 		for (InvtListType forInvtListType:invtListType) {
+			if(!productName.contains(forInvtListType.getGdsNm())){
+				if(productName.trim().length() > 0){
+					productName = productName + "," + forInvtListType.getGdsNm();
+				}else{
+					productName = forInvtListType.getGdsNm();
+				}
+			}
+			if(!hsNo.contains(forInvtListType.getGdecd())){
+				if(hsNo.trim().length() > 0){
+					hsNo = hsNo + "," + forInvtListType.getGdecd();
+				}else{
+					hsNo = forInvtListType.getGdecd();
+				}
+			}
 			BisPreEntryInfo bisPreEntryInfo = new BisPreEntryInfo();
 			bisPreEntryInfo.setForId(linkId);
 			bisPreEntryInfo.setXh(forInvtListType.getGdsSeqno());//序号
@@ -561,6 +563,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			if(forInvtListType.getDclQty() == null || forInvtListType.getDclQty().trim().length() == 0){
 				bisPreEntryInfo.setSbsl(Double.parseDouble("0"));//申报数量
 			}else{
+				price = price + Double.parseDouble(forInvtListType.getDclQty());
 				bisPreEntryInfo.setSbsl(Double.parseDouble(forInvtListType.getDclQty()));//申报数量
 			}
 			if(forInvtListType.getLawfQty() == null || forInvtListType.getLawfQty().trim().length() == 0){
@@ -596,6 +599,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			if(forInvtListType.getNetWt() == null || forInvtListType.getNetWt().trim().length() == 0){
 				bisPreEntryInfo.setJz(Double.parseDouble("0"));//净重
 			}else{
+				netWeight = netWeight + Double.parseDouble(forInvtListType.getNetWt());
 				bisPreEntryInfo.setJz(Double.parseDouble(forInvtListType.getNetWt()));//净重
 			}
 			bisPreEntryInfo.setZmfs(forInvtListType.getLvyrlfModecd());//征免方式
@@ -607,6 +611,12 @@ public class PreEntryInvtQueryController extends BaseController {
 			bisPreEntryInfoList.add(bisPreEntryInfo);
 		}
 
+		if(invtListType.size() > 0){
+			bisPreEntry.setProductName(productName);//品名
+			bisPreEntry.setHsNo(hsNo);//商品编码
+			bisPreEntry.setPrice(price.toString());//件数
+			bisPreEntry.setNetWeight(netWeight);//重量
+		}
 		preEntryService.save(bisPreEntry);
 		if (bisPreEntryInfoList.size() > 0){
 			for (BisPreEntryInfo forBisPreEntryInfo:bisPreEntryInfoList) {
