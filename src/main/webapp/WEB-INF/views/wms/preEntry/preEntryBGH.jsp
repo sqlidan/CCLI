@@ -150,10 +150,24 @@ function gridDG(){
 		]],
 	    columns:[[
 			{field:'jlAudit',title:'初审人',sortable:true},
-			{field:'jlAuditTime',title:'初审时间',sortable:true},
+			{field:'jlAuditTime',title:'初审时间',sortable:true,
+				formatter : function(value, row, index) {
+					if(value !== undefined && value!== null && value.toString().length >= 10 ){
+						return value.toString().substring(0,10);
+					}else{
+						return '';
+					}
+				}},
 			{field:'jlRejectReason',title:'初审驳回原因',sortable:true},
 			{field:'zgAudit',title:'复审人',sortable:true},
-			{field:'zgAuditTime',title:'复审时间',sortable:true},
+			{field:'zgAuditTime',title:'复审时间',sortable:true,
+				formatter : function(value, row, index) {
+					if(value !== undefined && value!== null && value.toString().length >= 10 ){
+						return value.toString().substring(0,10);
+					}else{
+						return '';
+					}
+				}},
 			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
 			{field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
@@ -162,46 +176,53 @@ function gridDG(){
 			{field:'ctnCont',title:'箱量',sortable:true},
 			{field:'productName',title:'品名',sortable:true},
 			{field:'hsNo',title:'HS编码',sortable:true},
-			{field:'price',title:'件数',sortable:true},
-			{field:'netWeight',title:'重量',sortable:true},
+			{field:'price',title:'重量',sortable:true},//件数
+			// {field:'netWeight',title:'重量',sortable:true},
 			{field:'consignee',title:'收货人',sortable:true},
 			{field:'consignor',title:'发货人',sortable:true},
 			{field:'contryOragin',title:'原产国',sortable:true},
-			{field:'seqNo',title:'通关一点通编号',sortable:true},
+			// {field:'seqNo',title:'通关一点通编号',sortable:true},
 			{field:'checkListNo',title:'核注清单号',sortable:true},
 			{field:'cdNum',title:'报关单号',sortable:true},
-			{field:'remark',title:'备注',sortable:true},
+			// {field:'remark',title:'备注',sortable:true},
 			{field:'cdBy',title:'报关人',sortable:true},
 			{field:'cdTime',title:'报关时间',sortable:true},
-			{field:'upAndDown',title:'是否上传报关单',sortable:true,
-				formatter : function(value, row, index) {
-					if(value == '0'){
-						return "未上传";
-					}
-					if(value == '1'){
-						return "已上传";
-					}
-					if(value == '2'){
-						return "已下载";
-					}
-				}},
-			{field:'upFileName',title:'文件名称',sortable:true},
-			{field:'upBy',title:'上传人',sortable:true},
-			{field:'upTime',title:'上传时间',sortable:true},
-			{field:'upAndDown',title:'上传/下载',sortable:true,
-				formatter : function(value, row, index) {
-					if(value == '0'){
-						return "未上传";
-					}
-					if(value == '1'){
-						return "已上传";
-					}
-					if(value == '2'){
-						return "已下载";
-					}
-				}},
+			// {field:'upAndDown',title:'是否上传报关单',sortable:true,
+			// 	formatter : function(value, row, index) {
+			// 		if(value == '0'){
+			// 			return "未上传";
+			// 		}
+			// 		if(value == '1'){
+			// 			return "已上传";
+			// 		}
+			// 		if(value == '2'){
+			// 			return "已下载";
+			// 		}
+			// 	}},
+			// {field:'upFileName',title:'文件名称',sortable:true},
+			// {field:'upBy',title:'上传人',sortable:true},
+			// {field:'upTime',title:'上传时间',sortable:true},
+			// {field:'upAndDown',title:'上传/下载',sortable:true,
+			// 	formatter : function(value, row, index) {
+			// 		if(value == '0'){
+			// 			return "未上传";
+			// 		}
+			// 		if(value == '1'){
+			// 			return "已上传";
+			// 		}
+			// 		if(value == '2'){
+			// 			return "已下载";
+			// 		}
+			// 	}},
 			{field:'createBy',title:'创建人',sortable:true},
-			{field:'createTime',title:'创建时间',sortable:true},
+			{field:'createTime',title:'创建时间',sortable:true,
+				formatter : function(value, row, index) {
+					if(value !== undefined && value!== null && value.toString().length >= 10 ){
+						return value.toString().substring(0,10);
+					}else{
+						return '';
+					}
+				}},
 			// {field:'updateBy',title:'修改人',sortable:true},
 			// {field:'updateTime',title:'修改时间',sortable:true},
 	    ]],

@@ -119,7 +119,22 @@ public class ApprController extends BaseController {
 			if("2".equals(apprheadList.get(0).getIoType())){
 				if(apprInfoList!=null && apprInfoList.size() > 1){//多个
 					String linkId = apprheadList.get(0).getLinkId();
+//					//TODO 逻辑待定
+//					List<BisOutStockInfo> outStockInfos = new ArrayList<BisOutStockInfo>();
+//					outStockInfos = outStockInfoService.getList(linkId);
+//					if(outStockInfos!=null && outStockInfos.size() >0) {
+//						for (BisOutStockInfo forBisOutStockInfo : outStockInfos) {
+//							for (ApprInfo forApprInfo : apprInfoList) {
+//								if (forApprInfo.getgName().equals(forApprInfoIn.getgName())) {
+//									forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
+//									forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
+//								}
+//								apprInfoService.merge(forApprInfo);
+//							}
+//						}
+//					}
 
+					//原逻辑-依据联系单获取提单号，依据提单号获取入库申请单及明细
 					List<BisOutStockInfo> outStockInfos = new ArrayList<BisOutStockInfo>();
 					BisOutStockInfo outStockInfo = new BisOutStockInfo();
 					outStockInfo.setOutLinkId(linkId);

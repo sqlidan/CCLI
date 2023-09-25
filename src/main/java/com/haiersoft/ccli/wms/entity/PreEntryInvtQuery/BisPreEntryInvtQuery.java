@@ -57,6 +57,16 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "ORDER_TIME")
 	private Date orderTime;
+	@Column(name = "TD_NO")
+	private String tdNo;
+
+	public String getTdNo() {
+		return tdNo;
+	}
+
+	public void setTdNo(String tdNo) {
+		this.tdNo = tdNo;
+	}
 
 	public Date getOrderTime() {
 		return orderTime;

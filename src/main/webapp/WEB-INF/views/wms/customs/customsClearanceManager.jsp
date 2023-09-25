@@ -189,32 +189,33 @@
 				{field:'CUSTOMS_DECLARATION_NUMBER',title:'报关单号',sortable:true,width:20},
 				{field:'CONTRY_ORAGIN',title:'原产国',sortable:true,width:20},
 				{field:'ACCOUNT_BOOK',title:'账册商品序号',sortable:true,width:20},
-				{field:'NUM',title:'数量',sortable:true,width:20},
-				{field:'NET_WEIGHT',title:'净重',sortable:true,width:20},
-				{field:'GROSS_WEIGHT',title:'毛重',sortable:true,width:20},
+				{field:'NUM',title:'重量',sortable:true,width:20},//数量
+				// {field:'NET_WEIGHT',title:'净重',sortable:true,width:20},
+				// {field:'GROSS_WEIGHT',title:'毛重',sortable:true,width:20},
 				{field:'MONEY',title:'金额',sortable:true,width:20},
 				{field:'CURRENCY_VALUE',title:'币制',sortable:true,width:20,
 					formatter : function(value, row, index) {
-						if(value == '1'){
-							return "美元";
-						}
-						if(value == '2'){
-							return "日元";
-						}
-						if(value == '3'){
-							return "欧元";
-						}
-						if(value == '4'){
-							return "英镑";
-						}
-						if(value == '0'){
-							return "人民币";
-						}
+						return "美元";
+						// if(value == '1'){
+						// 	return "美元";
+						// }
+						// if(value == '2'){
+						// 	return "日元";
+						// }
+						// if(value == '3'){
+						// 	return "欧元";
+						// }
+						// if(value == '4'){
+						// 	return "英镑";
+						// }
+						// if(value == '0'){
+						// 	return "人民币";
+						// }
 					}},
 				{field:'OPERATOR',title:'创建人',sortable:true,width:20},
 				{field:'OPERATE_TIME',title:'创建日期',sortable:true,width:20},
-				{field:'EXAMINE_PERSON',title:'审核人',sortable:true,width:20},
-				{field:'EXAMINE_TIME',title:'审核日期',sortable:true,width:20,align:'center'},
+				// {field:'EXAMINE_PERSON',title:'审核人',sortable:true,width:20},
+				// {field:'EXAMINE_TIME',title:'审核日期',sortable:true,width:20,align:'center'},
 			]],
 			/* onClickRow:function(rowIndex, rowData){
                 info(rowData.id);

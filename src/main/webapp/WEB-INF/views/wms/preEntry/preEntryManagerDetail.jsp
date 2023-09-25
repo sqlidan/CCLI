@@ -99,11 +99,11 @@
 					</td>
 					<td style="text-align:right;">录入日期</td>
 					<td>
-						<input id="LRRQ" name="LRRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${date}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
+						<input id="LRRQ" name="LRRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${inputTime}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 					<td style="text-align:right;">清单申报日期</td>
 					<td>
-						<input id="QDSBRQ" name="QDSBRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${date}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
+						<input id="QDSBRQ" name="QDSBRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${invtDclTime}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 				</tr>
 				<tr>
@@ -260,7 +260,7 @@
 				<tr>
 					<td style="text-align:right;">报关单申报日期</td>
 					<td>
-						<input id="BGDSBRQ" name="BGDSBRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${date}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
+						<input id="BGDSBRQ" name="BGDSBRQ" class="easyui-my97" data-options="width:180" datefmt="yyyy-MM-dd HH:mm:ss"  value="<fmt:formatDate value="${entryDclTime}" pattern="yyyy-MM-dd HH:mm:ss" />" disabled/>
 					</td>
 					<td style="text-align:right;">备注</td>
 					<td>

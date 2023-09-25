@@ -111,19 +111,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			InvtHeadTypeVo invtHeadTypeVo = new InvtHeadTypeVo();
 			BeanUtils.copyProperties(invtHeadType,invtHeadTypeVo);
 			invtHeadTypeVo.setId(forBisPreEntryInvtQuery.getId());
-			if(invtHeadTypeVo.getEtpsInnerInvtNo()!= null && invtHeadTypeVo.getEtpsInnerInvtNo().trim().length() >0){
-				String etpsInnerInvtNo = invtHeadTypeVo.getEtpsInnerInvtNo();
-				if(etpsInnerInvtNo.contains("入库")){
-					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("入库","");
-				}
-				if(etpsInnerInvtNo.contains("出库")){
-					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("出库","");
-				}
-				if(etpsInnerInvtNo.contains("入库出库")){
-					etpsInnerInvtNo = etpsInnerInvtNo.replaceAll("入库出库","");
-				}
-				invtHeadTypeVo.setEtpsInnerInvtNo(etpsInnerInvtNo);
-			}
+			invtHeadTypeVo.setEtpsInnerInvtNo(forBisPreEntryInvtQuery.getTdNo());
 			invtHeadTypeVo.setListStat(forBisPreEntryInvtQuery.getListStat().replaceAll("\"","").replaceAll("'",""));
 
 			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
@@ -179,21 +167,54 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntryInvtQueryList = preEntryInvtQueryService.getListBySynchronization();
 		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
 			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
-				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
-					//查询
-					String result = null;
-					try {
-						result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
-					} catch (IOException | ClassNotFoundException e) {
-						logger.info("批量核注清单同步异常:"+e.getMessage());
-						e.printStackTrace();
-					}
-					if ("success".equals(result)){
-						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 同步成功");
-					}else{
-						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
-					}
+//				//整理提单号
+//				List<InvtListType> invtListType = new ArrayList<>();
+//				try {
+//					invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				} catch (ClassNotFoundException e) {
+//					e.printStackTrace();
+//				}
+//				String tdNo = "";
+//				for (InvtListType forInvtListType:invtListType) {
+//					if(tdNo.trim().length() == 0){
+//						tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
+//					}else{
+//						if (!tdNo.contains(forInvtListType.getGdsMtno())){
+//							tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
+//						}
+//					}
+//				}
+//				if(tdNo.contains(",")){
+//					tdNo = tdNo.substring(0,tdNo.length()-1);
+//				}
+//				forBisPreEntryInvtQuery.setTdNo(tdNo);
+				forBisPreEntryInvtQuery.setSynchronization("1");
+				preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
+				try {
+					createInfo(forBisPreEntryInvtQuery);
+//					createPreEntry(forBisPreEntryInvtQuery);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
 				}
+//				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+//					//查询
+//					String result = null;
+//					try {
+//						result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
+//					} catch (IOException | ClassNotFoundException e) {
+//						logger.info("批量核注清单同步异常:"+e.getMessage());
+//						e.printStackTrace();
+//					}
+//					if ("success".equals(result)){
+//						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 同步成功");
+//					}else{
+//						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+//					}
+//				}
 			}
 		}
 		return msg;
@@ -456,6 +477,8 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntry.setZgAuditTime(bisPreEntry.getUpdateTime());
 		bisPreEntry.setUpAndDown("0");
 		bisPreEntry.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
+		bisPreEntry.setDeclarationUnit(invtHeadType.getDclEtpsNm());//报关公司
+		bisPreEntry.setBillNum(bisPreEntryInvtQuery.getTdNo());//提单号
 		bisPreEntry.setCdNum(invtHeadType.getEntryNo() == null ? "" : invtHeadType.getEntryNo());//报关单号
 		bisPreEntry.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
 		bisPreEntry.setBillNum(invtHeadType.getApplyNo() == null ? "" : invtHeadType.getApplyNo().trim());//提单号
@@ -655,10 +678,13 @@ public class PreEntryInvtQueryController extends BaseController {
 				userCode = StringUtils.lpadStringLeft(3, userCode);
 			}
 		}
-		String linkId = "F" + userCode + StringUtils.timeToString();
+		String linkId = "F" + "YZH" + StringUtils.timeToString();
 		//添加台账
 		BisCustomsClearanceList bisCustoms = new BisCustomsClearanceList();
 		bisCustoms.setCdNum(linkId);//业务单号
+		bisCustoms.setBillNum(bisPreEntryInvtQuery.getTdNo());//提单号
+		bisCustoms.setContryOragin(invtListType.get(0).getNatcd());//原产国
+		bisCustoms.setCustomsDeclarationNumber(invtHeadType.getEntryNo() == null ? "" : invtHeadType.getEntryNo());//报关单号
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		if(invtHeadType.getInvtDclTime() != null && invtHeadType.getInvtDclTime().trim().length() > 0){
@@ -670,7 +696,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			}
 			bisCustoms.setDeclareTime(declareTime);//申报日期
 		}
-		bisCustoms.setBillNum(invtHeadType.getApplyNo() == null ? "" : invtHeadType.getApplyNo().trim());//提单号
+		bisCustoms.setBillNum(bisPreEntryInvtQuery.getTdNo());//提单号
 		//服务项目
 		if (invtHeadType.getImpexpMarkcd() == null) {
 			bisCustoms.setServiceProject("0");//报进
@@ -700,8 +726,7 @@ public class PreEntryInvtQueryController extends BaseController {
 		} else {
 			bisCustoms.setContryDeparture(null);//起运国
 		}
-		bisCustoms.setCustomsDeclarationNumber(invtHeadType.getEntryNo() == null ? "" : invtHeadType.getEntryNo());//报关单号
-		bisCustoms.setContryOragin("");//原产国
+
 		bisCustoms.setAuditingState("3");//审核通过
 		bisCustoms.setClientId(null);//客户ID
 		bisCustoms.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
@@ -753,84 +778,84 @@ public class PreEntryInvtQueryController extends BaseController {
 			bisCustomsClearanceInfo.setIfWoodenPacking("");//有无木质包装
 			bisCustomsClearanceInfo.setWoodenNo("");//木托编号
 			customsClearanceInfoSService.save(bisCustomsClearanceInfo);
-
-			//通关底账
-			if ("I".equals(invtHeadType.getImpexpMarkcd())) {//进口(报进)
-				try {
-					//只需要添加一条底账信息即可
-					BaseBoundedList bounded = new BaseBoundedList();
-					bounded.setClientId(bisCustoms.getClientId());//客户ID
-					bounded.setClientName(bisCustoms.getClientName());//客户名称
-					bounded.setBillNum(bisCustoms.getBillNum());//提单号
-					bounded.setCdNum(bisCustoms.getCustomsDeclarationNumber());//报关单号
-					bounded.setCtnNum(null);//MR/集装箱号
-					bounded.setItemName(null);//货物描述
-					bounded.setStorageDate(null);//入库时间
-					bounded.setPiece(0);//件数
-					bounded.setNetWeight(0.00);//总净值
-					bounded.setCustomerServiceName(user.getName());//所属客服
-					bounded.setHsCode(forInvtListType.getGdecd());//HS编码
-					bounded.setHsItemname(bisCustomsClearanceInfo.getCommodityName());//海关品名
-					bounded.setAccountBook(bisCustomsClearanceInfo.getAccountBook());//账册商品序号
-					bounded.setHsQty(Double.parseDouble(bisCustomsClearanceInfo.getGrossWeight().toString()));//海关库存重量
-					bounded.setTypeSize(bisCustomsClearanceInfo.getSpecification());//规格
-					bounded.setCargoLocation(null);//库位
-					bounded.setCreatedTime(new Date());//创建时间
-					bounded.setUpdatedTime(new Date());//修改时间
-					bounded.setCargoArea(null);//库区
-					bounded.setDclQty(Double.parseDouble(bisCustomsClearanceInfo.getNum().toString()));//申报重量
-					bounded.setDclUnit(forInvtListType.getDclUnitcd() == null ? "" : forInvtListType.getDclUnitcd());//申报计量单位
-					logger.info("新增通关底账信息=> " + JSON.toJSONString(bounded));
-					baseBoundedListService.save(bounded);
-					logger.info("新增通关底账信息成功");
-				} catch (Exception e) {
-					logger.error("新增通关底账信息失败=> " + e.getMessage());
-				}
-			}else if ("E".equals(invtHeadType.getImpexpMarkcd())) {
-				//出区
-				BaseBoundedList bounded = new BaseBoundedList();
-				bounded = baseBoundedListService.find("accountBook",forInvtListType.getPutrecSeqno());
-				if(bounded!=null && bounded.getDclQty() != null){
-					//有数据扣减
-					Double dclQtyOrg = bounded.getDclQty();
-					bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(forInvtListType.getDclQty()));//申报重量
-					bounded.setUpdatedTime(new Date());
-					logger.info("修改通关底账信息==>(" + dclQtyOrg.toString() + "==>" + bounded.getDclQty() + ") " + JSON.toJSONString(bounded));
-					baseBoundedListService.merge(bounded);
-					logger.info("修改通关底账信息成功");
-				}else{
-					try {
-						//没数据新增为负数
-						BaseBoundedList insertounded = new BaseBoundedList();
-						insertounded.setClientId(bisCustoms.getClientId());//客户ID
-						insertounded.setClientName(bisCustoms.getClientName());//客户名称
-						insertounded.setBillNum(bisCustoms.getBillNum());//提单号
-						insertounded.setCdNum(bisCustoms.getCustomsDeclarationNumber());//报关单号
-						insertounded.setCtnNum(null);//MR/集装箱号
-						insertounded.setItemName(null);//货物描述
-						insertounded.setStorageDate(null);//入库时间
-						insertounded.setPiece(0);//件数
-						insertounded.setNetWeight(0.00);//总净值
-						insertounded.setCustomerServiceName(user.getName());//所属客服
-						insertounded.setHsCode(forInvtListType.getGdecd());//HS编码
-						insertounded.setHsItemname(bisCustomsClearanceInfo.getCommodityName());//海关品名
-						insertounded.setAccountBook(bisCustomsClearanceInfo.getAccountBook());//账册商品序号
-						insertounded.setHsQty(Double.parseDouble(bisCustomsClearanceInfo.getGrossWeight().toString()));//海关库存重量
-						insertounded.setTypeSize(bisCustomsClearanceInfo.getSpecification());//规格
-						insertounded.setCargoLocation(null);//库位
-						insertounded.setCreatedTime(new Date());//创建时间
-						insertounded.setUpdatedTime(new Date());//修改时间
-						insertounded.setCargoArea(null);//库区
-						insertounded.setDclQty(Double.parseDouble("0") - Double.parseDouble(forInvtListType.getDclQty()));//申报重量
-						insertounded.setDclUnit(forInvtListType.getDclUnitcd() == null ? "" : forInvtListType.getDclUnitcd());//申报计量单位
-						logger.info("新增通关底账信息==> " + JSON.toJSONString(insertounded));
-						baseBoundedListService.save(insertounded);
-						logger.info("新增通关底账信息成功");
-					} catch (Exception e) {
-						logger.error("新增通关底账信息失败==> " + e.getMessage());
-					}
-				}
-			}
+			logger.info("新增通关台账信息成功");
+//			//通关底账
+//			if ("I".equals(invtHeadType.getImpexpMarkcd())) {//进口(报进)
+//				try {
+//					//只需要添加一条底账信息即可
+//					BaseBoundedList bounded = new BaseBoundedList();
+//					bounded.setClientId(bisCustoms.getClientId());//客户ID
+//					bounded.setClientName(bisCustoms.getClientName());//客户名称
+//					bounded.setBillNum(bisCustoms.getBillNum());//提单号
+//					bounded.setCdNum(bisCustoms.getCustomsDeclarationNumber());//报关单号
+//					bounded.setCtnNum(null);//MR/集装箱号
+//					bounded.setItemName(null);//货物描述
+//					bounded.setStorageDate(null);//入库时间
+//					bounded.setPiece(0);//件数
+//					bounded.setNetWeight(0.00);//总净值
+//					bounded.setCustomerServiceName(user.getName());//所属客服
+//					bounded.setHsCode(forInvtListType.getGdecd());//HS编码
+//					bounded.setHsItemname(bisCustomsClearanceInfo.getCommodityName());//海关品名
+//					bounded.setAccountBook(bisCustomsClearanceInfo.getAccountBook());//账册商品序号
+//					bounded.setHsQty(Double.parseDouble(bisCustomsClearanceInfo.getGrossWeight().toString()));//海关库存重量
+//					bounded.setTypeSize(bisCustomsClearanceInfo.getSpecification());//规格
+//					bounded.setCargoLocation(null);//库位
+//					bounded.setCreatedTime(new Date());//创建时间
+//					bounded.setUpdatedTime(new Date());//修改时间
+//					bounded.setCargoArea(null);//库区
+//					bounded.setDclQty(Double.parseDouble(bisCustomsClearanceInfo.getNum().toString()));//申报重量
+//					bounded.setDclUnit(forInvtListType.getDclUnitcd() == null ? "" : forInvtListType.getDclUnitcd());//申报计量单位
+//					logger.info("新增通关底账信息=> " + JSON.toJSONString(bounded));
+//					baseBoundedListService.save(bounded);
+//					logger.info("新增通关底账信息成功");
+//				} catch (Exception e) {
+//					logger.error("新增通关底账信息失败=> " + e.getMessage());
+//				}
+//			}else if ("E".equals(invtHeadType.getImpexpMarkcd())) {
+//				//出区
+//				BaseBoundedList bounded = new BaseBoundedList();
+//				bounded = baseBoundedListService.find("accountBook",forInvtListType.getPutrecSeqno());
+//				if(bounded!=null && bounded.getDclQty() != null){
+//					//有数据扣减
+//					Double dclQtyOrg = bounded.getDclQty();
+//					bounded.setDclQty(bounded.getDclQty() - Double.parseDouble(forInvtListType.getDclQty()));//申报重量
+//					bounded.setUpdatedTime(new Date());
+//					logger.info("修改通关底账信息==>(" + dclQtyOrg.toString() + "==>" + bounded.getDclQty() + ") " + JSON.toJSONString(bounded));
+//					baseBoundedListService.merge(bounded);
+//					logger.info("修改通关底账信息成功");
+//				}else{
+//					try {
+//						//没数据新增为负数
+//						BaseBoundedList insertounded = new BaseBoundedList();
+//						insertounded.setClientId(bisCustoms.getClientId());//客户ID
+//						insertounded.setClientName(bisCustoms.getClientName());//客户名称
+//						insertounded.setBillNum(bisCustoms.getBillNum());//提单号
+//						insertounded.setCdNum(bisCustoms.getCustomsDeclarationNumber());//报关单号
+//						insertounded.setCtnNum(null);//MR/集装箱号
+//						insertounded.setItemName(null);//货物描述
+//						insertounded.setStorageDate(null);//入库时间
+//						insertounded.setPiece(0);//件数
+//						insertounded.setNetWeight(0.00);//总净值
+//						insertounded.setCustomerServiceName(user.getName());//所属客服
+//						insertounded.setHsCode(forInvtListType.getGdecd());//HS编码
+//						insertounded.setHsItemname(bisCustomsClearanceInfo.getCommodityName());//海关品名
+//						insertounded.setAccountBook(bisCustomsClearanceInfo.getAccountBook());//账册商品序号
+//						insertounded.setHsQty(Double.parseDouble(bisCustomsClearanceInfo.getGrossWeight().toString()));//海关库存重量
+//						insertounded.setTypeSize(bisCustomsClearanceInfo.getSpecification());//规格
+//						insertounded.setCargoLocation(null);//库位
+//						insertounded.setCreatedTime(new Date());//创建时间
+//						insertounded.setUpdatedTime(new Date());//修改时间
+//						insertounded.setCargoArea(null);//库区
+//						insertounded.setDclQty(Double.parseDouble("0") - Double.parseDouble(forInvtListType.getDclQty()));//申报重量
+//						insertounded.setDclUnit(forInvtListType.getDclUnitcd() == null ? "" : forInvtListType.getDclUnitcd());//申报计量单位
+//						logger.info("新增通关底账信息==> " + JSON.toJSONString(insertounded));
+//						baseBoundedListService.save(insertounded);
+//						logger.info("新增通关底账信息成功");
+//					} catch (Exception e) {
+//						logger.error("新增通关底账信息失败==> " + e.getMessage());
+//					}
+//				}
+//			}
 		}
 		return "success";
 	}
@@ -847,6 +872,7 @@ public class PreEntryInvtQueryController extends BaseController {
 		model.addAttribute("ID", bisPreEntryInvtQuery.getId());
 		if(bisPreEntryInvtQuery.getInvtHeadType() != null){
 			InvtHeadType invtHeadType = JSON.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+			invtHeadType.setEtpsInnerInvtNo(bisPreEntryInvtQuery.getTdNo());
 			model.addAttribute("bisPreEntry", invtHeadType);
 			SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
@@ -870,6 +896,9 @@ public class PreEntryInvtQueryController extends BaseController {
 		List<InvtListType> invtListType = new ArrayList<>();
 		if(bisPreEntryInvtQueryTemp.getInvtListType() != null){
 			invtListType = JSON.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQueryTemp.getInvtListType())),InvtListType.class);
+			for (InvtListType forInvtListType:invtListType) {
+				forInvtListType.setGdsMtno(bisPreEntryInvtQueryTemp.getTdNo());
+			}
 			page.setResult(invtListType);
 			page.setTotalCount(invtListType.size());
 		}else{

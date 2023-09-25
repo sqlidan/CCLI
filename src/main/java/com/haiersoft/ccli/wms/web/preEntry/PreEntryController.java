@@ -453,10 +453,20 @@ public class PreEntryController extends BaseController {
     @RequestMapping(value = "updateCK/{forId}", method = RequestMethod.GET)
     public String updateCK(Model model, @PathVariable("forId") String forId) {
         BisPreEntry bisPreEntry = preEntryService.get(forId);
+        bisPreEntry.setQYNBBH(bisPreEntry.getBillNum());
         model.addAttribute("bisPreEntry", bisPreEntry);
         BisPreEntryInfo bisPreEntryInfo = new BisPreEntryInfo();
         bisPreEntryInfo.setForId(forId);
         model.addAttribute("bisPreEntryInfo", bisPreEntryInfo);
+        if(bisPreEntry.getCreateTime()!=null && bisPreEntry.getCreateTime().toString().trim().length() >0){
+            model.addAttribute("inputTime", bisPreEntry.getCreateTime());//录入日期
+        }
+        if(bisPreEntry.getQDSBRQ()!=null && bisPreEntry.getQDSBRQ().toString().trim().length() >0){
+            model.addAttribute("invtDclTime", bisPreEntry.getQDSBRQ());//清单申报日期
+        }
+        if(bisPreEntry.getBGDSBRQ()!=null && bisPreEntry.getBGDSBRQ().toString().trim().length() >0){
+            model.addAttribute("entryDclTime", bisPreEntry.getBGDSBRQ());//报关单申报日期
+        }
         model.addAttribute("date", new Date());
         return "wms/preEntry/preEntryManagerDetail";
     }

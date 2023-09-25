@@ -274,10 +274,10 @@ function gridDG(){
 					}
 					return lbelStr;
 				}},
-			{field:'gdsSeqno',title:'商品序号',sortable:true},
-			{field:'dclQty',title:'申报数量',sortable:true},
-			{field:'corrEntryDclEtpsNm',title:'申报单位',sortable:true},
-			{field:'gdsMtno',title:'商品料号',sortable:true},
+			// {field:'gdsSeqno',title:'商品序号',sortable:true},
+			// {field:'dclQty',title:'申报数量',sortable:true},
+			// {field:'corrEntryDclEtpsNm',title:'申报单位',sortable:true},
+			// {field:'gdsMtno',title:'商品料号',sortable:true},
 			{field:'bizopEtpsno',title:'经营企业编号',sortable:true},
 			{field:'dclEtpsNm',title:'申报企业名称',sortable:true},
 			{field:'etpsInnerInvtNo',title:'企业内部编号',sortable:true},
