@@ -188,7 +188,7 @@
 				{field:'BILL_NUM',title:'提单号',sortable:true,width:20},
 				{field:'CUSTOMS_DECLARATION_NUMBER',title:'报关单号',sortable:true,width:20},
 				{field:'CONTRY_ORAGIN',title:'原产国',sortable:true,width:20},
-				{field:'ACCOUNT_BOOK',title:'账册商品序号',sortable:true,width:20},
+				// {field:'ACCOUNT_BOOK',title:'账册商品序号',sortable:true,width:20},
 				{field:'NUM',title:'重量',sortable:true,width:20},//数量
 				// {field:'NET_WEIGHT',title:'净重',sortable:true,width:20},
 				// {field:'GROSS_WEIGHT',title:'毛重',sortable:true,width:20},

@@ -33,9 +33,9 @@ public class CustomsClearanceDao extends HibernateDao<BisCustomsClearance, Strin
 		buffer.append("SELECT a.*,t.* FROM BIS_CUSTOMS_CLEARANCE a");
 		buffer.append(" LEFT JOIN (");
 		buffer.append("SELECT sum(bcci.NUM) AS NUM,sum(bcci.NET_WEIGHT) AS NET_WEIGHT, sum(bcci.GROSS_WEIGHT) AS GROSS_WEIGHT");
-		buffer.append(", sum(bcci.MONEY) AS MONEY, min(bcci.CURRENCY_VALUE) AS CURRENCY_VALUE,bcci.CUS_ID,bcci.ACCOUNT_BOOK, min(bcci.WOODEN_NO) AS WOODEN_NO");
+		buffer.append(", sum(bcci.MONEY) AS MONEY, min(bcci.CURRENCY_VALUE) AS CURRENCY_VALUE,bcci.CUS_ID, min(bcci.WOODEN_NO) AS WOODEN_NO");
 		buffer.append(" FROM BIS_CUSTOMS_CLEARANCE_INFO bcci");
-		buffer.append(" GROUP BY bcci.CUS_ID,bcci.ACCOUNT_BOOK");
+		buffer.append(" GROUP BY bcci.CUS_ID");
 		buffer.append(") t");
 		buffer.append(" ON T.CUS_ID = a.CD_NUM");
 		buffer.append(" where 1=1  ");
