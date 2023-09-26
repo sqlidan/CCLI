@@ -146,7 +146,7 @@ public class PreEntryInvtQueryController extends BaseController {
 		String result = null;
 		try {
 			result = invtQuery(bondInvtNo,false);
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException | ParseException e) {
 			logger.info("单个核注清单查询异常:"+e.getMessage());
 			e.printStackTrace();
 		}
@@ -167,61 +167,32 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntryInvtQueryList = preEntryInvtQueryService.getListBySynchronization();
 		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
 			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
-//				//整理提单号
-//				List<InvtListType> invtListType = new ArrayList<>();
-//				try {
-//					invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				} catch (ClassNotFoundException e) {
-//					e.printStackTrace();
-//				}
-//				String tdNo = "";
-//				for (InvtListType forInvtListType:invtListType) {
-//					if(tdNo.trim().length() == 0){
-//						tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
-//					}else{
-//						if (!tdNo.contains(forInvtListType.getGdsMtno())){
-//							tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
-//						}
-//					}
-//				}
-//				if(tdNo.contains(",")){
-//					tdNo = tdNo.substring(0,tdNo.length()-1);
-//				}
-//				forBisPreEntryInvtQuery.setTdNo(tdNo);
-				forBisPreEntryInvtQuery.setSynchronization("1");
-				preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
-				try {
-					createInfo(forBisPreEntryInvtQuery);
-//					createPreEntry(forBisPreEntryInvtQuery);
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
+				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+					//查询
+					String result = null;
+					try {
+						result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
+					} catch (IOException | ClassNotFoundException | ParseException e) {
+						logger.info("批量核注清单同步异常:"+e.getMessage());
+						e.printStackTrace();
+					}
+					if ("success".equals(result)){
+						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 同步成功");
+					}else{
+						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+					}
 				}
-//				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
-//					//查询
-//					String result = null;
-//					try {
-//						result = invtQuery(forBisPreEntryInvtQuery.getBondInvtNo(),true);
-//					} catch (IOException | ClassNotFoundException e) {
-//						logger.info("批量核注清单同步异常:"+e.getMessage());
-//						e.printStackTrace();
-//					}
-//					if ("success".equals(result)){
-//						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 同步成功");
-//					}else{
-//						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
-//					}
-//				}
 			}
 		}
 		return msg;
 	}
 
 	//查询核注清单信息
-	public String invtQuery(String bondInvtNo,Boolean createInfo) throws IOException, ClassNotFoundException {
+	public String invtQuery(String bondInvtNo,Boolean createInfo) throws IOException, ClassNotFoundException, ParseException {
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+		User user = UserUtil.getCurrentUser();
+
 		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
 
 		//查询保税核注清单列表
@@ -245,7 +216,6 @@ public class PreEntryInvtQueryController extends BaseController {
 			if(invtQueryListResponseResultLists != null && invtQueryListResponseResultLists.size() >0){
 				for (InvtQueryListResponseResultList forInvtQueryListResponseResultList:invtQueryListResponseResultLists) {
 					BisPreEntryInvtQuery insertBisPreEntryInvtQuery = new BisPreEntryInvtQuery();
-					insertBisPreEntryInvtQuery.setBondInvtNo(bondInvtNo);
 
 					//查询保税核注清单详细
 					NemsCommonSeqNoRequest nemsCommonSeqNoRequest = new NemsCommonSeqNoRequest();
@@ -282,8 +252,33 @@ public class PreEntryInvtQueryController extends BaseController {
 		}
 		if(bisPreEntryInvtQueryList.size() > 0){
 			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+				//获取核注清单数据
+				InvtHeadType invtHeadType = new InvtHeadType();
+				invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())), InvtHeadType.class);
+				//整理提单号
+				List<InvtListType> invtListType = new ArrayList<>();
+				invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+				String tdNo = "";
+				for (InvtListType forInvtListType:invtListType) {
+					if(tdNo.trim().length() == 0){
+						tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
+					}else{
+						if (!tdNo.contains(forInvtListType.getGdsMtno())){
+							tdNo = tdNo + forInvtListType.getGdsMtno() + ",";
+						}
+					}
+				}
+				if(tdNo.contains(",")){
+					tdNo = tdNo.substring(0,tdNo.length()-1);
+				}
+				forBisPreEntryInvtQuery.setBondInvtNo(invtHeadType.getBondInvtNo());
+				forBisPreEntryInvtQuery.setTdNo(tdNo);
+				forBisPreEntryInvtQuery.setOrderTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
+				forBisPreEntryInvtQuery.setSynchronization("1");
+				forBisPreEntryInvtQuery.setCreatePreEntry("1");
+
 				List<BisPreEntryInvtQuery> queryBisPreEntryInvtQueryList = new ArrayList<>();
-				queryBisPreEntryInvtQueryList = preEntryInvtQueryService.getList(bondInvtNo);
+				queryBisPreEntryInvtQueryList = preEntryInvtQueryService.getList(invtHeadType.getBondInvtNo());
 				if (queryBisPreEntryInvtQueryList!=null && queryBisPreEntryInvtQueryList.size() > 0){
 					for (int i = 0; i < queryBisPreEntryInvtQueryList.size(); i++) {
 						if(i == 0){
@@ -298,8 +293,10 @@ public class PreEntryInvtQueryController extends BaseController {
 							updateBisPreEntryInvtQuery.setListStat(forBisPreEntryInvtQuery.getListStat());
 							updateBisPreEntryInvtQuery.setOperCusRegCode(forBisPreEntryInvtQuery.getOperCusRegCode());
 							updateBisPreEntryInvtQuery.setSysId(forBisPreEntryInvtQuery.getSysId());
-							updateBisPreEntryInvtQuery.setSynchronization("1");
-							User user = UserUtil.getCurrentUser();
+							updateBisPreEntryInvtQuery.setSynchronization(forBisPreEntryInvtQuery.getSynchronization());
+							updateBisPreEntryInvtQuery.setCreatePreEntry(forBisPreEntryInvtQuery.getCreatePreEntry());
+							updateBisPreEntryInvtQuery.setOrderTime(forBisPreEntryInvtQuery.getOrderTime());
+							updateBisPreEntryInvtQuery.setTdNo(forBisPreEntryInvtQuery.getTdNo());
 							updateBisPreEntryInvtQuery.setUpdateBy(user.getName());
 							updateBisPreEntryInvtQuery.setUpdateTime(new Date());
 							preEntryInvtQueryService.merge(updateBisPreEntryInvtQuery);
@@ -317,8 +314,6 @@ public class PreEntryInvtQueryController extends BaseController {
 						}
 					}
 				}else{
-					forBisPreEntryInvtQuery.setSynchronization("1");
-					User user = UserUtil.getCurrentUser();
 					forBisPreEntryInvtQuery.setCreateBy(user.getName());
 					forBisPreEntryInvtQuery.setCreateTime(new Date());
 					preEntryInvtQueryService.save(forBisPreEntryInvtQuery);
@@ -392,8 +387,6 @@ public class PreEntryInvtQueryController extends BaseController {
 	@RequestMapping(value="createPreEntry",method = RequestMethod.GET)
 	@ResponseBody
 	public String createPreEntry() {
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		String msg = "success";
 		//获取要同步的核注清单号
 		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
@@ -405,18 +398,15 @@ public class PreEntryInvtQueryController extends BaseController {
 					String result = null;
 					try {
 						result = createPreEntry(forBisPreEntryInvtQuery);
-						//获取核注清单数据
-						InvtHeadType invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())), InvtHeadType.class);
-						forBisPreEntryInvtQuery.setOrderTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 					} catch (IOException | ClassNotFoundException | ParseException e) {
 						logger.info("批量生成预报单异常:"+e.getMessage());
 						e.printStackTrace();
 					}
 					if ("success".equals(result)){
-						forBisPreEntryInvtQuery.setCreatePreEntry("1");
 						User user = UserUtil.getCurrentUser();
 						forBisPreEntryInvtQuery.setUpdateBy(user.getName());
 						forBisPreEntryInvtQuery.setUpdateTime(new Date());
+						forBisPreEntryInvtQuery.setCreatePreEntry("1");
 						preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
 						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 生成预报单成功");
 					}else{
@@ -451,7 +441,6 @@ public class PreEntryInvtQueryController extends BaseController {
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 
-//		String linkId = "FYZH" + StringUtils.timeToString();
 		String linkId = UUID.randomUUID().toString();
 		bisPreEntry.setForId(linkId);
 		bisPreEntry.setState("5");//状态 5-申报核注清单通过，状态为5
