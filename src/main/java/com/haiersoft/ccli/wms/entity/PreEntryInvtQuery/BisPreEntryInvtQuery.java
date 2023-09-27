@@ -53,12 +53,22 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@Column(name = "SYNCHRONIZATION")
 	private String synchronization;// 同步标识 0-未同步；1-已同步
 	@Column(name = "CREATE_PREENTRY")
-	private String createPreEntry;// 生成标识 0-未生成；1-已生成
+	private String createPreEntry;// 生成预报单标识 0-未生成；1-已生成
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "ORDER_TIME")
 	private Date orderTime;
 	@Column(name = "TD_NO")
 	private String tdNo;
+	@Column(name = "CREATE_CLEARANCE")
+	private String createClearance;// 生成台账标识 0-未生成；1-已生成
+
+	public String getCreateClearance() {
+		return createClearance;
+	}
+
+	public void setCreateClearance(String createClearance) {
+		this.createClearance = createClearance;
+	}
 
 	public String getTdNo() {
 		return tdNo;

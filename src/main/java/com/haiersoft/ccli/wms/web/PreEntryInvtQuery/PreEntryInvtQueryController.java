@@ -639,6 +639,41 @@ public class PreEntryInvtQueryController extends BaseController {
 	}
 
 //================================================================================================================================
+		//批量生成台账
+		@RequestMapping(value="createClearance",method = RequestMethod.GET)
+		@ResponseBody
+		public String createClearance() {
+			String msg = "success";
+			//获取要同步的核注清单号
+			List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+			bisPreEntryInvtQueryList = preEntryInvtQueryService.getListByCreateClearance();
+			if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
+				for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+					if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+						//查询
+						String result = null;
+						try {
+							result = createInfo(forBisPreEntryInvtQuery);
+						} catch (IOException | ClassNotFoundException e) {
+							logger.info("批量生成预报单异常:"+e.getMessage());
+							e.printStackTrace();
+						}
+						if ("success".equals(result)){
+							User user = UserUtil.getCurrentUser();
+							forBisPreEntryInvtQuery.setUpdateBy(user.getName());
+							forBisPreEntryInvtQuery.setUpdateTime(new Date());
+							forBisPreEntryInvtQuery.setCreateClearance("1");
+							preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
+							logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 生成预报单成功");
+						}else{
+							msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+						}
+					}
+				}
+			}
+			return msg;
+		}
+
 	//生成台账底账
 	public String createInfo(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException {
 		InvtHeadType invtHeadType = new InvtHeadType();

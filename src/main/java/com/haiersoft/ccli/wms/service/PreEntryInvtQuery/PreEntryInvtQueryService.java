@@ -41,4 +41,7 @@ public class PreEntryInvtQueryService extends BaseService<BisPreEntryInvtQuery, 
 	public List<BisPreEntryInvtQuery> getListByCreatePreEntry(){
 		return preEntryInvtQueryDao.findBy("createPreEntry", "0");
 	}
+	public List<BisPreEntryInvtQuery> getListByCreateClearance(){
+		return preEntryInvtQueryDao.findBy("createClearance", "0");
+	}
 }

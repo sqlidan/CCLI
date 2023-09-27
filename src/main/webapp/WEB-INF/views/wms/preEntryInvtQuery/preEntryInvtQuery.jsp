@@ -26,6 +26,10 @@
 				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createPreEntry()">批量生成预报单</a>
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
+			<shiro:hasPermission name="wms:preEntryInvtQuery:createClearance">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据</a>
+				<span class="toolbar-item dialog-tool-separator"></span>
+			</shiro:hasPermission>
         </div>
 	</div>
 </div>
@@ -340,6 +344,22 @@ function createPreEntry(){
 			$.ajax({
 				type:'get',
 				url:"${ctx}/wms/preEntryInvtQuery/createPreEntry",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}else{
+			return;
+		}
+	});
+}
+//批量生成台账
+function createClearance(){
+	parent.$.messager.confirm('提示', '确定批量生成台账信息吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/createClearance",
 				success: function(data){
 					successTip(data,dg);
 				},
