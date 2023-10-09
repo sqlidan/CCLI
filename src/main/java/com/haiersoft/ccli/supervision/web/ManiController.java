@@ -232,6 +232,16 @@ public class ManiController extends BaseController{
 	@RequestMapping(value = "apply/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public String applyData(HttpServletRequest request, @PathVariable("id") String id) throws IOException, ServiceException {
+		//TODO 临时作废 申报时海关会校验，如果没有库存让业务再去确认就好
+//		//2023-10-09 徐峥添加核放单申报之前校验是否入库到货确认逻辑
+//		ManiHead ihead = maniHeadService.get(id);
+//		if(ihead == null) {
+//			return "未找到对应的核放单";
+//		}
+//		if(ihead.getPassStatus()==null || !ihead.getPassStatus().equals("2")) {
+//			return "请先执行入库到货确认!";
+//		}
+
 		//根据linkId查询ManiHead
 		List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
 		filters.add(new PropertyFilter("EQS_id", id));

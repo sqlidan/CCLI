@@ -87,8 +87,23 @@ public class OutApprController extends BaseController {
 			apprHead.setCreateTime(new Date());
 
 			List<BisOutStockInfo> list = outStockInfoService.getList(apprHead.getLinkId());
+			//整合提单号，方便申请单中依据提单号关联入库联系单获取商品编号
+			if(list!=null && list.size() > 0){
+				String billNum ="";
+				for (BisOutStockInfo forBisOutStockInfo:list) {
+					if(forBisOutStockInfo.getBillNum()!=null && forBisOutStockInfo.getBillNum().trim().length() > 0){
+						if(!billNum.contains(forBisOutStockInfo.getBillNum())){
+							billNum = billNum + forBisOutStockInfo.getBillNum().trim() + ",";
+						}
+					}
+				}
+				if(billNum.trim().length() > 0){
+					billNum = billNum.substring(0,billNum.length()-1);
+				}
+				apprHead.setItemNum(billNum);
+			}
+
 			//根据提单号查找对应的申请单底项账号
-			apprHead.setItemNum(list.get(0).getBillNum());
 			apprHead.setgNo(getGnoMethod(list.get(0).getBillNum()));
 
 			//从库存信息生成申请单行
