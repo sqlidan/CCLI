@@ -17,7 +17,7 @@
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '数据状态' " >
 				<option value=""></option>
 				<option value="0">新增</option>
-				<option value="1">暂存/申报</option>
+				<option value="1">申报</option>
 				<option value="2">通过</option>
 				<option value="3">作废</option>
 				<option value="4">转人工</option>
@@ -95,6 +95,10 @@
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="cancel()">作废</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
+		<shiro:hasPermission name="wms:passPort:submit">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronization()">同步</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+		</shiro:hasPermission>
         </div>
 </div>
 <table id="dg"></table>
@@ -104,7 +108,6 @@ var dg;
 var d;
 var dgg
 $(function(){   
-	ajaxS();	
 	gridDG();
 });
 
@@ -115,33 +118,6 @@ document.onkeydown = function () {if(event.keyCode == 13){cx();}};
 function cx(){
 	var obj=$("#searchFrom").serializeObject();
 	dg.datagrid('load',obj);
-}
-
-function ajaxS(){
-	<%--//核放单类型--%>
-	<%--$('#passportTypecd').combobox({--%>
-	<%--	method:"GET",--%>
-	<%--	url : "${ctx}/wms/preEntry/dictData/CUS_PASSPORT_TYPECD",--%>
-	<%--	valueField: 'value',--%>
-	<%--	textField: 'label',--%>
-	<%--	mode:'remote'--%>
-	<%--});--%>
-	<%--//关联单证类型--%>
-	<%--$('#rltTbTypecd').combobox({--%>
-	<%--	method:"GET",--%>
-	<%--	url : "${ctx}/wms/preEntry/dictData/CUS_RLT_TB_TYPECD",--%>
-	<%--	valueField: 'value',--%>
-	<%--	textField: 'label',--%>
-	<%--	mode:'remote'--%>
-	<%--});--%>
-	<%--//申报类型--%>
-	<%--$('#dclTypecd').combobox({--%>
-	<%--	method:"GET",--%>
-	<%--	url : "${ctx}/wms/preEntry/dictData/CUS_DCLTYPECD",--%>
-	<%--	valueField: 'value',--%>
-	<%--	textField: 'label',--%>
-	<%--	mode:'remote'--%>
-	<%--});--%>
 }
 
 //预报单列表
@@ -164,7 +140,31 @@ function gridDG(){
 	    columns:[[   
 	    	{field:'seqNo',title:'预录入统一编号',sortable:true},
 	        {field:'passportNo',title:'核放单编号',sortable:true},
- 	        {field:'passportTypecd',title:'核放单类型',sortable:true},
+ 	        {field:'passportTypecd',title:'核放单类型',sortable:true,
+				formatter : function(value, row, index) {
+					if(value == '1'){
+						return "先入区后报关";
+					}
+					if(value == '2'){
+						return "一线一体化进出区";
+					}
+					if(value == '3'){
+						return "二线进出区";
+					}
+					if(value == '4'){
+						return "非报关进出区";
+					}
+					if(value == '5'){
+						return "卡口登记货物";
+					}
+					if(value == '6'){
+						return "空车进出区";
+					}
+					if(value == '7'){
+						return "两步申报";
+					}
+					return value;
+				}},
 			{field:'ioTypecd',title:'进出标志',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == 'I'){
@@ -195,7 +195,7 @@ function gridDG(){
 						return "新增";
 					}
 					if(value == '1'){
-						return "暂存/申报";
+						return "申报";
 					}
 					if(value == '2'){
 						return "通过";
@@ -286,6 +286,10 @@ function deleteInfo(){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条核放单数据！", position: "bottomRight" });
 		return;
 	}
+	if(parseInt(row.state) > 0){
+		parent.$.messager.show({ title : "提示",msg: "当前核放单已申报，不可删除！", position: "bottomRight" });
+		return;
+	}
 	parent.$.messager.confirm('提示', '删除后无法恢复您确定要删除？', function(data){
 		if (data){
 			$.ajax({
@@ -329,6 +333,25 @@ function cancel(){
 			$.ajax({
 				type:'get',
 				url:"${ctx}/wms/passPort/UpdateState/"+row.id+"/3",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+//同步
+function synchronization(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核放单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '您确定要将选中的核放单信息进行同步吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/passPort/synchronization/"+row.id,
 				success: function(data){
 					successTip(data,dg);
 				},

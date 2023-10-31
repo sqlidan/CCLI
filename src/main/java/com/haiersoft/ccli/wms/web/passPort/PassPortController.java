@@ -8,6 +8,7 @@ import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.system.entity.Log;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
 import com.haiersoft.ccli.wms.entity.apiEntity.*;
@@ -61,6 +62,31 @@ public class PassPortController extends BaseController {
     private static final String icCode = "2100030046252";
 
     /**
+     * 获取单条核放单信息中的总重量
+     */
+    @RequestMapping(value = "checkTotalWt", method = RequestMethod.GET)
+    @ResponseBody
+    public String checkTotalWt(HttpServletRequest request) {
+        Long start = System.currentTimeMillis();
+        logger.info("STARTTIME:"+start+";MOTHED:checkTotalWt;PARAM:"+request.getParameter("PLATE_NO"));
+
+        String totalWt = "";
+
+        String PLATE_NO = request.getParameter("PLATE_NO");
+        if(PLATE_NO == null || PLATE_NO.trim().length() == 0){
+            return "承运车牌号为必填参数";
+        }
+        System.out.println("PLATE_NO："+PLATE_NO);
+        totalWt = passPortService.getDataByVehicleNo(PLATE_NO);
+
+        Long end = System.currentTimeMillis();
+        logger.info("ENDTIME:"+end+";MOTHED:checkTotalWt;RESULT:"+totalWt);
+
+        return totalWt;
+    }
+
+
+    /**
      * 核放单页面
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
@@ -100,6 +126,7 @@ public class PassPortController extends BaseController {
         bisPassPort.setInputCode("3702631016");//录入单位编码
         bisPassPort.setInputSccd("91370220395949850B");//录入单位社会信用代码
         bisPassPort.setInputName("青岛港怡之航冷链物流有限公司");//录入单位名称
+        bisPassPort.setEtpsPreentNo("3702631016");//企业内部编号
         bisPassPort.setDclTypecd("1");//申报类型
         bisPassPort.setDclBy(user.getName());
         model.addAttribute("passPort", bisPassPort);
@@ -152,7 +179,7 @@ public class PassPortController extends BaseController {
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
             /**
-             * 1-暂存/申报
+             * 1-申报
              * 2-通过
              * 3-作废
              */
@@ -187,7 +214,33 @@ public class PassPortController extends BaseController {
         }
     }
 
-    //暂存/申报核放单
+    /**
+     * 同步
+     */
+    @RequestMapping(value = "synchronization/{id}")
+    @ResponseBody
+    public String synchronization(@PathVariable("id") String id) {
+        User user = UserUtil.getCurrentUser();
+        BisPassPort bisPassPort = passPortService.get(id);
+        if (bisPassPort != null) {
+            //调用申报核放单同步接口
+            Map<String, Object> resultMap = passPortSynchronization(id);
+            if ("200".equals(resultMap.get("code").toString())) {
+                //同步成功
+                System.out.println("同步成功");
+            } else {
+                return resultMap.get("msg").toString();
+            }
+            bisPassPort.setUpdateBy(user.getName());//修改人
+            bisPassPort.setUpdateTime(new Date());//修改时间
+            passPortService.merge(bisPassPort);
+            return "success";
+        } else {
+            return "error";
+        }
+    }
+
+    //申报核放单
     public Map<String, Object> passPortSave(String id) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -372,6 +425,15 @@ public class PassPortController extends BaseController {
         return resultMap;
     }
 
+    //同步核放单
+    public Map<String, Object> passPortSynchronization(String id){
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put("code","200");
+        resultMap.put("msg","success");
+        resultMap.put("data","");
+        return resultMap;
+    }
+
 //======================================================================================================================
 
     /**
@@ -454,6 +516,7 @@ public class PassPortController extends BaseController {
         try {
             passPortMessage.setKey(ApiKey.保税监管_保税核放单保存服务秘钥.getValue());
             String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单申报接口.getValue(), JSON.toJSONString(passPortMessage));
+            logger.info("核放单申报接口结果:"+s);
             JSONObject jsonObject = JSON.parseObject(s);
             String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
             if ("200".equals(code)) {
@@ -498,6 +561,7 @@ public class PassPortController extends BaseController {
         try {
             sasCommonSeqNoRequest.setKey(ApiKey.保税监管_保税核放单作废秘钥.getValue());
             String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单作废服务接口.getValue(), JSON.toJSONString(sasCommonSeqNoRequest));
+            logger.info("核放单作废服务结果:"+s);
             JSONObject jsonObject = JSON.parseObject(s);
             String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
             if ("200".equals(code)) {

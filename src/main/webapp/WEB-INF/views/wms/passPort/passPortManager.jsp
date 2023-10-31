@@ -100,11 +100,11 @@
 				<tr>
 					<td style="text-align:right;">企业内部编号</td>
 					<td>
-						<input type="text" id="etpsPreentNo" name="etpsPreentNo"  class="easyui-validatebox" value="${passPort.etpsPreentNo}" data-options="width:180" >
+						<input type="text" id="etpsPreentNo" name="etpsPreentNo"  class="easyui-validatebox" value="${passPort.etpsPreentNo}" data-options="width:180" readonly style="background:#eee">
 					</td>
-					<td style="text-align:right;">承运车牌号</td>
+					<td style="text-align:right;"><span style="color: red">*</span>承运车牌号</td>
 					<td>
-						<input type="text" id="vehicleNo" name="vehicleNo"  class="easyui-validatebox" value="${passPort.vehicleNo}" data-options="width:180" >
+						<input type="text" id="vehicleNo" name="vehicleNo"  class="easyui-validatebox" value="${passPort.vehicleNo}" data-options="width:180, required:'required'" >
 					</td>
 					<td style="text-align:right;">IC卡号(电子车牌)</td>
 					<td>
@@ -114,7 +114,7 @@
 				<tr>
 					<td style="text-align:right;"><span style="color: red">*</span>车自重</td>
 					<td>
-						<input type="text" id="vehicleWt" name="vehicleWt"  class="easyui-validatebox" value="${passPort.vehicleWt}" data-options="width:180, required:'required'" >
+						<input type="text" id="vehicleWt" name="vehicleWt"  class="easyui-validatebox" value="${passPort.vehicleWt}" data-options="width:180, required:'required'" onchange="updateTotalWt()">
 					</td>
 					<td style="text-align:right;">车架号</td>
 					<td>
@@ -122,7 +122,7 @@
 					</td>
 					<td style="text-align:right;"><span style="color: red">*</span>车架重</td>
 					<td>
-						<input type="text" id="vehicleFrameWt" name="vehicleFrameWt"  class="easyui-validatebox" value="${passPort.vehicleFrameWt}" data-options="width:180, required:'required'">
+						<input type="text" id="vehicleFrameWt" name="vehicleFrameWt"  class="easyui-validatebox" value="${passPort.vehicleFrameWt}" data-options="width:180, required:'required'" onchange="updateTotalWt()">
 					</td>
 				</tr>
 				<tr>
@@ -134,15 +134,15 @@
 					<td>
 						<input type="text" id="containerType" name="containerType"  class="easyui-validatebox" value="${passPort.containerType}" data-options="width:180" >
 					</td>
-					<td style="text-align:right;">集装箱重</td>
+					<td style="text-align:right;"><span style="color: red">*</span>集装箱重</td>
 					<td>
-						<input type="text" id="containerWt" name="containerWt"  class="easyui-validatebox" value="${passPort.containerWt}" data-options="width:180">
+						<input type="text" id="containerWt" name="containerWt"  class="easyui-validatebox" value="${passPort.containerWt}" data-options="width:180, required:'required'">
 					</td>
 				</tr>
 				<tr>
 					<td style="text-align:right;"><span style="color: red">*</span>货物总毛重</td>
 					<td>
-						<input type="text" id="totalGrossWt" name="totalGrossWt"  class="easyui-validatebox" value="${passPort.totalGrossWt}" data-options="width:180, required:'required'" >
+						<input type="text" id="totalGrossWt" name="totalGrossWt"  class="easyui-validatebox" value="${passPort.totalGrossWt}" data-options="width:180, required:'required'" onchange="updateTotalWt()">
 					</td>
 					<td style="text-align:right;"><span style="color: red">*</span>货物总净重</td>
 					<td>
@@ -330,6 +330,26 @@ var dhs;
 var dt;
 
 
+//===============================================================================================================
+
+function updateTotalWt(){
+	var vehicleWt = $("#vehicleWt").val();//车自重
+	if(vehicleWt == undefined || vehicleWt == null || vehicleWt == "" || vehicleWt == '' || vehicleWt.length == 0){
+		vehicleWt = 0;
+	}
+	var vehicleFrameWt = $("#vehicleFrameWt").val();//车架重
+	if(vehicleFrameWt == undefined || vehicleFrameWt == null || vehicleFrameWt == "" || vehicleFrameWt == '' || vehicleFrameWt.length == 0){
+		vehicleFrameWt = 0;
+	}
+	var totalGrossWt = $("#totalGrossWt").val();//货物总毛重
+	if(totalGrossWt == undefined || totalGrossWt == null || totalGrossWt == "" || totalGrossWt == '' || totalGrossWt.length == 0){
+		totalGrossWt = 0;
+	}
+	var allWt = parseFloat(vehicleWt) + parseFloat(vehicleFrameWt) + parseFloat(totalGrossWt);
+	$("#totalWt").val(allWt+"");
+}
+
+//===============================================================================================================
 var dclUnitcdAry;//计量单位
 
 //初始化
