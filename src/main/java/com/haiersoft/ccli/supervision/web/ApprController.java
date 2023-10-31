@@ -42,7 +42,7 @@ import com.haiersoft.ccli.supervision.service.GetKeyService;
 
 /**
  * 分类监管 申请单controller
- * 
+ *
  * @author
  *
  */
@@ -122,87 +122,30 @@ public class ApprController extends BaseController {
 
 			//入区不用调整，出区需要调整
 			if("2".equals(apprheadList.get(0).getIoType())){
-				if(apprInfoList!=null && apprInfoList.size() > 1){//多个
-					String tdNo = apprheadList.get(0).getItemNum();
-					System.out.println("tdNo:"+tdNo);
-					String[] tdNoAry = null;
-					if(tdNo.contains(",")){
-						tdNoAry = tdNo.split(",");
-					}else{
-						tdNoAry = new String[1];
-						tdNoAry[0] = tdNo;
-					}
-					for (int i = 0; i < tdNoAry.length; i++) {
-						List<BisEnterStockInfo> bisEnterStockInfoList = new ArrayList<BisEnterStockInfo>();
-						List<PropertyFilter> enterStockFilters = PropertyFilter.buildFromHttpRequest(request);
-						enterStockFilters.add(new PropertyFilter("EQS_itemNum", tdNoAry[i]));
-						bisEnterStockInfoList = enterStockInfoService.search(enterStockFilters);
-						for (ApprInfo forApprInfo : apprInfoList) {
-							for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
-								if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
-//								forApprInfo.setgNo(forBisEnterStockInfo.getAccountBook());//底账项号
-									forApprInfo.setCodeTs(forBisEnterStockInfo.getHsCode());//HS编码/商品编码
-								}
-								apprInfoService.merge(forApprInfo);
-							}
-						}
-					}
-
-//					//原逻辑-依据联系单获取提单号，依据提单号获取入库申请单及明细
-//					List<BisOutStockInfo> outStockInfos = new ArrayList<BisOutStockInfo>();
-//					BisOutStockInfo outStockInfo = new BisOutStockInfo();
-//					outStockInfo.setOutLinkId(linkId);
-//					outStockInfos = outStockInfoService.searchBillCodeByLinkId(outStockInfo);
-//					if(outStockInfos!=null && outStockInfos.size() >0){
-//						for (BisOutStockInfo forBisOutStockInfo:outStockInfos) {
-//							//依据出区获取入区
-//							List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
-//							filtersIn.add(new PropertyFilter("EQS_itemNum", forBisOutStockInfo.getBillNum()));
-//							filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
-//							List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
-//							//依据入区完善出区申报信息
-//							if (!apprheadInList.isEmpty()) {
-//								List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
-//								infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
-//								List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
-//								logger.error("apprInfoList： "+JSON.toJSONString(apprInfoList));
-//								logger.error("apprInfoInList： "+JSON.toJSONString(apprInfoInList));
-//								for (ApprInfo forApprInfo:apprInfoList) {
-//									for (ApprInfo forApprInfoIn:apprInfoInList) {
-//										if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
-//											forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
-//											forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
-//										}
-//									}
-//									apprInfoService.merge(forApprInfo);
-//								}
-//							}
-//						}
-//					}
-				}else{//一个
-					//依据出区获取入区
-					List<PropertyFilter> filtersIn = new ArrayList<PropertyFilter>();
-					filtersIn.add(new PropertyFilter("EQS_itemNum", apprheadList.get(0).getItemNum()));
-					filtersIn.add(new PropertyFilter("EQS_ioType", "1"));
-					List<ApprHead> apprheadInList = apprHeadService.search(filtersIn);
-					//依据入区完善出区申报信息
-					if (!apprheadInList.isEmpty()) {
-						List<PropertyFilter> infofilterIn = new ArrayList<PropertyFilter>();
-						infofilterIn.add(new PropertyFilter("EQS_headId", apprheadInList.get(0).getId()));
-						List<ApprInfo> apprInfoInList = apprInfoService.search(infofilterIn);
-						logger.error("apprInfoList： "+JSON.toJSONString(apprInfoList));
-						logger.error("apprInfoInList： "+JSON.toJSONString(apprInfoInList));
-						for (ApprInfo forApprInfo:apprInfoList) {
-							for (ApprInfo forApprInfoIn:apprInfoInList) {
-								if(forApprInfo.getgName().equals(forApprInfoIn.getgName())){
-									forApprInfo.setgNo(forApprInfoIn.getgNo());//底账项号
-									forApprInfo.setCodeTs(forApprInfoIn.getCodeTs());//HS编码/商品编码
-								}
+				String tdNo = apprheadList.get(0).getItemNum();
+				System.out.println("tdNo:"+tdNo);
+				String[] tdNoAry = null;
+				if(tdNo.contains(",")){
+					tdNoAry = tdNo.split(",");
+				}else{
+					tdNoAry = new String[1];
+					tdNoAry[0] = tdNo;
+				}
+				for (int i = 0; i < tdNoAry.length; i++) {
+					List<BisEnterStockInfo> bisEnterStockInfoList = new ArrayList<BisEnterStockInfo>();
+					List<PropertyFilter> enterStockFilters = PropertyFilter.buildFromHttpRequest(request);
+					enterStockFilters.add(new PropertyFilter("EQS_itemNum", tdNoAry[i]));
+					bisEnterStockInfoList = enterStockInfoService.search(enterStockFilters);
+					for (ApprInfo forApprInfo : apprInfoList) {
+						for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
+							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
+								forApprInfo.setCodeTs(forBisEnterStockInfo.getHsCode());//HS编码/商品编码
 							}
 							apprInfoService.merge(forApprInfo);
 						}
 					}
 				}
+
 				for (ApprInfo forApprInfo:apprInfoList) {
 					forApprInfo.setgUnit("035");//申报计量单位
 				}
@@ -222,26 +165,26 @@ public class ApprController extends BaseController {
 			//String json = objectMapper.writeValueAsString(apprheadList.get(0));
 			String json = objectMapper.writeValueAsString(map);
 			System.out.println(json);
-			
-			//删除不需要发送的字段
-			JsonNode rootNode = objectMapper.readTree(json);			
-			for (JsonNode personNode : rootNode) {
-			    if (personNode instanceof ObjectNode) {
-			        ObjectNode object = (ObjectNode) personNode;
-			        object.remove("id");
-			        object.remove("LocalStatus");
 
-			    }else {
-			        for (JsonNode sonNode : personNode) {
-			        	 if (sonNode instanceof ObjectNode) {
-						        ObjectNode object2 = (ObjectNode) sonNode;
-						        System.out.println(object2);
-						        object2.remove("id");
-						        object2.remove("HeadId");
-						        object2.remove("CREATETIME");
-			        	 }
-			        }
-		        }
+			//删除不需要发送的字段
+			JsonNode rootNode = objectMapper.readTree(json);
+			for (JsonNode personNode : rootNode) {
+				if (personNode instanceof ObjectNode) {
+					ObjectNode object = (ObjectNode) personNode;
+					object.remove("id");
+					object.remove("LocalStatus");
+
+				}else {
+					for (JsonNode sonNode : personNode) {
+						if (sonNode instanceof ObjectNode) {
+							ObjectNode object2 = (ObjectNode) sonNode;
+							System.out.println(object2);
+							object2.remove("id");
+							object2.remove("HeadId");
+							object2.remove("CREATETIME");
+						}
+					}
+				}
 			}
 			System.out.println(rootNode.toString());
 			jsonString = rootNode.toString();
@@ -263,24 +206,24 @@ public class ApprController extends BaseController {
 		 * "    \"message\":\"\",\r\n" + "    \"data\":\"A42302000000000001\",\r\n" +
 		 * "    \"CheckInfos\":null\r\n" + "}";
 		 */
-		
-		JSONObject jsonObject = JSON.parseObject(result);
-        String state = jsonObject.getString("state");
-        
-        if(state.equals("1")) {
-        	String data = jsonObject.getString("data");    
-        	apprHeadService.updateArrpIdById(data,"1" ,id);
-        	apprInfoService.updateArrpIdbyHeadId(data, id);
-        	return "success";
-        }else {
-        	String CheckInfos = jsonObject.getString("CheckInfos");
-        	return CheckInfos;
 
-        }
+		JSONObject jsonObject = JSON.parseObject(result);
+		String state = jsonObject.getString("state");
+
+		if(state.equals("1")) {
+			String data = jsonObject.getString("data");
+			apprHeadService.updateArrpIdById(data,"1" ,id);
+			apprInfoService.updateArrpIdbyHeadId(data, id);
+			return "success";
+		}else {
+			String CheckInfos = jsonObject.getString("CheckInfos");
+			return CheckInfos;
+
+		}
 
 //		return jsonObject.toJSONString();
 	}
-	
+
 
 
 	//删除申请
@@ -290,18 +233,18 @@ public class ApprController extends BaseController {
 	public String deleteAppr(@PathVariable("ids") List<String> ids) throws RemoteException, ServiceException {
 
 		List<ApprHead> toDelRemote = new ArrayList<ApprHead>();
-		List<ApprHead> toDelLocal = new ArrayList<ApprHead>();		
+		List<ApprHead> toDelLocal = new ArrayList<ApprHead>();
 		//检查本地状态,先整理出需要接口删除的申请单
-		for(String id : ids) {			
+		for(String id : ids) {
 			ApprHead apprHead = apprHeadService.find("id", id);
-			if((null ==apprHead.getApprId()) || ("".equals(apprHead.getApprId()))) {				
+			if((null ==apprHead.getApprId()) || ("".equals(apprHead.getApprId()))) {
 				toDelLocal.add(apprHead);
 			}else {
 				toDelRemote.add(apprHead);
 			}
-				
+
 		}
-		
+
 		//需要调用接口删除的appr
 		if(toDelRemote.size() != 0) {
 			// 1 获得key
@@ -316,26 +259,26 @@ public class ApprController extends BaseController {
 			String serviceName = "ApprDelete";
 			for(ApprHead app:toDelRemote) {
 				String apprdelete="{\"KeyModel\":{\"ApprId\":\""+app.getApprId()+"\"}}";
-				logger.error(">>>>>>>>>>>>>>>>>调用申请单删除json： "+apprdelete);				
+				logger.error(">>>>>>>>>>>>>>>>>调用申请单删除json： "+apprdelete);
 				String result = fljgWsClient.getResult(apprdelete, tickId, serviceName);
 				logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
 				System.out.println("result: " + result);
 				JSONObject jsonObject = JSON.parseObject(result);
-		        String state = jsonObject.getString("state");
-		        //如果接口state返回1为删除成功
-		        if(state.equals("1")) {
-		        	//删除本地数据库中的记录
+				String state = jsonObject.getString("state");
+				//如果接口state返回1为删除成功
+				if(state.equals("1")) {
+					//删除本地数据库中的记录
 					apprHeadService.deleteById(app.getId());
 					apprInfoService.deleteByHeadId(app.getId());
-		        	return "success";
-		        }else {
-		        	
-		        	return "接口错误";
-		        }
+					return "success";
+				}else {
+
+					return "接口错误";
+				}
 			}
-			
+
 		}
-		
+
 		//不需要调用接口删除的 list
 		for(ApprHead app:toDelLocal) {
 			apprHeadService.deleteById(app.getId());
@@ -343,9 +286,9 @@ public class ApprController extends BaseController {
 		}
 
 		return "success";
-		
+
 	}
-	
+
 	//作废申请
 	@Transactional
 	@RequestMapping(value="/cancel/{ids}")
@@ -353,18 +296,18 @@ public class ApprController extends BaseController {
 	public String cancelAppr(@PathVariable("ids") List<String> ids) throws RemoteException, ServiceException {
 
 		List<ApprHead> toCancelRemote = new ArrayList<ApprHead>();
-		List<ApprHead> toCancelLocal = new ArrayList<ApprHead>();		
+		List<ApprHead> toCancelLocal = new ArrayList<ApprHead>();
 		//检查本地状态,先整理出需要接口删除的申请单
-		for(String id : ids) {			
+		for(String id : ids) {
 			ApprHead apprHead = apprHeadService.find("id",id);
-			if((null ==apprHead.getApprId()) || ("".equals(apprHead.getApprId()))) {		
+			if((null ==apprHead.getApprId()) || ("".equals(apprHead.getApprId()))) {
 				toCancelLocal.add(apprHead);
 			}else {
 				toCancelRemote.add(apprHead);
 			}
-				
+
 		}
-		
+
 		//需要调用接口作废的appr
 		if(toCancelRemote.size() != 0) {
 			// 1 获得key
@@ -384,32 +327,27 @@ public class ApprController extends BaseController {
 				System.out.println("result: " + result);
 				logger.error(">>>>>>>>>>>>>>>>>调用申请单作废result： "+ result);
 				JSONObject jsonObject = JSON.parseObject(result);
-		        String state = jsonObject.getString("state");
-		        //如果接口state返回1为删除成功
-		        if(state.equals("1")) {
-		        	app.setDeclType("3");
-		        	app.setLocalStatus("2");
+				String state = jsonObject.getString("state");
+				//如果接口state返回1为删除成功
+				if(state.equals("1")) {
+					app.setDeclType("3");
+					app.setLocalStatus("2");
 					apprHeadService.update(app);
-		        	return "success";
-		        }else {
-		        	
-		        	return "接口错误";
-		        }
+					return "success";
+				}else {
+
+					return "接口错误";
+				}
 			}
-			
+
 		}
-		
+
 		//不需要调用接口作废的 list
 		for(ApprHead app:toCancelLocal) {
 			app.setLocalStatus("2");
 			apprHeadService.save(app);;
 		}
 
-		return "success";		
+		return "success";
 	}
-	
-
-	
-	
-
 }
