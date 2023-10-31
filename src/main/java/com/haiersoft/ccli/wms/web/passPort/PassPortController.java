@@ -16,6 +16,7 @@ import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfoDJ;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
+import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryBounded;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryInfo;
 import com.haiersoft.ccli.wms.service.passPort.PassPortInfoDJService;
@@ -224,7 +225,7 @@ public class PassPortController extends BaseController {
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
             //调用申报核放单同步接口
-            Map<String, Object> resultMap = passPortSynchronization(id);
+            Map<String, Object> resultMap = passPortSynchronization(bisPassPort);
             if ("200".equals(resultMap.get("code").toString())) {
                 //同步成功
                 System.out.println("同步成功");
@@ -387,9 +388,7 @@ public class PassPortController extends BaseController {
         passPortMessage.setMemberCode(memberCode);
         passPortMessage.setPass(pass);
         passPortMessage.setIcCode(icCode);
-        //核放单暂存
-        System.out.println("passPortMessage== "+JSON.toJSONString(passPortMessage));
-//        resultMap = PassPortSaveService(passPortMessage);
+        logger.info("passPortMessage== "+JSON.toJSONString(passPortMessage));
 //        //核放单申报
         resultMap = PassPortDeclearService(passPortMessage);
 
@@ -419,19 +418,48 @@ public class PassPortController extends BaseController {
         sasCommonSeqNoRequest.setPass(pass);
         sasCommonSeqNoRequest.setIcCode(icCode);
         //核放单作废
-        System.out.println("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
+        logger.info("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
         resultMap = PassPortNullifyService(sasCommonSeqNoRequest);
 
         return resultMap;
     }
 
     //同步核放单
-    public Map<String, Object> passPortSynchronization(String id){
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put("code","200");
-        resultMap.put("msg","success");
-        resultMap.put("data","");
-        return resultMap;
+    public Map<String, Object> passPortSynchronization(BisPassPort bisPassPort){
+        Map<String, Object> resultMap1 = new HashMap<String, Object>();
+        PassPortQueryRequest passPortQueryRequest = new PassPortQueryRequest();
+        passPortQueryRequest.setSeqNo(bisPassPort.getSeqNo());
+        passPortQueryRequest.setPassportNo(bisPassPort.getPassportNo());
+        passPortQueryRequest.setMemberCode(memberCode);
+        passPortQueryRequest.setPass(pass);
+        passPortQueryRequest.setIcCode(icCode);
+        //核放单列表查询服务
+        logger.info("passPortQueryRequest== "+JSON.toJSONString(passPortQueryRequest));
+        resultMap1 = PassPortQueryListService(passPortQueryRequest);
+        logger.info("passPortQueryResult== "+resultMap1.toString());
+        if("200".equals(resultMap1.get("code").toString())){
+            //TODO 修改核放单信息
+
+            //核放单列表查询服务
+            Map<String, Object> resultMap2 = new HashMap<String, Object>();
+            SasCommonSeqNoRequest sasCommonSeqNoRequest = new SasCommonSeqNoRequest();
+            sasCommonSeqNoRequest.setSeqNo(bisPassPort.getSeqNo());
+            sasCommonSeqNoRequest.setMemberCode(memberCode);
+            sasCommonSeqNoRequest.setPass(pass);
+            sasCommonSeqNoRequest.setIcCode(icCode);
+            logger.info("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
+            resultMap2 = PassPortDetailService(sasCommonSeqNoRequest);
+            logger.info("sasCommonSeqNoResult== "+resultMap1.toString());
+            if("200".equals(resultMap2.get("code").toString())){
+                //TODO 修改核放单信息
+                return resultMap2;
+            }else{
+                return resultMap2;
+            }
+
+        }else{
+            return resultMap1;
+        }
     }
 
 //======================================================================================================================
@@ -587,6 +615,95 @@ public class PassPortController extends BaseController {
                 resultMap.put("data",null);
             }
 
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return resultMap;
+    }
+
+    /**
+     * @return java.util.concurrent.Callable<com.chenay.bean.entity.customs.PassPortQueryListResponse>
+     * @Author chenp
+     * @Description 核放单列表查询服务
+     * @Date 9:21 2021/1/30
+     * @Param [passPortQueryRequest]
+     **/
+    public Map<String,Object> PassPortQueryListService(PassPortQueryRequest passPortQueryRequest) {
+        logger.info("核放单列表查询服务:"+JSON.toJSONString(passPortQueryRequest));
+        Map<String,Object> resultMap = new HashMap<>();
+        PassPortQueryListResponse baseResult = new PassPortQueryListResponse();
+        try {
+            passPortQueryRequest.setKey(ApiKey.保税监管_保税核放单查询服务秘钥.getValue());
+            String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单列表查询服务接口.getValue(), JSON.toJSONString(passPortQueryRequest));
+            JSONObject jsonObject = JSON.parseObject(s);
+            String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
+            if ("200".equals(code)) {
+                Object data = jsonObject.get("data");
+                String dataStr = "";
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), PassPortQueryListResponse.class);
+                resultMap.put("code","200");
+                resultMap.put("msg","success");
+                resultMap.put("data",baseResult);
+            } else {
+                Object data = jsonObject.get("msg");
+                String dataStr = "";
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                logger.error("保税监管_核放单列表查询服务接口","结果"+dataStr);
+                logger.error(dataStr);
+                resultMap.put("code","500");
+                resultMap.put("msg",dataStr);
+                resultMap.put("data",null);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return resultMap;
+    }
+
+    /**
+     * @return com.chenay.core.tool.api.R<com.chenay.bean.entity.customs.PassPortMessage>
+     * @Author chenp
+     * @Description 核放单详细查询服务
+     * @Date 9:23 2021/1/30
+     * @Param [sasCommonSeqNoRequest]
+     **/
+    public Map<String,Object> PassPortDetailService(SasCommonSeqNoRequest sasCommonSeqNoRequest) {
+        logger.info("核放单详细查询服务:"+JSON.toJSONString(sasCommonSeqNoRequest));
+        Map<String,Object> resultMap = new HashMap<>();
+        PassPortMessage baseResult = new PassPortMessage();
+        try {
+            sasCommonSeqNoRequest.setKey(ApiKey.保税监管_保税核放单查询服务秘钥.getValue());
+            String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单详细信息查询服务接口.getValue(), JSON.toJSONString(sasCommonSeqNoRequest, SerializerFeature.WriteNullStringAsEmpty));
+            JSONObject jsonObject = JSON.parseObject(s);
+            String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
+            if ("200".equals(code)) {
+                Object data = jsonObject.get("data");
+                String dataStr = "";
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), PassPortMessage.class);
+                resultMap.put("code","200");
+                resultMap.put("msg","success");
+                resultMap.put("data",baseResult);
+            } else {
+                Object data = jsonObject.get("msg");
+                String dataStr = "";
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                logger.error("保税监管_核放单详细信息查询服务接口","结果"+dataStr);
+                logger.error(dataStr);
+                resultMap.put("code","500");
+                resultMap.put("msg",dataStr);
+                resultMap.put("data",null);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
