@@ -117,6 +117,36 @@ public class BaseBounded implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "UPDATED_TIME")
 	private Date updatedTime;//修改时间
+	@Transient
+	private String gdsMtno;
+	@Transient
+	private Double grossWeight;
+	@Transient
+	private Double dclTotalAmt;
+
+	public String getGdsMtno() {
+		return gdsMtno;
+	}
+
+	public void setGdsMtno(String gdsMtno) {
+		this.gdsMtno = gdsMtno;
+	}
+
+	public Double getGrossWeight() {
+		return grossWeight;
+	}
+
+	public void setGrossWeight(Double grossWeight) {
+		this.grossWeight = grossWeight;
+	}
+
+	public Double getDclTotalAmt() {
+		return dclTotalAmt;
+	}
+
+	public void setDclTotalAmt(Double dclTotalAmt) {
+		this.dclTotalAmt = dclTotalAmt;
+	}
 
 	public String getId() {
 		return id;

@@ -17,13 +17,14 @@
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '数据状态' " >
 				<option value=""></option>
 				<option value="0">新增</option>
-				<option value="1">申报</option>
-				<option value="2">通过</option>
-				<option value="3">作废</option>
-				<option value="4">转人工</option>
-				<option value="5">退单</option>
-				<option value="Y">入库成功</option>
-				<option value="Z">入库失败</option>
+				<option value="1">申报成功</option>
+				<option value="4">成功发送海关</option>
+				<option value="5">海关接收成功</option>
+				<option value="6">海关接收失败</option>
+				<option value="B">海关终审通过</option>
+				<option value="C">退单</option>
+				<option value="E">删除</option>
+				<option value="T">转人工</option>
 			</select>
 			<select name="filter_EQS_bindTypecd" class="easyui-combobox" data-options="width:150,prompt: '绑定类型' " >
 				<option value=""></option>
@@ -195,25 +196,21 @@ function gridDG(){
 						return "新增";
 					}
 					if(value == '1'){
-						return "申报";
-					}
-					if(value == '2'){
-						return "通过";
-					}
-					if(value == '3'){
-						return "作废";
-					}
-					if(value == '4'){
-						return "转人工";
-					}
-					if(value == '5'){
+						return "申报成功";
+					}else if(value == '4'){
+						return "成功发送海关";
+					}else if(value == '5'){
+						return "海关接收成功";
+					}else if(value == '6'){
+						return "海关接收失败";
+					}else if(value == 'B'){
+						return "海关终审通过";
+					}else if(value == 'C'){
 						return "退单";
-					}
-					if(value == 'Y'){
-						return "入库成功";
-					}
-					if(value == 'Z'){
-						return "入库失败";
+					}else if(value == 'E'){
+						return "删除";
+					}else if(value == 'T'){
+						return "转人工";
 					}
 				}},
 			{field:'areainEtpsNm',title:'区内企业名称',sortable:true},
@@ -286,21 +283,23 @@ function deleteInfo(){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条核放单数据！", position: "bottomRight" });
 		return;
 	}
-	if(parseInt(row.state) > 0){
-		parent.$.messager.show({ title : "提示",msg: "当前核放单已申报，不可删除！", position: "bottomRight" });
+	if((row.state == 0 || parseInt(row.state) == 0)){
+		parent.$.messager.confirm('提示', '删除后无法恢复您确定要删除？', function(data){
+			if (data){
+				$.ajax({
+					type:'get',
+					url:"${ctx}/wms/passPort/delete/"+row.id,
+					success: function(data){
+						successTip(data,dg);
+					},
+				});
+			}
+		});
+	}else{
+		parent.$.messager.show({ title : "提示",msg: "当前核放单不可删除！", position: "bottomRight" });
 		return;
 	}
-	parent.$.messager.confirm('提示', '删除后无法恢复您确定要删除？', function(data){
-		if (data){
-			$.ajax({
-				type:'get',
-				url:"${ctx}/wms/passPort/delete/"+row.id,
-				success: function(data){
-					successTip(data,dg);
-				},
-			});
-		}
-	});
+
 }
 //申报
 function submit(){
@@ -332,7 +331,7 @@ function cancel(){
 		if (data){
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/passPort/UpdateState/"+row.id+"/3",
+				url:"${ctx}/wms/passPort/UpdateState/"+row.id+"/C",
 				success: function(data){
 					successTip(data,dg);
 				},
@@ -347,17 +346,31 @@ function synchronization(){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条核放单数据！", position: "bottomRight" });
 		return;
 	}
-	parent.$.messager.confirm('提示', '您确定要将选中的核放单信息进行同步吗？', function(data){
-		if (data){
+	parent.$.messager.prompt('提示', '请输入需要同步的核放单号。', function(content){
+		if (content){
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/passPort/synchronization/"+row.id,
+				url:"${ctx}/wms/passPort/synchronization/"+row.id+"?content="+content,
 				success: function(data){
 					successTip(data,dg);
 				},
 			});
+		}else{
+			parent.$.messager.show({ title : "提示",msg: "请输入核放单号！", position: "bottomRight" });
+			return;
 		}
 	});
+	<%--parent.$.messager.confirm('提示', '您确定要将选中的核放单信息进行同步吗？', function(data){--%>
+	<%--	if (data){--%>
+	<%--		$.ajax({--%>
+	<%--			type:'get',--%>
+	<%--			url:"${ctx}/wms/passPort/synchronization/"+row.id,--%>
+	<%--			success: function(data){--%>
+	<%--				successTip(data,dg);--%>
+	<%--			},--%>
+	<%--		});--%>
+	<%--	}--%>
+	<%--});--%>
 }
 
 </script>

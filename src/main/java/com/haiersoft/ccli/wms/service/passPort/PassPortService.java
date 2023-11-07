@@ -36,6 +36,15 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		return passPortDao.findBy("id", id);
 	}
 
+	public String getDataByVehicleNo(String vehicleNo){
+		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo);
+		String totalWt = "";
+		if(bisPassPortDataMap!=null && bisPassPortDataMap.size() > 0){
+			totalWt = bisPassPortDataMap.get(0).get("TOTAL_WT")==null?"":bisPassPortDataMap.get(0).get("TOTAL_WT").toString();
+		}
+		return totalWt;
+	}
+
 	public List<BisPreEntryDictData> getDictDataByCode(String code){
 		List<Map<String,Object>> bisPreEntryDictDataMap = passPortDao.getDictDataByCode(code);
 		List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();

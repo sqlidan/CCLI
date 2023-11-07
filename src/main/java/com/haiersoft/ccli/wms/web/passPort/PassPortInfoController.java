@@ -2,7 +2,9 @@ package com.haiersoft.ccli.wms.web.passPort;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.Page;
@@ -12,6 +14,7 @@ import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.supervision.tempuri.ReturnModel;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
+import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.apiEntity.*;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
@@ -20,6 +23,7 @@ import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryInfo;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryInfoDJ;
+import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortInfoDJService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortInfoService;
 import com.haiersoft.ccli.wms.service.passPort.PassPortService;
@@ -40,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -56,6 +61,8 @@ public class PassPortInfoController extends BaseController {
     private PassPortInfoService passPortInfoService;
     @Autowired
     private PassPortInfoDJService passPortInfoDJService;
+    @Autowired
+    private PreEntryInvtQueryService preEntryInvtQueryService;
 
     private static final String memberCode = "eimskipMember";
     private static final String pass = "66668888";
@@ -88,18 +95,96 @@ public class PassPortInfoController extends BaseController {
      */
     @RequestMapping(value = "getGdsInfo", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String, Object> getGdsInfo(HttpServletRequest request, @RequestParam("rltGdsSeqno") String rltGdsSeqno) {
+    public Map<String, Object> getGdsInfo(HttpServletRequest request, @RequestParam("rltGdsSeqno") String rltGdsSeqno, @RequestParam("passPortId") String passPortId) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("code", "200");
-        map.put("msg", "success");
-        List<BaseBounded> baseBoundedList = new ArrayList<>();
-        baseBoundedList = passPortInfoService.getGdsInfo(rltGdsSeqno);
-        if(baseBoundedList == null || baseBoundedList.size() == 0 || baseBoundedList.get(0) == null){
-            map.put("data", null);
-        }else{
-            map.put("data", baseBoundedList.get(0));
+        try {
+            BisPassPort queryBisPassPort = passPortService.get(passPortId);
+            if(queryBisPassPort == null){
+                map.put("code", "500");
+                map.put("msg", "未查询到对应的表头信息!");
+            }
+            if(queryBisPassPort.getRltNo() == null || queryBisPassPort.getRltNo().trim().length() == 0){
+                map.put("code", "500");
+                map.put("msg", "未获取到关联单证编号!");
+            }
+            List<BaseBounded> baseBoundedList = new ArrayList<>();
+            //原逻辑 2023-11-02作废
+    //        baseBoundedList = passPortInfoService.getGdsInfo(rltGdsSeqno);
+            //新逻辑
+            baseBoundedList = invtQuery(queryBisPassPort.getRltNo(),rltGdsSeqno);
+            if (baseBoundedList == null || baseBoundedList.size() == 0 || baseBoundedList.get(0) == null) {
+                map.put("code", "200");
+                map.put("data", null);
+                map.put("msg", "success");
+            } else {
+                map.put("code", "200");
+                map.put("data", baseBoundedList.get(0));
+                map.put("msg", "success");
+            }
+        } catch (Exception e) {
+            map.put("code", "500");
+            map.put("msg", "error");
+            e.printStackTrace();
         }
         return map;
+    }
+
+    //获取核注清单明细信息
+    public List<BaseBounded> invtQuery(String bondInvtNo,String rltGdsSeqno) throws IOException, ClassNotFoundException {
+        List<BaseBounded> baseBoundedList = new ArrayList<>();
+        BaseBounded baseBounded = new BaseBounded();
+
+        //查询保税核注清单列表
+        InvtQueryListRequest invtQueryListRequest = new InvtQueryListRequest();
+        invtQueryListRequest.setBondInvtNo(bondInvtNo);
+        invtQueryListRequest.setMemberCode(memberCode);
+        invtQueryListRequest.setPass(pass);
+        invtQueryListRequest.setIcCode(icCode);
+        //调用服务
+        Map<String, Object> invtQueryListMap = InvtQueryListService(invtQueryListRequest);
+        if("500".equals(invtQueryListMap.get("code").toString())){
+            return baseBoundedList;
+        }else{
+            //处理结果
+            InvtQueryListResponse invtQueryListResponse = (InvtQueryListResponse) invtQueryListMap.get("data");
+            List<InvtQueryListResponseResultList> invtQueryListResponseResultLists = invtQueryListResponse.getResultList();
+            if(invtQueryListResponseResultLists != null && invtQueryListResponseResultLists.size() >0){
+                for (InvtQueryListResponseResultList forInvtQueryListResponseResultList:invtQueryListResponseResultLists) {
+                    //查询保税核注清单详细
+                    NemsCommonSeqNoRequest nemsCommonSeqNoRequest = new NemsCommonSeqNoRequest();
+                    nemsCommonSeqNoRequest.setSeqNo(forInvtQueryListResponseResultList.getSeqNo());
+                    nemsCommonSeqNoRequest.setIcCode(icCode);
+                    nemsCommonSeqNoRequest.setMemberCode(memberCode);
+                    nemsCommonSeqNoRequest.setPass(pass);
+                    //调用服务
+                    Map<String, Object> invtDetailMap = InvtDetailService(nemsCommonSeqNoRequest);
+                    if("500".equals(invtDetailMap.get("code").toString())){
+                        return baseBoundedList;
+                    }else{
+//                        //处理结果
+                        InvtMessage invtMessage = (InvtMessage) invtDetailMap.get("data");
+                        List<InvtListType> invtListTypeList = invtMessage.getInvtListType();
+
+//                        BisPreEntryInvtQuery bisPreEntryInvtQuery = preEntryInvtQueryService.get("9C1E9CCE74F5480ABFC999586639D088");
+//                        List<InvtListType> invtListTypeList = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+                        for (InvtListType forInvtListType:invtListTypeList) {
+                            if(forInvtListType.getGdsSeqno()!=null && forInvtListType.getGdsSeqno().equals(rltGdsSeqno)){
+                                baseBounded.setGdsMtno(forInvtListType.getGdsMtno());
+                                baseBounded.setHsCode(forInvtListType.getGdecd());
+                                baseBounded.setHsItemname(forInvtListType.getGdsNm());
+                                baseBounded.setDclUnit(forInvtListType.getDclUnitcd());
+                                baseBounded.setDclQty(forInvtListType.getDclQty()==null?0:Double.parseDouble(forInvtListType.getDclQty()));
+                                baseBounded.setDclTotalAmt(forInvtListType.getDclTotalAmt()==null?0:Double.parseDouble(forInvtListType.getDclTotalAmt()));
+                                baseBounded.setGrossWeight(forInvtListType.getGrossWt()==null?0:Double.parseDouble(forInvtListType.getGrossWt()));
+                                baseBounded.setNetWeight(forInvtListType.getNetWt()==null?0:Double.parseDouble(forInvtListType.getNetWt()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        baseBoundedList.add(baseBounded);
+        return baseBoundedList;
     }
 
     /**
@@ -341,6 +426,108 @@ public class PassPortInfoController extends BaseController {
             return "";
         }
         return object + "";
+    }
+//================================================================================================================================
+
+
+    /**
+     * @return java.util.concurrent.Callable<com.chenay.bean.entity.customs.InvtQueryListResponse>
+     * @Author chenp
+     * @Description 保税核注清单列表查询服务
+     * @Date 9:14 2021/1/30
+     * @Param [invtQueryListRequest]
+     **/
+    public Map<String,Object> InvtQueryListService(InvtQueryListRequest invtQueryListRequest) {
+        logger.info("保税核注清单列表查询服务:"+JSON.toJSONString(invtQueryListRequest));
+        Map<String,Object> resultMap = new HashMap<>();
+        InvtQueryListResponse baseResult = new InvtQueryListResponse();
+        String dataStr = "";
+        try {
+            invtQueryListRequest.setKey(ApiKey.保税监管_保税核注清单查询服务秘钥.getValue());
+            String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_保税核注清单列表查询服务接口.getValue(), JSON.toJSONString(invtQueryListRequest, SerializerFeature.WriteNullStringAsEmpty));
+            JSONObject jsonObject = JSON.parseObject(s);
+            String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
+            if ("200".equals(code)) {
+                Object data = jsonObject.get("data");
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), InvtQueryListResponse.class);
+                logger.error("baseResult "+JSON.toJSONString(baseResult));
+                resultMap.put("code","200");
+                resultMap.put("msg","success");
+                resultMap.put("data",baseResult);
+            } else {
+                Object data = jsonObject.get("msg");
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                logger.error("保税监管_保税核注清单列表查询服务接口"+invtQueryListRequest.getBondInvtNo(),"结果"+dataStr);
+                logger.error(dataStr);
+                resultMap.put("code","500");
+                resultMap.put("msg",dataStr);
+                resultMap.put("data",null);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return resultMap;
+    }
+
+    /**
+     * @return java.util.concurrent.Callable<com.chenay.bean.entity.customs.InvtMessage>
+     * @Author chenp
+     * @Description 保税核注清单详细查询服务
+     * @Date 9:12 2021/1/30
+     * @Param [nemsCommonSeqNoRequest]
+     **/
+    public Map<String,Object> InvtDetailService(NemsCommonSeqNoRequest nemsCommonSeqNoRequest) {
+        logger.info("保税核注清单详细查询服务:"+JSON.toJSONString(nemsCommonSeqNoRequest));
+        Map<String,Object> resultMap = new HashMap<>();
+        InvtMessage baseResult = new InvtMessage();
+        String dataStr = "";
+        try {
+            nemsCommonSeqNoRequest.setKey(ApiKey.保税监管_保税核注清单查询服务秘钥.getValue());
+            String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_保税核注清单详细查询接口.getValue(), JSON.toJSONString(nemsCommonSeqNoRequest));
+            JSONObject jsonObject = JSON.parseObject(s);
+            String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
+            if ("200".equals(code)) {
+                Object data = jsonObject.get("data");
+
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), InvtMessage.class);
+                resultMap.put("code","200");
+                resultMap.put("msg","success");
+                resultMap.put("data",baseResult);
+            } else {
+                Object data = jsonObject.get("msg");
+                if (data != null) {
+                    dataStr = data.toString();
+                }
+                logger.error("保税监管_保税核注清单详细查询接口"+nemsCommonSeqNoRequest.getBlsNo(),"结果"+dataStr);
+                logger.error(dataStr);
+                resultMap.put("code","500");
+                resultMap.put("msg",dataStr);
+                resultMap.put("data",null);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        return resultMap;
+    }
+
+    public static Object ByteAryToObject(byte[] bytes) throws IOException, ClassNotFoundException {
+        if(bytes == null){
+            return null;
+        }
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ObjectInputStream sIn = null;
+        Object obj = null;
+        sIn = new ObjectInputStream(in);
+        obj = sIn.readObject();
+        return obj;
     }
 
 }

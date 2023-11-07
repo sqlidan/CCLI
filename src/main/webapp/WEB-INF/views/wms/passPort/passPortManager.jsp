@@ -215,26 +215,6 @@
 			</table>
 		</form>
 		</div>
-		<div data-options="region:'south',split:true,border:false" title="关联单证" style="height:500px">
-			<div id="tb" style="padding:5px;height:auto" class="datagrid-toolbar">
-				<div>
-					<shiro:hasPermission name="wms:passPort:add">
-						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDJInfo()">添加关联</a>
-						<span class="toolbar-item dialog-tool-separator"></span>
-					</shiro:hasPermission>
-					<shiro:hasPermission name="wms:passPort:add">
-						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delDJInfo()">删除</a>
-						<span class="toolbar-item dialog-tool-separator"></span>
-					</shiro:hasPermission>
-<%--					<shiro:hasPermission name="wms:passPort:add">--%>
-<%--						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="submit()">提交</a>--%>
-<%--						<span class="toolbar-item dialog-tool-separator"></span>--%>
-<%--					</shiro:hasPermission>--%>
-				</div>
-			</div>
-			<table id="dg" ></table>
-			<div id="dlg"></div>
-		</div>
 	</div>
 	<div title="表体" >
 		<div data-options="region:'center'">
@@ -276,7 +256,7 @@
 					<tr>
 						<td style="text-align:right;"><span style="color: red">*</span>申报数量</td>
 						<td>
-							<input type="text" id="dclQty" name="dclQty"  class="easyui-validatebox" data-options="width:180, required:'required'"  value="${passPortInfo.dclQty}">
+							<input type="text" id="dclQty" name="dclQty"  class="easyui-validatebox" data-options="width:180, required:'required'"  value="${passPortInfo.dclQty}" onchange="updateDclQty()">
 						</td>
 						<td style="text-align:right;">货物毛重</td>
 						<td>
@@ -288,6 +268,10 @@
 						</td>
 					</tr>
 					<tr>
+						<td style="text-align:right;">剩余数量</td>
+						<td>
+							<input type="text" id="remainingQuantity" name="remainingQuantity"  class="easyui-validatebox" data-options="width:180" value="${passPortInfo.remainingQuantity}">
+						</td>
 						<td style="text-align:right;">备注</td>
 						<td>
 							<input type="text" id="remark" name="remark"  class="easyui-validatebox" data-options="width:180" value="${passPortInfo.remark}"  >
@@ -316,6 +300,22 @@
 			<table id="dg2" ></table>
 		</div>
 	</div>
+	<div title="关联单证" >
+		<div data-options="region:'south',split:true,border:false" title="关联单证" style="height:500px">
+			<div id="tb" style="padding:5px;height:auto" class="datagrid-toolbar">
+				<shiro:hasPermission name="wms:passPort:add">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDJInfo()">添加关联</a>
+					<span class="toolbar-item dialog-tool-separator"></span>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="wms:passPort:add">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delDJInfo()">删除</a>
+					<span class="toolbar-item dialog-tool-separator"></span>
+				</shiro:hasPermission>
+			</div>
+			<table id="dg" ></table>
+			<div id="dlg"></div>
+		</div>
+	</div>
 </div>
 
 
@@ -328,10 +328,10 @@ var passPortId = "${passPort.id}";
 var b=0;
 var dhs;
 var dt;
-
+var dclUnitcdAry;//计量单位
+var allDclQty;//核注清单中的总数量
 
 //===============================================================================================================
-
 function updateTotalWt(){
 	var vehicleWt = $("#vehicleWt").val();//车自重
 	if(vehicleWt == undefined || vehicleWt == null || vehicleWt == "" || vehicleWt == '' || vehicleWt.length == 0){
@@ -348,9 +348,17 @@ function updateTotalWt(){
 	var allWt = parseFloat(vehicleWt) + parseFloat(vehicleFrameWt) + parseFloat(totalGrossWt);
 	$("#totalWt").val(allWt+"");
 }
+//===============================================================================================================
+function updateDclQty(){
+	var dclQty = $("#dclQty").val();//申报数量
+	if(dclQty == undefined || dclQty == null || dclQty == "" || dclQty == '' || dclQty.length == 0){
+		dclQty = 0;
+	}
+	var remainingQuantity = parseFloat(allDclQty) - parseFloat(dclQty);
+	$("#remainingQuantity").val(remainingQuantity+"");
+}
 
 //===============================================================================================================
-var dclUnitcdAry;//计量单位
 
 //初始化
 $(function(){
@@ -643,19 +651,24 @@ function getGdsInfo(){
 		$.ajax({
 			async: false,
 			type: 'GET',
-			url: "${ctx}/wms/passPortInfo/getGdsInfo?rltGdsSeqno="+rltGdsSeqno,
+			url: "${ctx}/wms/passPortInfo/getGdsInfo?rltGdsSeqno="+rltGdsSeqno+"&passPortId="+passPortId,
 			dataType: "text",
 			success: function(resStr){
 				var res = JSON.parse(resStr);
 				if(res.msg == "success"){
 					var data = res.data;
-					// $("#gdsMtno").val(data.gdsMtno);
+					$("#gdsMtno").val(data.gdsMtno);
 					$("#gdecd").val(data.hsCode);
 					$("#gdsNm").val(data.hsItemname);
 					$('#dclUnitcd').combobox('select',data.dclUnitcd);
-					$("#dclQty").val(data.piece);
-					$("#grossWt").val(data.hsQty);
+					allDclQty = data.dclTotalAmt;
+					$("#dclQty").val(data.dclQty);
+					var remainingQuantity = parseFloat(data.dclTotalAmt) - parseFloat(data.dclQty);
+					$("#remainingQuantity").val(remainingQuantity+"");
+					$("#grossWt").val(data.grossWeight);
 					$("#netWt").val(data.netWeight);
+				}else{
+					parent.$.messager.show({title: "提示", msg: res.msg, position: "bottomRight" });
 				}
 			}
 		});

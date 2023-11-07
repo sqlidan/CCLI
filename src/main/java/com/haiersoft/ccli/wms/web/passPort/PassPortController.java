@@ -179,27 +179,26 @@ public class PassPortController extends BaseController {
         User user = UserUtil.getCurrentUser();
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
-            /**
-             * 1-申报
-             * 2-通过
-             * 3-作废
-             */
-            bisPassPort.setState(type);
             if ("1".equals(type)) {
                 bisPassPort.setDclBy(user.getName());//申报人
                 bisPassPort.setDclTime(new Date());//申报时间
                 //调用申报核放单接口
                 Map<String, Object> resultMap = passPortSave(id);
                 if ("200".equals(resultMap.get("code").toString())) {
-                    bisPassPort.setEtpsPreentNo2(resultMap.get("data").toString());
+                    bisPassPort.setState("1");
+                    bisPassPort.setDclTime(new Date());
+                    if(resultMap.get("data") != null){
+                        bisPassPort.setPassportNo(resultMap.get("data").toString());
+                    }
                 } else {
                     return resultMap.get("msg").toString();
                 }
             }
-            if ("3".equals(type)) {
+            if ("C".equals(type)) {
                 //调用申报核放单接口
                 Map<String, Object> resultMap = passPortNullify(id);
                 if ("200".equals(resultMap.get("code").toString())) {
+                    bisPassPort.setState(type);
                     //作废申请成功
                     System.out.println("作废申请成功");
                 } else {
@@ -220,15 +219,22 @@ public class PassPortController extends BaseController {
      */
     @RequestMapping(value = "synchronization/{id}")
     @ResponseBody
-    public String synchronization(@PathVariable("id") String id) {
+    public String synchronization(@PathVariable("id") String id,@RequestParam("content") String content) {
         User user = UserUtil.getCurrentUser();
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
             //调用申报核放单同步接口
-            Map<String, Object> resultMap = passPortSynchronization(bisPassPort);
+            Map<String, Object> resultMap = passPortSynchronization(bisPassPort.getSeqNo(),content);
             if ("200".equals(resultMap.get("code").toString())) {
-                //同步成功
                 System.out.println("同步成功");
+                //TODO 同步成功，修改核放单信息
+//                bisPassPort.setSeqNo("");
+//                bisPassPort.setPassportNo("");
+//                bisPassPort.setState(bisPassPort.getState());
+//                bisPassPort.setLockage("");
+//                bisPassPort.setCheckResult("");
+//                bisPassPort.setLockageTime1(null);
+//                bisPassPort.setLockageTime2(null);
             } else {
                 return resultMap.get("msg").toString();
             }
@@ -258,7 +264,7 @@ public class PassPortController extends BaseController {
         //校验是否是空车进出区
         boolean empty = false;
         if(bisPassPortHead != null && bisPassPortHead.getPassportTypecd() != null && bisPassPortHead.getPassportTypecd().trim().length() > 0){
-            System.out.println("继续判断");
+            //继续判断
             if("6".equals(bisPassPortHead.getPassportTypecd().trim())){
                 empty = true;
             }
@@ -270,7 +276,7 @@ public class PassPortController extends BaseController {
 
         List<BisPassPortInfo> bisPassPortInfoList = new ArrayList<>();
         List<BisPassPortInfoDJ> bisPassPortInfoDJList = new ArrayList<>();
-        //核放单类型为空车进出区时不校验表体和关联单据淑君
+        //核放单类型为空车进出区时不校验表体和关联单据
         if(!empty){
             //获取表体数据
             bisPassPortInfoList = passPortInfoService.getList(id);
@@ -281,13 +287,23 @@ public class PassPortController extends BaseController {
             }
             //获取表体数据
             bisPassPortInfoDJList = passPortInfoDJService.getList(id);
-            if (bisPassPortInfoDJList == null || bisPassPortInfoDJList.size() == 0) {
-                resultMap.put("code","500");
-                resultMap.put("msg","未获取到核放单关联单证数据");
-                return resultMap;
+        }
+        //核绑定类型为一票多车时需要校验关联单据不能为空
+        boolean multipleCars = false;
+        if(bisPassPortHead != null && bisPassPortHead.getBindTypecd() != null && bisPassPortHead.getBindTypecd().trim().length() > 0){
+            //继续判断
+            if("3".equals(bisPassPortHead.getBindTypecd().trim())){
+                //一票多车
+                multipleCars = true;
+            }
+            if(multipleCars){
+                if (bisPassPortInfoDJList == null || bisPassPortInfoDJList.size() == 0) {
+                    resultMap.put("code","500");
+                    resultMap.put("msg","未获取到核放单关联单证数据");
+                    return resultMap;
+                }
             }
         }
-
 
         String seqNo = isNullOrEmpty(bisPassPortHead.getSeqNo());
         String passportNo = isNullOrEmpty(bisPassPortHead.getPassportNo());
@@ -425,41 +441,35 @@ public class PassPortController extends BaseController {
     }
 
     //同步核放单
-    public Map<String, Object> passPortSynchronization(BisPassPort bisPassPort){
-        Map<String, Object> resultMap1 = new HashMap<String, Object>();
-        PassPortQueryRequest passPortQueryRequest = new PassPortQueryRequest();
-        passPortQueryRequest.setSeqNo(bisPassPort.getSeqNo());
-        passPortQueryRequest.setPassportNo(bisPassPort.getPassportNo());
-        passPortQueryRequest.setMemberCode(memberCode);
-        passPortQueryRequest.setPass(pass);
-        passPortQueryRequest.setIcCode(icCode);
+    public Map<String, Object> passPortSynchronization(String seqNo,String content){
         //核放单列表查询服务
-        logger.info("passPortQueryRequest== "+JSON.toJSONString(passPortQueryRequest));
-        resultMap1 = PassPortQueryListService(passPortQueryRequest);
-        logger.info("passPortQueryResult== "+resultMap1.toString());
-        if("200".equals(resultMap1.get("code").toString())){
-            //TODO 修改核放单信息
-
-            //核放单列表查询服务
-            Map<String, Object> resultMap2 = new HashMap<String, Object>();
-            SasCommonSeqNoRequest sasCommonSeqNoRequest = new SasCommonSeqNoRequest();
-            sasCommonSeqNoRequest.setSeqNo(bisPassPort.getSeqNo());
-            sasCommonSeqNoRequest.setMemberCode(memberCode);
-            sasCommonSeqNoRequest.setPass(pass);
-            sasCommonSeqNoRequest.setIcCode(icCode);
-            logger.info("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
-            resultMap2 = PassPortDetailService(sasCommonSeqNoRequest);
-            logger.info("sasCommonSeqNoResult== "+resultMap1.toString());
-            if("200".equals(resultMap2.get("code").toString())){
-                //TODO 修改核放单信息
-                return resultMap2;
-            }else{
-                return resultMap2;
-            }
-
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        SasCommonSeqNoRequest sasCommonSeqNoRequest = new SasCommonSeqNoRequest();
+        if(content == null ||content.trim().length() == 0){
+            sasCommonSeqNoRequest.setSeqNo(seqNo);
         }else{
-            return resultMap1;
+            String str = content.substring(0,content.length()-1);
+            String lastStr = content.substring(content.length()-1,content.length());
+            if("1".equals(lastStr)){
+                sasCommonSeqNoRequest.setSeqNo(seqNo);
+            }else if("2".equals(lastStr)){
+                sasCommonSeqNoRequest.setSeqNo(str);
+            }else if("3".equals(lastStr)){
+                sasCommonSeqNoRequest.setSeqNo(seqNo);
+                sasCommonSeqNoRequest.setBlsNo(str);
+            }else if("4".equals(lastStr)){
+                sasCommonSeqNoRequest.setSeqNo(str);
+                sasCommonSeqNoRequest.setBlsNo(seqNo);
+            }
         }
+        sasCommonSeqNoRequest.setMemberCode(memberCode);
+        sasCommonSeqNoRequest.setPass(pass);
+        sasCommonSeqNoRequest.setIcCode(icCode);
+        logger.info("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
+        resultMap = PassPortDetailService(sasCommonSeqNoRequest);
+        JSONObject jsonObject = new JSONObject(resultMap);
+        logger.info("sasCommonSeqNoResult== "+jsonObject.toJSONString());
+        return resultMap;
     }
 
 //======================================================================================================================
@@ -545,6 +555,7 @@ public class PassPortController extends BaseController {
             passPortMessage.setKey(ApiKey.保税监管_保税核放单保存服务秘钥.getValue());
             String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单申报接口.getValue(), JSON.toJSONString(passPortMessage));
             logger.info("核放单申报接口结果:"+s);
+//            JSONObject jsonObject = JSON.parseObject("{\"code\":200,\"msg\":null,\"data\":{\"seqNo\":null,\"etpsPreentNo\":null,\"checkInfo\":null,\"dealFlag\":null,\"clientSeqNo\":null,\"dclDate\":\"20231101\",\"preNo\":\"P42302300000032509\",\"state\":\"1\"}}");
             JSONObject jsonObject = JSON.parseObject(s);
             String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
             if ("200".equals(code)) {
@@ -556,7 +567,7 @@ public class PassPortController extends BaseController {
                 baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), SasCommonResponse.class);
                 resultMap.put("code","200");
                 resultMap.put("msg","success");
-                resultMap.put("data",baseResult.getSeqNo());
+                resultMap.put("data",baseResult.getPreNo());
             } else {
                 Object data = jsonObject.get("msg");
                 if (data != null) {
