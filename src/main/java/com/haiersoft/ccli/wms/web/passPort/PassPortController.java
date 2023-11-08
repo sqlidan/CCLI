@@ -2,6 +2,7 @@ package com.haiersoft.ccli.wms.web.passPort;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.haiersoft.ccli.api.entity.ResponseVo;
 import com.haiersoft.ccli.common.persistence.Page;
@@ -39,6 +40,7 @@ import javax.validation.Valid;
 import javax.xml.rpc.ServiceException;
 import java.io.*;
 import java.rmi.RemoteException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -188,7 +190,7 @@ public class PassPortController extends BaseController {
                     bisPassPort.setState("1");
                     bisPassPort.setDclTime(new Date());
                     if(resultMap.get("data") != null){
-                        bisPassPort.setPassportNo(resultMap.get("data").toString());
+                        bisPassPort.setSeqNo(resultMap.get("data").toString());
                     }
                 } else {
                     return resultMap.get("msg").toString();
@@ -214,27 +216,42 @@ public class PassPortController extends BaseController {
         }
     }
 
+    public static void main(String[] args) {
+
+    }
+
     /**
      * 同步
      */
     @RequestMapping(value = "synchronization/{id}")
     @ResponseBody
-    public String synchronization(@PathVariable("id") String id,@RequestParam("content") String content) {
+    public String synchronization(@PathVariable("id") String id) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd hh:mm:ss");
         User user = UserUtil.getCurrentUser();
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
             //调用申报核放单同步接口
-            Map<String, Object> resultMap = passPortSynchronization(bisPassPort.getSeqNo(),content);
+            Map<String, Object> resultMap = passPortSynchronization(bisPassPort.getSeqNo());
             if ("200".equals(resultMap.get("code").toString())) {
-                System.out.println("同步成功");
-                //TODO 同步成功，修改核放单信息
-//                bisPassPort.setSeqNo("");
-//                bisPassPort.setPassportNo("");
-//                bisPassPort.setState(bisPassPort.getState());
-//                bisPassPort.setLockage("");
-//                bisPassPort.setCheckResult("");
-//                bisPassPort.setLockageTime1(null);
-//                bisPassPort.setLockageTime2(null);
+                //处理结果
+                PassPortMessage passPortMessage = (PassPortMessage) resultMap.get("data");
+                String status = passPortMessage.getStatus();
+                bisPassPort.setState(status);
+                PassPortHead passPortHead = passPortMessage.getPassportHead();
+                if(passPortHead.getPassportNo()!=null && passPortHead.getPassportNo().toString().trim().length() > 0){
+                    bisPassPort.setPassportNo(passPortHead.getPassportNo().toString());
+                }
+                if(passPortHead.getPassStatus()!=null && passPortHead.getPassStatus().toString().trim().length() > 0){
+                    bisPassPort.setLockage(passPortHead.getPassStatus().toString());
+                }
+                if(passPortHead.getPassTime1()!=null && passPortHead.getPassTime1().toString().trim().length() > 0){
+                    Date passTime1 = simpleDateFormat.parse(passPortHead.getPassTime1().toString());
+                    bisPassPort.setLockageTime1(passTime1);
+                }
+                if(passPortHead.getPassTime2()!=null && passPortHead.getPassTime2().toString().trim().length() > 0){
+                    Date passTime2 = simpleDateFormat.parse(passPortHead.getPassTime2().toString());
+                    bisPassPort.setLockageTime2(passTime2);
+                }
             } else {
                 return resultMap.get("msg").toString();
             }
@@ -441,34 +458,17 @@ public class PassPortController extends BaseController {
     }
 
     //同步核放单
-    public Map<String, Object> passPortSynchronization(String seqNo,String content){
+    public Map<String, Object> passPortSynchronization(String seqNo){
         //核放单列表查询服务
         Map<String, Object> resultMap = new HashMap<String, Object>();
         SasCommonSeqNoRequest sasCommonSeqNoRequest = new SasCommonSeqNoRequest();
-        if(content == null ||content.trim().length() == 0){
-            sasCommonSeqNoRequest.setSeqNo(seqNo);
-        }else{
-            String str = content.substring(0,content.length()-1);
-            String lastStr = content.substring(content.length()-1,content.length());
-            if("1".equals(lastStr)){
-                sasCommonSeqNoRequest.setSeqNo(seqNo);
-            }else if("2".equals(lastStr)){
-                sasCommonSeqNoRequest.setSeqNo(str);
-            }else if("3".equals(lastStr)){
-                sasCommonSeqNoRequest.setSeqNo(seqNo);
-                sasCommonSeqNoRequest.setBlsNo(str);
-            }else if("4".equals(lastStr)){
-                sasCommonSeqNoRequest.setSeqNo(str);
-                sasCommonSeqNoRequest.setBlsNo(seqNo);
-            }
-        }
+        sasCommonSeqNoRequest.setSeqNo(seqNo);
         sasCommonSeqNoRequest.setMemberCode(memberCode);
         sasCommonSeqNoRequest.setPass(pass);
         sasCommonSeqNoRequest.setIcCode(icCode);
         logger.info("sasCommonSeqNoRequest== "+JSON.toJSONString(sasCommonSeqNoRequest));
         resultMap = PassPortDetailService(sasCommonSeqNoRequest);
-        JSONObject jsonObject = new JSONObject(resultMap);
-        logger.info("sasCommonSeqNoResult== "+jsonObject.toJSONString());
+        logger.info("sasCommonSeqNoResult== "+resultMap.toString());
         return resultMap;
     }
 

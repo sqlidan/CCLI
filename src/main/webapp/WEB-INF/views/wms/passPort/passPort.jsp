@@ -9,6 +9,18 @@
 <div id="tb" style="padding:5px;height:auto">
 	<div>
 		<form id="searchFrom" action="">
+			<input type="text" name="filter_LIKES_seqNo" class="easyui-validatebox" data-options="width:150,prompt: '预录入统一编号'"/>
+			<input type="text" name="filter_LIKES_passportNo" class="easyui-validatebox" data-options="width:150,prompt: '核放单编号'"/>
+			<select id="passportTypecd" name="filter_LIKES_passportTypecd" class="easyui-combobox" data-options="width:150,prompt: '核放单类型'" >
+				<option value=""></option>
+				<option value="1">先入区后报关</option>
+				<option value="2">一线一体化进出区</option>
+				<option value="3">二线进出区</option>
+				<option value="4">非报关进出区</option>
+				<option value="5">卡口登记货物</option>
+				<option value="6">空车进出区</option>
+				<option value="7">两步申报</option>
+			</select>
 			<select name="filter_EQS_ioTypecd" class="easyui-combobox" data-options="width:150,prompt: '进出标志' " >
 				<option value=""></option>
 				<option value="I">进区</option>
@@ -32,16 +44,6 @@
 				<option value="2">一车一票</option>
 				<option value="3">一票多车</option>
 			</select>
-      	    <select id="passportTypecd" name="filter_LIKES_passportTypecd" class="easyui-combobox" data-options="width:150,prompt: '核放单类型'" >
-				<option value=""></option>
-				<option value="1">先入区后报关</option>
-				<option value="2">一线一体化进出区</option>
-				<option value="3">二线进出区</option>
-				<option value="4">非报关进出区</option>
-				<option value="5">卡口登记货物</option>
-				<option value="6">空车进出区</option>
-				<option value="7">两步申报</option>
-      	    </select>
 			<select id="rltTbTypecd" name="filter_LIKES_rltTbTypecd" class="easyui-combobox" data-options="width:150,prompt: '关联单证类型'" >
 				<option value=""></option>
 				<option value="1">核注清单</option>
@@ -49,17 +51,15 @@
 				<option value="3">提运单</option>
 			</select>
 			<input type="text" name="filter_LIKES_rltNo" class="easyui-validatebox" data-options="width:150,prompt: '关联单证编号'"/>
-			<input type="text" name="filter_LIKES_seqNo" class="easyui-validatebox" data-options="width:150,prompt: '预录入统一编号'"/>
-			<input type="text" name="filter_LIKES_passportNo" class="easyui-validatebox" data-options="width:150,prompt: '核放单编号'"/>
-			<input type="text" name="filter_LIKES_etpsPreentNo" class="easyui-validatebox" data-options="width:150,prompt: '企业内部编号'"/>
-			<input type="text" name="filter_LIKES_areainEtpsno" class="easyui-validatebox" data-options="width:150,prompt: '区内企业编码'"/>
+<%--			<input type="text" name="filter_LIKES_etpsPreentNo" class="easyui-validatebox" data-options="width:150,prompt: '企业内部编号'"/>--%>
+<%--			<input type="text" name="filter_LIKES_areainEtpsno" class="easyui-validatebox" data-options="width:150,prompt: '区内企业编码'"/>--%>
 			<input type="text" name="filter_LIKES_vehicleNo" class="easyui-validatebox" data-options="width:150,prompt: '承运车车牌号'"/>
-			<select id="dclTypecd" name="filter_LIKES_dclTypecd" class="easyui-combobox" data-options="width:150,prompt: '申报类型'" >
-				<option value=""></option>
-				<option value="1">备案</option>
-				<option value="2">变更</option>
-				<option value="3">删除</option>
-			</select>
+<%--			<select id="dclTypecd" name="filter_LIKES_dclTypecd" class="easyui-combobox" data-options="width:150,prompt: '申报类型'" >--%>
+<%--				<option value=""></option>--%>
+<%--				<option value="1">备案</option>--%>
+<%--				<option value="2">变更</option>--%>
+<%--				<option value="3">删除</option>--%>
+<%--			</select>--%>
 			<select name="filter_EQS_lockage" class="easyui-combobox" data-options="width:150,prompt: '过卡状态' " >
 				<option value=""></option>
 				<option value="0">已申请</option>
@@ -70,8 +70,8 @@
 				<option value="5">已删除</option>
 				<option value="6">已作废(拒绝过卡)</option>
 			</select>
-	        <input type="text" name="filter_GED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入开始日期'"/>
-	        <input type="text" name="filter_LED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入结束日期'"/>
+<%--	        <input type="text" name="filter_GED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入开始日期'"/>--%>
+<%--	        <input type="text" name="filter_LED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss" data-options="width:150,prompt: '录入结束日期'"/>--%>
 	        <span class="toolbar-item dialog-tool-separator"></span>
 	        <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
 		</form>
@@ -346,31 +346,17 @@ function synchronization(){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条核放单数据！", position: "bottomRight" });
 		return;
 	}
-	parent.$.messager.prompt('提示', '请输入需要同步的核放单号。', function(content){
-		if (content){
+	parent.$.messager.confirm('提示', '您确定要将选中的核放单信息进行同步吗？', function(data){
+		if (data){
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/passPort/synchronization/"+row.id+"?content="+content,
+				url:"${ctx}/wms/passPort/synchronization/"+row.id,
 				success: function(data){
 					successTip(data,dg);
 				},
 			});
-		}else{
-			parent.$.messager.show({ title : "提示",msg: "请输入核放单号！", position: "bottomRight" });
-			return;
 		}
 	});
-	<%--parent.$.messager.confirm('提示', '您确定要将选中的核放单信息进行同步吗？', function(data){--%>
-	<%--	if (data){--%>
-	<%--		$.ajax({--%>
-	<%--			type:'get',--%>
-	<%--			url:"${ctx}/wms/passPort/synchronization/"+row.id,--%>
-	<%--			success: function(data){--%>
-	<%--				successTip(data,dg);--%>
-	<%--			},--%>
-	<%--		});--%>
-	<%--	}--%>
-	<%--});--%>
 }
 
 </script>

@@ -136,7 +136,7 @@
 					</td>
 					<td style="text-align:right;"><span style="color: red">*</span>集装箱重</td>
 					<td>
-						<input type="text" id="containerWt" name="containerWt"  class="easyui-validatebox" value="${passPort.containerWt}" data-options="width:180, required:'required'">
+						<input type="text" id="containerWt" name="containerWt"  class="easyui-validatebox" value="${passPort.containerWt}" data-options="width:180, required:'required'" onchange="updateTotalWt()">
 					</td>
 				</tr>
 				<tr>
@@ -341,11 +341,15 @@ function updateTotalWt(){
 	if(vehicleFrameWt == undefined || vehicleFrameWt == null || vehicleFrameWt == "" || vehicleFrameWt == '' || vehicleFrameWt.length == 0){
 		vehicleFrameWt = 0;
 	}
+	var containerWt = $("#containerWt").val();//集装箱重
+	if(containerWt == undefined || containerWt == null || containerWt == "" || containerWt == '' || containerWt.length == 0){
+		containerWt = 0;
+	}
 	var totalGrossWt = $("#totalGrossWt").val();//货物总毛重
 	if(totalGrossWt == undefined || totalGrossWt == null || totalGrossWt == "" || totalGrossWt == '' || totalGrossWt.length == 0){
 		totalGrossWt = 0;
 	}
-	var allWt = parseFloat(vehicleWt) + parseFloat(vehicleFrameWt) + parseFloat(totalGrossWt);
+	var allWt = parseFloat(vehicleWt) + parseFloat(vehicleFrameWt)+ parseFloat(containerWt) + parseFloat(totalGrossWt);
 	$("#totalWt").val(allWt+"");
 }
 //===============================================================================================================
