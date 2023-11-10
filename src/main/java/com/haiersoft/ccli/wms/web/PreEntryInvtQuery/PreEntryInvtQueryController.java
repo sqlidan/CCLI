@@ -20,6 +20,8 @@ import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisCustomsClearanceInfoS;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisCustomsClearanceList;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.apiEntity.*;
+import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclaration;
+import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclarationInfo;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
@@ -31,6 +33,8 @@ import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.BaseBoundedListService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.CustomsClearanceInfoSService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.CustomsClearanceListService;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
+import com.haiersoft.ccli.wms.service.customsDeclaration.CDInfoService;
+import com.haiersoft.ccli.wms.service.customsDeclaration.CDService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryInfoService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryService;
 import com.haiersoft.ccli.wms.web.preEntry.HttpUtils;
@@ -71,6 +75,10 @@ public class PreEntryInvtQueryController extends BaseController {
 	private CustomsClearanceInfoSService customsClearanceInfoSService;
 	@Autowired
 	private BaseBoundedListService baseBoundedListService;
+	@Autowired
+	private CDService cdService;
+	@Autowired
+	private CDInfoService cdInfoService;
 
 	private static final String memberCode = "eimskipMember";
 	private static final String pass = "66668888";
@@ -880,6 +888,223 @@ public class PreEntryInvtQueryController extends BaseController {
 //					}
 //				}
 //			}
+		}
+		return "success";
+	}
+
+//================================================================================================================================
+	//生成报关单
+	@RequestMapping(value="createOneBGD/{id}",method = RequestMethod.GET)
+	@ResponseBody
+	public String createOneBGD(@PathVariable("id") String id) {
+		String msg = "success";
+		//获取要同步的核注清单号
+		BisPreEntryInvtQuery bisPreEntryInvtQuery = new BisPreEntryInvtQuery();
+		bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
+		if (bisPreEntryInvtQuery != null){
+			if (bisPreEntryInvtQuery.getBondInvtNo()!=null && bisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+				int count = cdService.getCount(bisPreEntryInvtQuery.getBondInvtNo());
+				if(count > 0){
+					return "当前核注清单已生成过报关单，请联系管理员。";
+				}
+				//查询
+				String result = null;
+				try {
+					result = createBGD(bisPreEntryInvtQuery);
+				} catch (IOException | ClassNotFoundException | ParseException e) {
+					logger.info("批量生成报关单异常:"+e.getMessage());
+					e.printStackTrace();
+				}
+				if ("success".equals(result)){
+					User user = UserUtil.getCurrentUser();
+					bisPreEntryInvtQuery.setUpdateBy(user.getName());
+					bisPreEntryInvtQuery.setUpdateTime(new Date());
+					bisPreEntryInvtQuery.setCreateBgd("1");
+					preEntryInvtQueryService.merge(bisPreEntryInvtQuery);
+					logger.info("核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" 生成报关单成功");
+				}else{
+					msg = msg + "核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+				}
+			}
+		}
+		return msg;
+	}
+
+	//批量生成报关单
+	@RequestMapping(value="createAllBGD",method = RequestMethod.GET)
+	@ResponseBody
+	public String createAllBGD() {
+		String msg = "success";
+		//获取要同步的核注清单号
+		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+		bisPreEntryInvtQueryList = preEntryInvtQueryService.getListByCreateBGD();
+		if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() > 0){
+			for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+					int count = cdService.getCount(forBisPreEntryInvtQuery.getBondInvtNo());
+					if(count > 0){
+//						return "当前核注清单已生成过报关单，请联系管理员。";
+						continue;
+					}
+					//查询
+					String result = null;
+					try {
+						result = createBGD(forBisPreEntryInvtQuery);
+					} catch (IOException | ClassNotFoundException | ParseException e) {
+						logger.info("批量生成报关单异常:"+e.getMessage());
+						e.printStackTrace();
+					}
+					if ("success".equals(result)){
+						User user = UserUtil.getCurrentUser();
+						forBisPreEntryInvtQuery.setUpdateBy(user.getName());
+						forBisPreEntryInvtQuery.setUpdateTime(new Date());
+						forBisPreEntryInvtQuery.setCreateBgd("1");
+						preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
+						logger.info("核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" 生成报关单成功");
+					}else{
+						msg = msg + "核注清单号："+forBisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+					}
+				}
+			}
+		}
+		return msg;
+	}
+
+	//生成报关单
+	public String createBGD(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException, ParseException {
+		//获取核注清单数据
+		InvtHeadType invtHeadType = new InvtHeadType();
+		List<InvtListType> invtListType = new ArrayList<>();
+		if (bisPreEntryInvtQuery.getInvtHeadType() == null){
+			return "生成预报单时未获取到表头信息";
+		}else{
+			invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+		}
+		//非报关不生成报关单
+		if(invtHeadType.getDclcusFlag() == null || "2".equals(invtHeadType.getDclcusFlag())){
+			return "success";
+		}
+		if (bisPreEntryInvtQuery.getInvtListType() == null || "[]".equals(bisPreEntryInvtQuery.getInvtListType())){
+			return "生成预报单时未获取到表体信息";
+		}else{
+			invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+		}
+
+		//创建报关单对象
+		BsCustomsDeclaration bsCustomsDeclaration = new BsCustomsDeclaration();
+		List<BsCustomsDeclarationInfo> bsCustomsDeclarationInfoList = new ArrayList<>();
+
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+
+		String linkId = UUID.randomUUID().toString();
+		bsCustomsDeclaration.setForId(linkId);
+		bsCustomsDeclaration.setState("5");//状态 5-申报核注清单通过，状态为5
+
+		//服务项目
+		if (invtHeadType.getImpexpMarkcd() == null || "I".equals(invtHeadType.getImpexpMarkcd())){
+			bsCustomsDeclaration.setServiceProject("0");
+		}else{
+			bsCustomsDeclaration.setServiceProject("1");
+		}
+		User user = UserUtil.getCurrentUser();
+		bsCustomsDeclaration.setCreateBy("SYSTEM");
+		if(invtHeadType.getInputTime()!=null){
+			bsCustomsDeclaration.setCreateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInputTime()))));
+		}
+		bsCustomsDeclaration.setUpdateBy("SYSTEM");
+		if(invtHeadType.getInvtDclTime()!=null){
+			bsCustomsDeclaration.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
+		}
+		bsCustomsDeclaration.setJlAudit("李晓静");
+		bsCustomsDeclaration.setJlAuditTime(bsCustomsDeclaration.getUpdateTime());
+		bsCustomsDeclaration.setZgAudit("王巧玲");
+		bsCustomsDeclaration.setZgAuditTime(bsCustomsDeclaration.getUpdateTime());
+		bsCustomsDeclaration.setUpAndDown("0");//上传/下载,0-未上传;1-已上传;2-已下载
+		bsCustomsDeclaration.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
+		bsCustomsDeclaration.setDeclarationUnit(invtHeadType.getDclEtpsNm());//报关公司
+		String cdNum = "";
+		if(invtHeadType.getEntryNo() != null && invtHeadType.getEntryNo().toString().trim().length() > 0){
+			cdNum = invtHeadType.getEntryNo().toString().trim();
+		}else{
+			if(invtHeadType.getRltEntryNo() != null && invtHeadType.getRltEntryNo().toString().trim().length() > 0){
+				cdNum = invtHeadType.getRltEntryNo().toString().trim();
+			}
+		}
+		bsCustomsDeclaration.setCdNum(cdNum);//报关单号
+		bsCustomsDeclaration.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
+		bsCustomsDeclaration.setBillNum(bisPreEntryInvtQuery.getTdNo().trim());//提单号
+		bsCustomsDeclaration.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
+		bsCustomsDeclaration.setStoragePlace("青岛港怡之航冷链物流有限公司");//货物存放地点
+		bsCustomsDeclaration.setConsignee(invtHeadType.getRcvgdEtpsNm() == null ? "" : invtHeadType.getRcvgdEtpsNm());//收货人
+		bsCustomsDeclaration.setConsignor(invtHeadType.getRltEntryBizopEtpsno());//发货人
+		bsCustomsDeclaration.setMyg(invtHeadType.getStshipTrsarvNatcd());//贸易国
+		bsCustomsDeclaration.setQyg(invtHeadType.getStshipTrsarvNatcd());//启运国
+		bsCustomsDeclaration.setCdBy("韩飞");//报关人
+		if(invtHeadType.getEntryDclTime()!=null){
+			bsCustomsDeclaration.setCdTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getEntryDclTime()))));//报关时间
+			bsCustomsDeclaration.setSbTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getEntryDclTime()))));//申报日期
+		}
+		bsCustomsDeclaration.setRemark(invtHeadType.getRmk());
+
+		Double dty = 0.00;
+		Double netWeight = 0.00;//净重
+		Double grossWeight = 0.00;//毛重
+		for (InvtListType forInvtListType:invtListType) {
+			BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
+			bsCustomsDeclarationInfo.setForId(linkId);
+			bsCustomsDeclarationInfo.setXh(forInvtListType.getGdsSeqno());//序号
+			bsCustomsDeclarationInfo.setSpbh(forInvtListType.getGdecd());//商品编号
+			bsCustomsDeclarationInfo.setSpmc(forInvtListType.getGdsNm());//商品名称
+			bsCustomsDeclarationInfo.setGgxh(forInvtListType.getGdsSpcfModelDesc());//规格型号
+			bsCustomsDeclarationInfo.setBzt(forInvtListType.getDclCurrcd());//币制
+			bsCustomsDeclarationInfo.setSbjldw(forInvtListType.getDclUnitcd());//申报计量单位
+			if(forInvtListType.getDclQty() == null || forInvtListType.getDclQty().trim().length() == 0){
+				bsCustomsDeclarationInfo.setSbsl(Double.parseDouble("0"));//申报数量
+			}else{
+				dty = dty + Double.parseDouble(forInvtListType.getDclQty());
+				bsCustomsDeclarationInfo.setSbsl(Double.parseDouble(forInvtListType.getDclQty()));//申报数量
+			}
+			if(forInvtListType.getDclUprcAmt() == null || forInvtListType.getDclUprcAmt().trim().length() == 0){
+				bsCustomsDeclarationInfo.setQysbdj(Double.parseDouble("0"));//单价
+			}else{
+				bsCustomsDeclarationInfo.setQysbdj(Double.parseDouble(forInvtListType.getDclUprcAmt()));//单价
+			}
+			if(forInvtListType.getUsdStatTotalAmt() == null || forInvtListType.getUsdStatTotalAmt().trim().length() == 0){
+				bsCustomsDeclarationInfo.setMytjzje(Double.parseDouble("0"));//美元总价
+			}else{
+				bsCustomsDeclarationInfo.setMytjzje(Double.parseDouble(forInvtListType.getUsdStatTotalAmt()));//美元总价
+			}
+
+			if(forInvtListType.getGrossWt() == null || forInvtListType.getGrossWt().trim().length() == 0){
+
+			}else{
+				grossWeight = grossWeight + Double.parseDouble(forInvtListType.getGrossWt());//毛重
+			}
+			if(forInvtListType.getNetWt() == null || forInvtListType.getNetWt().trim().length() == 0){
+
+			}else{
+				netWeight = netWeight + Double.parseDouble(forInvtListType.getNetWt());//净重
+			}
+			bsCustomsDeclarationInfo.setYcg(forInvtListType.getNatcd());//原产国(地区)
+			bsCustomsDeclarationInfo.setZzmdg(forInvtListType.getDestinationNatcd());//最终目的国
+			bsCustomsDeclarationInfo.setJnmdd("(37026/370211)青岛前湾保税港区、青岛西海岸和胶州湾综合保税区/青岛市黄岛区");//境内目的地
+			bsCustomsDeclarationInfo.setZmfs(forInvtListType.getLvyrlfModecd());//征免方式
+			bsCustomsDeclarationInfo.setRemark(forInvtListType.getRmk());//备注
+
+			bsCustomsDeclarationInfoList.add(bsCustomsDeclarationInfo);
+		}
+
+		if(invtListType.size() > 0){
+			bsCustomsDeclaration.setDty(dty.toString());//件数
+			bsCustomsDeclaration.setGrossWeight(grossWeight);//毛重
+			bsCustomsDeclaration.setNetWeight(netWeight);//净重
+		}
+		cdService.save(bsCustomsDeclaration);
+		if (bsCustomsDeclarationInfoList.size() > 0){
+			for (BsCustomsDeclarationInfo bsCustomsDeclarationInfo:bsCustomsDeclarationInfoList) {
+				cdInfoService.save(bsCustomsDeclarationInfo);
+			}
 		}
 		return "success";
 	}

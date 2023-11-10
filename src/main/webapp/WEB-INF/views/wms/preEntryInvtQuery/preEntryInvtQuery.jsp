@@ -30,6 +30,14 @@
 				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据</a>
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
+			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOneBGD()">生成报关单(单条)</a>
+				<span class="toolbar-item dialog-tool-separator"></span>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createAllBGD()">生成报关单(批量)</a>
+				<span class="toolbar-item dialog-tool-separator"></span>
+			</shiro:hasPermission>
         </div>
 	</div>
 </div>
@@ -360,6 +368,47 @@ function createClearance(){
 			$.ajax({
 				type:'get',
 				url:"${ctx}/wms/preEntryInvtQuery/createClearance",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}else{
+			return;
+		}
+	});
+}
+//生成报关单
+function createOneBGD(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条数据！", position: "bottomRight" });
+		return;
+	}
+	if(parseInt(row.state) > 0){
+		parent.$.messager.show({ title : "提示",msg: "报关单信息已完善提交，不可删除。", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '确定生成报关单吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/createOneBGD/"+row.id,
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}else{
+			return;
+		}
+	});
+}
+//批量生成报关单
+function createAllBGD(){
+	parent.$.messager.confirm('提示', '确定批量生成报关单吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/createAllBGD",
 				success: function(data){
 					successTip(data,dg);
 				},

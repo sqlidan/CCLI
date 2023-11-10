@@ -61,6 +61,16 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	private String tdNo;
 	@Column(name = "CREATE_CLEARANCE")
 	private String createClearance;// 生成台账标识 0-未生成；1-已生成
+	@Column(name = "CREATE_BGD")
+	private String createBgd;// 生成报关单 0-未生成；1-已生成
+
+	public String getCreateBgd() {
+		return createBgd;
+	}
+
+	public void setCreateBgd(String createBgd) {
+		this.createBgd = createBgd;
+	}
 
 	public String getCreateClearance() {
 		return createClearance;

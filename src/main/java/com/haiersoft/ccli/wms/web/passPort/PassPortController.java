@@ -297,11 +297,11 @@ public class PassPortController extends BaseController {
         if(!empty){
             //获取表体数据
             bisPassPortInfoList = passPortInfoService.getList(id);
-            if (bisPassPortInfoList == null || bisPassPortInfoList.size() == 0) {
-                resultMap.put("code","500");
-                resultMap.put("msg","未获取到核放单表体数据");
-                return resultMap;
-            }
+//            if (bisPassPortInfoList == null || bisPassPortInfoList.size() == 0) {
+//                resultMap.put("code","500");
+//                resultMap.put("msg","未获取到核放单表体数据");
+//                return resultMap;
+//            }
             //获取表体数据
             bisPassPortInfoDJList = passPortInfoDJService.getList(id);
         }
