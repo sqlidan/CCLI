@@ -64,7 +64,7 @@ public class CDController extends BaseController {
     @ResponseBody
     public Map<String, Object> getData(HttpServletRequest request) {
         Page<BsCustomsDeclaration> page = getPage(request);
-        page.orderBy("forId").order(Page.DESC);
+        page.orderBy("createTime").order(Page.DESC);
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         PropertyFilter filter = new PropertyFilter("NEQS_state", "-1");//已删除
         filters.add(filter);
