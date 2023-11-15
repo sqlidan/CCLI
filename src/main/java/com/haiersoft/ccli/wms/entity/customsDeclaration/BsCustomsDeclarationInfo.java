@@ -39,6 +39,8 @@ public class BsCustomsDeclarationInfo implements java.io.Serializable {
 
 	@Column(name = "XH")
 	private String xh;
+	@Column(name = "ACCOUNT_BOOK")
+	private String accountBook;//账册商品序号
 	@Column(name = "SPBH")
 	private String spbh;
 	@Column(name = "SPMC")
@@ -65,6 +67,14 @@ public class BsCustomsDeclarationInfo implements java.io.Serializable {
 	private String zmfs;
 	@Column(name = "REMARK")
 	private String remark;
+
+	public String getAccountBook() {
+		return accountBook;
+	}
+
+	public void setAccountBook(String accountBook) {
+		this.accountBook = accountBook;
+	}
 
 	public Integer getId() {
 		return id;

@@ -46,10 +46,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -894,6 +891,70 @@ public class PreEntryInvtQueryController extends BaseController {
 
 //================================================================================================================================
 	//生成报关单
+	@RequestMapping(value="getBGDInfo/{forId}",method = RequestMethod.GET)
+	@ResponseBody
+	public String getBGDInfo(@PathVariable("forId") String forId,@RequestParam("checkListNoVal") String checkListNoVal) {
+		String msg = "success";
+		//获取要同步的核注清单号
+		BisPreEntryInvtQuery bisPreEntryInvtQuery = new BisPreEntryInvtQuery();
+		bisPreEntryInvtQuery = preEntryInvtQueryService.find("bondInvtNo",checkListNoVal);
+		if (bisPreEntryInvtQuery != null){//本地已获取
+			if (bisPreEntryInvtQuery.getBondInvtNo()!=null && bisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+				int count = cdService.getCount(bisPreEntryInvtQuery.getBondInvtNo());
+				if(count > 0){
+					return "当前核注清单已生成过报关单，请查询后修改。";
+				}
+				//查询
+				String result = null;
+				try {
+					result = createBGD(forId,bisPreEntryInvtQuery);
+				} catch (IOException | ClassNotFoundException | ParseException e) {
+					logger.info("批量生成报关单异常:"+e.getMessage());
+					e.printStackTrace();
+				}
+				if ("success".equals(result)){
+					User user = UserUtil.getCurrentUser();
+					bisPreEntryInvtQuery.setUpdateBy(user.getName());
+					bisPreEntryInvtQuery.setUpdateTime(new Date());
+					bisPreEntryInvtQuery.setCreateBgd("1");
+					preEntryInvtQueryService.merge(bisPreEntryInvtQuery);
+					logger.info("核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" 生成报关单成功");
+				}else{
+					msg = msg + "本地存在，核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+					logger.info("生成报关单失败:"+msg);
+				}
+			}
+		}else{//本地未获取，需查询
+			//查询
+			String result = null;
+			try {
+				result = invtQuery(checkListNoVal,false);
+				if ("success".equals(result)){
+					result = createBGD(forId,bisPreEntryInvtQuery);
+					if ("success".equals(result)){
+						User user = UserUtil.getCurrentUser();
+						bisPreEntryInvtQuery.setUpdateBy(user.getName());
+						bisPreEntryInvtQuery.setUpdateTime(new Date());
+						bisPreEntryInvtQuery.setCreateBgd("1");
+						preEntryInvtQueryService.merge(bisPreEntryInvtQuery);
+						logger.info("核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" 生成报关单成功");
+					}else{
+						msg = msg + "接口获取核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+"成功，生成报关单失败。 "+result +";";
+						logger.info("生成报关单失败:"+msg);
+					}
+				}else{
+					msg = msg + "接口获取核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+"失败。 "+result +";";
+					logger.info("生成报关单失败:"+msg);
+				}
+			} catch (IOException | ClassNotFoundException | ParseException e) {
+				logger.info("批量生成报关单异常:"+e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		return msg;
+	}
+
+	//生成报关单
 	@RequestMapping(value="createOneBGD/{id}",method = RequestMethod.GET)
 	@ResponseBody
 	public String createOneBGD(@PathVariable("id") String id) {
@@ -910,7 +971,7 @@ public class PreEntryInvtQueryController extends BaseController {
 				//查询
 				String result = null;
 				try {
-					result = createBGD(bisPreEntryInvtQuery);
+					result = createBGD(null,bisPreEntryInvtQuery);
 				} catch (IOException | ClassNotFoundException | ParseException e) {
 					logger.info("批量生成报关单异常:"+e.getMessage());
 					e.printStackTrace();
@@ -943,13 +1004,14 @@ public class PreEntryInvtQueryController extends BaseController {
 				if (forBisPreEntryInvtQuery.getBondInvtNo()!=null && forBisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
 					int count = cdService.getCount(forBisPreEntryInvtQuery.getBondInvtNo());
 					if(count > 0){
-//						return "当前核注清单已生成过报关单，请联系管理员。";
-						continue;
+						return "当前核注清单:"+forBisPreEntryInvtQuery.getBondInvtNo()+"已生成过报关单，请联系管理员。";
+//						continue;
 					}
 					//查询
 					String result = null;
 					try {
-						result = createBGD(forBisPreEntryInvtQuery);
+						result = createBGD(null,forBisPreEntryInvtQuery);
+//						result = createBGD2(forBisPreEntryInvtQuery);
 					} catch (IOException | ClassNotFoundException | ParseException e) {
 						logger.info("批量生成报关单异常:"+e.getMessage());
 						e.printStackTrace();
@@ -969,9 +1031,33 @@ public class PreEntryInvtQueryController extends BaseController {
 		}
 		return msg;
 	}
+	//生成报关单
+	public String createBGD2(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException, ParseException {
+		BsCustomsDeclaration bsCustomsDeclaration = new BsCustomsDeclaration();
+		List<BsCustomsDeclarationInfo> bsCustomsDeclarationInfoList = new ArrayList<>();
+		List<InvtListType> invtListType = new ArrayList<>();
+
+		invtListType = JSONArray.parseArray(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtListType())),InvtListType.class);
+
+		String checkListNo = bisPreEntryInvtQuery.getBondInvtNo();
+		bsCustomsDeclaration = cdService.find("checkListNo",checkListNo);
+		bsCustomsDeclarationInfoList = cdInfoService.getList(bsCustomsDeclaration.getForId());
+		if(bsCustomsDeclarationInfoList!=null && bsCustomsDeclarationInfoList.size() > 0){
+			for (BsCustomsDeclarationInfo forBsCustomsDeclarationInfo:bsCustomsDeclarationInfoList) {
+				for (InvtListType forInvtListType:invtListType) {
+					if(forInvtListType.getGdsSeqno().equals(forBsCustomsDeclarationInfo.getXh())){
+						forBsCustomsDeclarationInfo.setAccountBook(forInvtListType.getPutrecSeqno());
+						cdInfoService.save(forBsCustomsDeclarationInfo);
+						break;
+					}
+				}
+			}
+		}
+		return "success";
+	}
 
 	//生成报关单
-	public String createBGD(BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException, ParseException {
+	public String createBGD(String linkId,BisPreEntryInvtQuery bisPreEntryInvtQuery) throws IOException, ClassNotFoundException, ParseException {
 		//获取核注清单数据
 		InvtHeadType invtHeadType = new InvtHeadType();
 		List<InvtListType> invtListType = new ArrayList<>();
@@ -997,7 +1083,9 @@ public class PreEntryInvtQueryController extends BaseController {
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 
-		String linkId = UUID.randomUUID().toString();
+		if (linkId == null){
+			linkId = UUID.randomUUID().toString();
+		}
 		bsCustomsDeclaration.setForId(linkId);
 		bsCustomsDeclaration.setState("5");//状态 5-申报核注清单通过，状态为5
 
@@ -1022,7 +1110,8 @@ public class PreEntryInvtQueryController extends BaseController {
 		bsCustomsDeclaration.setZgAuditTime(bsCustomsDeclaration.getUpdateTime());
 		bsCustomsDeclaration.setUpAndDown("0");//上传/下载,0-未上传;1-已上传;2-已下载
 		bsCustomsDeclaration.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
-		bsCustomsDeclaration.setDeclarationUnit(invtHeadType.getDclEtpsNm());//报关公司
+		bsCustomsDeclaration.setDeclarationUnitId(invtHeadType.getDclEtpsno());//报关公司ID
+		bsCustomsDeclaration.setDeclarationUnit(invtHeadType.getDclEtpsNm());//报关公司名称
 		String cdNum = "";
 		if(invtHeadType.getEntryNo() != null && invtHeadType.getEntryNo().toString().trim().length() > 0){
 			cdNum = invtHeadType.getEntryNo().toString().trim();
@@ -1032,14 +1121,24 @@ public class PreEntryInvtQueryController extends BaseController {
 			}
 		}
 		bsCustomsDeclaration.setCdNum(cdNum);//报关单号
+		bsCustomsDeclaration.setClientId(invtHeadType.getRltEntryBizopEtpsno());//客户ID
 		bsCustomsDeclaration.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
 		bsCustomsDeclaration.setBillNum(bisPreEntryInvtQuery.getTdNo().trim());//提单号
 		bsCustomsDeclaration.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
 		bsCustomsDeclaration.setStoragePlace("青岛港怡之航冷链物流有限公司");//货物存放地点
 		bsCustomsDeclaration.setConsignee(invtHeadType.getRcvgdEtpsNm() == null ? "" : invtHeadType.getRcvgdEtpsNm());//收货人
 		bsCustomsDeclaration.setConsignor(invtHeadType.getRltEntryBizopEtpsno());//发货人
-		bsCustomsDeclaration.setMyg(invtHeadType.getStshipTrsarvNatcd());//贸易国
-		bsCustomsDeclaration.setQyg(invtHeadType.getStshipTrsarvNatcd());//启运国
+
+		//起运国，从字典中依据编号转成名称
+		List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();
+		bisPreEntryDictDataList = preEntryService.getDictDataByCode("CUS_STSHIP_TRSARV_NATCD");
+		for (BisPreEntryDictData forBisPreEntryDictData : bisPreEntryDictDataList) {
+			if (forBisPreEntryDictData.getValue().equals(invtHeadType.getStshipTrsarvNatcd()) || forBisPreEntryDictData.getLabel().equals(invtHeadType.getStshipTrsarvNatcd())) {
+				bsCustomsDeclaration.setMyg(forBisPreEntryDictData.getLabel());//贸易国
+				bsCustomsDeclaration.setQyg(forBisPreEntryDictData.getLabel());//启运国
+				break;
+			}
+		}
 		bsCustomsDeclaration.setCdBy("韩飞");//报关人
 		if(invtHeadType.getEntryDclTime()!=null){
 			bsCustomsDeclaration.setCdTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getEntryDclTime()))));//报关时间
@@ -1054,6 +1153,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
 			bsCustomsDeclarationInfo.setForId(linkId);
 			bsCustomsDeclarationInfo.setXh(forInvtListType.getGdsSeqno());//序号
+			bsCustomsDeclarationInfo.setAccountBook(forInvtListType.getPutrecSeqno());//账册商品序号
 			bsCustomsDeclarationInfo.setSpbh(forInvtListType.getGdecd());//商品编号
 			bsCustomsDeclarationInfo.setSpmc(forInvtListType.getGdsNm());//商品名称
 			bsCustomsDeclarationInfo.setGgxh(forInvtListType.getGdsSpcfModelDesc());//规格型号

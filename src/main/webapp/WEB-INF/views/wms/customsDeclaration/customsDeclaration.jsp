@@ -9,6 +9,8 @@
 <div id="tb" style="padding:5px;height:auto">
 	<div>
 		<form id="searchFrom" action="">
+			<input type="text" name="filter_LIKES_checkListNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
+			<input type="text" name="filter_LIKES_cdNum" class="easyui-validatebox" data-options="width:150,prompt: '报关单号'"/>
 			<input type="text" name="filter_LIKES_billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
 			<select id="searchStock" name="filter_LIKES_clientName" class="easyui-combobox" data-options="width:150,prompt: '消费使用单位'" >
 			</select>
@@ -22,11 +24,8 @@
 				<option  value="0">待完善</option>
 				<option  value="1">待初审</option>
 				<option  value="2">待复审</option>
-				<option  value="3">待申报</option>
-				<option  value="4">申报核注清单中</option>
-				<option  value="5">核注清单通过</option>
-				<option  value="6">报关中</option>
-				<option  value="7">报关通过</option>
+				<option  value="3">待上传报关单</option>
+				<option  value="4">报关通过</option>
 			</select>
 			<input type="text" name="filter_LIKES_declarationUnit" class="easyui-validatebox" data-options="width:150,prompt: '报关公司'"/>
 			<input type="text" name="filter_GED_createTime" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width:150,prompt: '创建开始日期'"/>
@@ -46,8 +45,8 @@
 			 <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="del()">删除</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
-		<shiro:hasPermission name="wms:customsDeclaration:add">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="ck()">查看</a>
+		<shiro:hasPermission name="wms:customsDeclaration:submit">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="submit()">提交审核</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:customsDeclaration:jlExamineOk">
@@ -151,18 +150,9 @@ function gridDG(){
 						return "待复审";
 					}
 					if(value == '3'){
-						return "待申报";
+						return "待上传报关单";
 					}
 					if(value == '4'){
-						return "申报核注清单中";
-					}
-					if(value == '5'){
-						return "核注清单通过";
-					}
-					if(value == '6'){
-						return "报关中";
-					}
-					if(value == '7'){
 						return "报关通过";
 					}
 				}},
@@ -263,19 +253,41 @@ function gridDG(){
 }
 //添加
 function add(){
-	window.parent.mainpage.mainTabs.addModule('报关单添加','wms/customsDeclaration/create');
+	parent.$.messager.prompt('提示', '请输入需要查询的核注清单号。', function(content){
+		if (content){
+			//生成新的报关单ID
+			$.ajax({
+				type : "POST",
+				url : "${ctx}/wms/customsDeclaration/getNewForId",
+				dataType : "text",
+				success : function(forId) {
+					$.ajax({
+						type: 'get',
+						url: "${ctx}/wms/preEntryInvtQuery/getBGDInfo/" + forId+"?checkListNoVal="+content,
+						success: function (data) {
+							if("success" == data){
+								window.parent.mainpage.mainTabs.addModule('报关单修改','wms/customsDeclaration/update/' + forId);
+							}else{
+								parent.$.messager.show({ title : "提示",msg: data, position: "bottomRight" });
+								return;
+							}
+						}
+					});
+				}
+			});
+
+		}else{
+			parent.$.messager.show({ title : "提示",msg: "请输入核注清单号！", position: "bottomRight" });
+			return;
+		}
+	});
+	// window.parent.mainpage.mainTabs.addModule('报关单添加','wms/customsDeclaration/create');
 }
 //修改
 function update(){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)) return;
 	window.parent.mainpage.mainTabs.addModule('报关单修改','wms/customsDeclaration/update/' + row.forId);
-}
-//查看
-function ck(){
-	var row = dg.datagrid('getSelected');
-	if(rowIsNull(row)) return;
-	window.parent.mainpage.mainTabs.addModule('报关单查看','wms/customsDeclaration/updateCK/' + row.forId);
 }
 //删除
 function del(){
@@ -293,6 +305,25 @@ function del(){
 			$.ajax({
 				type:'get',
 				url:"${ctx}/wms/customsDeclaration/delete/"+row.forId,
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+//提交审核
+function submit(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条报关单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '您确定要将选中的报关单信息进行提交吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/customsDeclaration/UpdateState/"+row.forId+"/bghSubmit",
 				success: function(data){
 					successTip(data,dg);
 				},
@@ -398,6 +429,11 @@ function uploadBGD(){
 		maximizable:true,
 		modal:true,
 		buttons:[{
+			text:'确认',
+			handler:function(){
+				dt.panel('close');
+			}
+		},{
 			text:'取消',
 			handler:function(){
 				dt.panel('close');

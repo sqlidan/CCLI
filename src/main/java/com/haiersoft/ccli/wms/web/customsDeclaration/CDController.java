@@ -7,6 +7,7 @@ import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
+import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclaration;
 import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclarationInfo;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
@@ -26,6 +27,7 @@ import javax.validation.Valid;
 import javax.xml.rpc.ServiceException;
 import java.io.*;
 import java.rmi.RemoteException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -107,7 +109,7 @@ public class CDController extends BaseController {
                 userCode = StringUtils.lpadStringLeft(3, userCode);
             }
         }
-        String linkId = "BG" + userCode + StringUtils.timeToString();
+        String linkId = "BGD" + userCode + StringUtils.timeToString();
         return linkId;
     }
 
@@ -167,7 +169,11 @@ public class CDController extends BaseController {
         User user = UserUtil.getCurrentUser();
         BsCustomsDeclaration bsCustomsDeclaration = CDService.get(forId);
         model.addAttribute("bsCustomsDeclaration", bsCustomsDeclaration);
+        BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
+        bsCustomsDeclarationInfo.setForId(forId);
+        model.addAttribute("bsCustomsDeclarationInfo", bsCustomsDeclarationInfo);
         model.addAttribute("sbTime", bsCustomsDeclaration.getSbTime());
+        model.addAttribute("cdTime", new Date());
         model.addAttribute("user", user.getName());
         model.addAttribute("action", "update");
         return "wms/customsDeclaration/customsDeclarationManagerEdit";
@@ -247,103 +253,6 @@ public class CDController extends BaseController {
     }
 
     /**
-     * 报关单修改
-     */
-    @RequestMapping(value = "updateBGH/{forId}", method = RequestMethod.GET)
-    public String updateBGH(Model model, @PathVariable("forId") String forId) {
-        User user = UserUtil.getCurrentUser();
-        BsCustomsDeclaration bsCustomsDeclaration = CDService.get(forId);
-        model.addAttribute("bsCustomsDeclaration", bsCustomsDeclaration);
-        BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
-        bsCustomsDeclarationInfo.setForId(forId);
-        model.addAttribute("bsCustomsDeclarationInfo", bsCustomsDeclarationInfo);
-        model.addAttribute("sbTime", bsCustomsDeclaration.getSbTime());
-        model.addAttribute("cdTime", new Date());
-        model.addAttribute("user", user.getName());
-        return "wms/customsDeclaration/customsDeclarationBGHManager";
-    }
-
-    /**
-     * 修改报关单
-     */
-    @RequestMapping(value = "updateBGH", method = RequestMethod.POST)
-    @ResponseBody
-    public String updateBGH(@Valid BsCustomsDeclaration bsCustomsDeclaration, Model model, HttpServletRequest request) {
-        //保留原对象信息
-        BsCustomsDeclaration queryBsCustomsDeclaration = CDService.get(bsCustomsDeclaration.getForId());
-        if(queryBsCustomsDeclaration == null){
-            return "未找到对应的报关单信息";
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getServiceProject())) {
-            queryBsCustomsDeclaration.setServiceProject(bsCustomsDeclaration.getServiceProject());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getCheckListNo())) {
-            queryBsCustomsDeclaration.setCheckListNo(bsCustomsDeclaration.getCheckListNo());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getCdNum())) {
-            queryBsCustomsDeclaration.setCdNum(bsCustomsDeclaration.getCdNum());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getClientId())) {
-            queryBsCustomsDeclaration.setClientId(bsCustomsDeclaration.getClientId());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getClientName())) {
-            queryBsCustomsDeclaration.setClientName(bsCustomsDeclaration.getClientName());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getDeclarationUnitId())) {
-            queryBsCustomsDeclaration.setDeclarationUnitId(bsCustomsDeclaration.getDeclarationUnitId());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getDeclarationUnit())) {
-            queryBsCustomsDeclaration.setDeclarationUnit(bsCustomsDeclaration.getDeclarationUnit());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getBillNum())) {
-            queryBsCustomsDeclaration.setBillNum(bsCustomsDeclaration.getBillNum());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getTradeMode())) {
-            queryBsCustomsDeclaration.setTradeMode(bsCustomsDeclaration.getTradeMode());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getRemark())) {
-            queryBsCustomsDeclaration.setRemark(bsCustomsDeclaration.getRemark());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getDty())) {
-            queryBsCustomsDeclaration.setDty(bsCustomsDeclaration.getDty());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getGrossWeight())) {
-            queryBsCustomsDeclaration.setGrossWeight(bsCustomsDeclaration.getGrossWeight());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getNetWeight())) {
-            queryBsCustomsDeclaration.setNetWeight(bsCustomsDeclaration.getNetWeight());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getConsignee())) {
-            queryBsCustomsDeclaration.setConsignee(bsCustomsDeclaration.getConsignee());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getConsignor())) {
-            queryBsCustomsDeclaration.setConsignor(bsCustomsDeclaration.getConsignor());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getMyg())) {
-            queryBsCustomsDeclaration.setMyg(bsCustomsDeclaration.getMyg());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getQyg())) {
-            queryBsCustomsDeclaration.setQyg(bsCustomsDeclaration.getQyg());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getSbTime())) {
-            queryBsCustomsDeclaration.setSbTime(bsCustomsDeclaration.getSbTime());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getCdBy())) {
-            queryBsCustomsDeclaration.setCdBy(bsCustomsDeclaration.getCdBy());
-        }
-        if (isNotNullOrEmpty(bsCustomsDeclaration.getCdTime())) {
-            queryBsCustomsDeclaration.setCdTime(bsCustomsDeclaration.getCdTime());
-        }
-
-        User user = UserUtil.getCurrentUser();
-        queryBsCustomsDeclaration.setUpdateBy(user.getName());//修改人
-        queryBsCustomsDeclaration.setUpdateTime(new Date());//修改时间
-        CDService.merge(queryBsCustomsDeclaration);
-        return "success";
-    }
-
-
-    /**
      * 删除
      */
     @RequestMapping(value = "delete/{forId}")
@@ -356,24 +265,6 @@ public class CDController extends BaseController {
         bsCustomsDeclaration.setUpdateTime(new Date());//修改时间
         CDService.merge(bsCustomsDeclaration);
         return "success";
-    }
-
-    /**
-     * 报关单查看
-     */
-    @RequestMapping(value = "updateCK/{forId}", method = RequestMethod.GET)
-    public String updateCK(Model model, @PathVariable("forId") String forId) {
-        User user = UserUtil.getCurrentUser();
-        BsCustomsDeclaration bsCustomsDeclaration = CDService.get(forId);
-        model.addAttribute("bsCustomsDeclaration", bsCustomsDeclaration);
-        BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
-        bsCustomsDeclarationInfo.setForId(forId);
-        model.addAttribute("bsCustomsDeclarationInfo", bsCustomsDeclarationInfo);
-        model.addAttribute("sbTime", bsCustomsDeclaration.getSbTime());
-        model.addAttribute("cdTime", bsCustomsDeclaration.getCdTime());
-        model.addAttribute("date", new Date());
-        model.addAttribute("user", user.getName());
-        return "wms/customsDeclaration/customsDeclarationManagerDetail";
     }
 
     /**
@@ -439,7 +330,6 @@ public class CDController extends BaseController {
         }
     }
 
-
 //======================================================================================================================
     /**
      * 跳转上传报关单画面
@@ -474,6 +364,7 @@ public class CDController extends BaseController {
                 file.transferTo(f);
                 User user = UserUtil.getCurrentUser();
                 BsCustomsDeclaration bsCustomsDeclaration = CDService.get(forId);
+                bsCustomsDeclaration.setState("4");
                 bsCustomsDeclaration.setUpAndDown("1");//已上传
                 bsCustomsDeclaration.setUpBy(user.getName());//上传人
                 bsCustomsDeclaration.setUpTime(new Date());//上传时间

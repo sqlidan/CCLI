@@ -456,7 +456,7 @@ public class BisPayMidGroupServeice extends BaseService<BisPay, String> {
                         return "该单号的结算单号尚未保存到数据库";
                     }
                     String encryptNO = AESUtils.encrypt(statementNo,PASSWORD);
-                    String bodys = HttpUtil.createPost(BASE_URL+"/api/statement/removeCostByStatementNo?statementNo="+encryptNO)
+                    String bodys = HttpUtil.createPost(BASE_URL+"/api/statement/deleteCostByStatementNo?statementNo="+encryptNO)
                                 .header("Content-Type", "application/json")
                                 .header("APPID","7e86aa901e86de01")
                                 .header("Fmp-Tenant-Data-Node","080013")
