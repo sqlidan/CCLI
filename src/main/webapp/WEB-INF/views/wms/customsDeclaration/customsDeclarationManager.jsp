@@ -34,7 +34,7 @@
 				<td>报关单号：</td>
 				<td>
 					<input type="text" id="cdNum" name="cdNum" class="easyui-validatebox"
-						   value="${bsCustomsDeclaration.cdNum}" data-options="width:180, required:'required'">
+						   value="${bsCustomsDeclaration.cdNum}" data-options="width:180">
 				</td>
 				<td>申报日期：</td>
 				<td>
