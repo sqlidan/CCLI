@@ -9,6 +9,7 @@ import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.supervision.tempuri.ReturnModel;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
+import com.haiersoft.ccli.wms.entity.BisCustomsClearanceInfo;
 import com.haiersoft.ccli.wms.entity.apiEntity.*;
 import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclaration;
 import com.haiersoft.ccli.wms.entity.customsDeclaration.BsCustomsDeclarationInfo;
@@ -66,17 +67,42 @@ public class CDInfoController extends BaseController {
 
     }
 
+    @RequestMapping(value = "create/{forId}", method = RequestMethod.GET)
+    public String createForm(@PathVariable("forId") String forId,Model model) {
+        User user = UserUtil.getCurrentUser();
+        model.addAttribute("user",user.getName());
+        model.addAttribute("date",new Date());
+        BsCustomsDeclarationInfo bsCustomsDeclarationInfo = new BsCustomsDeclarationInfo();
+        bsCustomsDeclarationInfo.setForId(forId);
+        model.addAttribute("bsCustomsDeclarationInfo",bsCustomsDeclarationInfo);
+        model.addAttribute("action", "create");
+        return "wms/customsDeclaration/customsDeclarationInfoManager";
+    }
+
     /**
      * 添加货物信息
      */
-    @RequestMapping(value = "create/{forId}", method = RequestMethod.POST)
+    @RequestMapping(value = "create", method = RequestMethod.POST)
     @ResponseBody
-    public String create(@Valid BsCustomsDeclarationInfo bsCustomsDeclarationInfo, @PathVariable("forId") String forId, Model model, HttpServletRequest request) {
-        bsCustomsDeclarationInfo.setForId(forId);
+    public String create(@Valid BsCustomsDeclarationInfo bsCustomsDeclarationInfo, HttpServletRequest request) {
         User user = UserUtil.getCurrentUser();
         bsCustomsDeclarationInfo.setCreateBy(user.getName());//创建人
         bsCustomsDeclarationInfo.setCreateTime(new Date());//创建时间
         CDInfoService.save(bsCustomsDeclarationInfo);
+        return "success";
+    }
+
+    @RequestMapping(value = "update/{id}", method = RequestMethod.GET)
+    public String updateForm(@PathVariable("id") Integer id, Model model) {
+        model.addAttribute("bsCustomsDeclarationInfo", CDInfoService.get(id));
+        model.addAttribute("action", "update");
+        return "wms/customsDeclaration/customsDeclarationInfoManager";
+    }
+
+    @RequestMapping(value = "update", method = RequestMethod.POST)
+    @ResponseBody
+    public String update(@Valid @ModelAttribute @RequestBody BsCustomsDeclarationInfo bsCustomsDeclarationInfo,Model model) {
+        CDInfoService.update(bsCustomsDeclarationInfo);
         return "success";
     }
 

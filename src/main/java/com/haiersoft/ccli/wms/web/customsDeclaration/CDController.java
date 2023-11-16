@@ -74,23 +74,6 @@ public class CDController extends BaseController {
         return getEasyUIData(page);
     }
 
-    /**
-     * 报关单管理默认页面（清空）
-     */
-    @RequestMapping(value = "manager", method = RequestMethod.GET)
-    public String manager(Model model) {
-        User user = UserUtil.getCurrentUser();
-        BsCustomsDeclaration bsCustomsDeclaration = new BsCustomsDeclaration();
-        bsCustomsDeclaration.setStoragePlace("青岛港怡之航冷链物流有限公司");
-        bsCustomsDeclaration.setClientId("1014");
-        bsCustomsDeclaration.setClientName("青岛港怡之航冷链物流有限公司");
-        model.addAttribute("bsCustomsDeclaration", bsCustomsDeclaration);
-        model.addAttribute("sbTime", new Date());
-        model.addAttribute("user", user.getName());
-        model.addAttribute("action", "create");
-        return "wms/customsDeclaration/customsDeclarationManagerAdd";
-    }
-
     /*
      * 获取新的报关单号
      */
@@ -128,25 +111,6 @@ public class CDController extends BaseController {
     }
 
     /**
-     * 添加报关单跳转
-     *
-     * @param model
-     */
-    @RequestMapping(value = "create", method = RequestMethod.GET)
-    public String createForm(Model model) {
-        User user = UserUtil.getCurrentUser();
-        BsCustomsDeclaration bsCustomsDeclaration = new BsCustomsDeclaration();
-        bsCustomsDeclaration.setStoragePlace("青岛港怡之航冷链物流有限公司");
-        bsCustomsDeclaration.setClientId("1014");
-        bsCustomsDeclaration.setClientName("青岛港怡之航冷链物流有限公司");
-        model.addAttribute("bsCustomsDeclaration", bsCustomsDeclaration);
-        model.addAttribute("sbTime", new Date());
-        model.addAttribute("user", user.getName());
-        model.addAttribute("action", "create");
-        return "wms/customsDeclaration/customsDeclarationManagerAdd";
-    }
-
-    /**
      * 添加报关单
      */
     @RequestMapping(value = "create", method = RequestMethod.POST)
@@ -176,7 +140,7 @@ public class CDController extends BaseController {
         model.addAttribute("cdTime", new Date());
         model.addAttribute("user", user.getName());
         model.addAttribute("action", "update");
-        return "wms/customsDeclaration/customsDeclarationManagerEdit";
+        return "wms/customsDeclaration/customsDeclarationManager";
     }
 
     /**

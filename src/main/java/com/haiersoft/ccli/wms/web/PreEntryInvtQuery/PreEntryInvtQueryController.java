@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.primitives.Bytes;
+import com.haiersoft.ccli.base.entity.BaseClientInfo;
+import com.haiersoft.ccli.base.service.ClientService;
 import com.haiersoft.ccli.bounded.entity.BaseBounded;
 import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.Page;
@@ -76,6 +78,8 @@ public class PreEntryInvtQueryController extends BaseController {
 	private CDService cdService;
 	@Autowired
 	private CDInfoService cdInfoService;
+	@Autowired
+	private ClientService clientService;
 
 	private static final String memberCode = "eimskipMember";
 	private static final String pass = "66668888";
@@ -1087,7 +1091,7 @@ public class PreEntryInvtQueryController extends BaseController {
 			linkId = UUID.randomUUID().toString();
 		}
 		bsCustomsDeclaration.setForId(linkId);
-		bsCustomsDeclaration.setState("5");//状态 5-申报核注清单通过，状态为5
+		bsCustomsDeclaration.setState("4");//状态 5-申报核注清单通过，状态为5
 
 		//服务项目
 		if (invtHeadType.getImpexpMarkcd() == null || "I".equals(invtHeadType.getImpexpMarkcd())){
@@ -1110,7 +1114,12 @@ public class PreEntryInvtQueryController extends BaseController {
 		bsCustomsDeclaration.setZgAuditTime(bsCustomsDeclaration.getUpdateTime());
 		bsCustomsDeclaration.setUpAndDown("0");//上传/下载,0-未上传;1-已上传;2-已下载
 		bsCustomsDeclaration.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
-		bsCustomsDeclaration.setDeclarationUnitId(invtHeadType.getDclEtpsno());//报关公司ID
+		if (invtHeadType.getDclEtpsNm()!=null && invtHeadType.getDclEtpsNm().trim().length() > 0){
+			BaseClientInfo baseClientInfo = clientService.find("clientName",invtHeadType.getDclEtpsNm());
+			if(baseClientInfo!=null && baseClientInfo.getIds()!=null){
+				bsCustomsDeclaration.setDeclarationUnitId(baseClientInfo.getIds().toString());//报关公司ID
+			}
+		}
 		bsCustomsDeclaration.setDeclarationUnit(invtHeadType.getDclEtpsNm());//报关公司名称
 		String cdNum = "";
 		if(invtHeadType.getEntryNo() != null && invtHeadType.getEntryNo().toString().trim().length() > 0){
@@ -1121,7 +1130,12 @@ public class PreEntryInvtQueryController extends BaseController {
 			}
 		}
 		bsCustomsDeclaration.setCdNum(cdNum);//报关单号
-		bsCustomsDeclaration.setClientId(invtHeadType.getRltEntryBizopEtpsno());//客户ID
+		if (invtHeadType.getRltEntryBizopEtpsNm()!=null && invtHeadType.getRltEntryBizopEtpsNm().trim().length() > 0){
+			BaseClientInfo baseClientInfo = clientService.find("clientName",invtHeadType.getRltEntryBizopEtpsNm());
+			if(baseClientInfo!=null && baseClientInfo.getIds()!=null){
+				bsCustomsDeclaration.setClientId(baseClientInfo.getIds().toString());//客户ID
+			}
+		}
 		bsCustomsDeclaration.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
 		bsCustomsDeclaration.setBillNum(bisPreEntryInvtQuery.getTdNo().trim());//提单号
 		bsCustomsDeclaration.setTradeMode(invtHeadType.getTrspModecd());//贸易方式

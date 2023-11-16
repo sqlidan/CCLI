@@ -281,7 +281,6 @@ function add(){
 			return;
 		}
 	});
-	// window.parent.mainpage.mainTabs.addModule('报关单添加','wms/customsDeclaration/create');
 }
 //修改
 function update(){
