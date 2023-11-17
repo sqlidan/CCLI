@@ -180,16 +180,16 @@ function gridDG(){
 			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
 			{field:'clientName',title:'消费使用单位',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
-			{field:'tradeMode',title:'贸易方式',sortable:true,
+			{field:'tradeMode',title:'监管方式',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '1'){
-						return "进料加工";
+						return "进料对口";
 					}
 					if(value == '2'){
-						return "保税仓库货物";
+						return "区内物流货物";
 					}
 					if(value == '3'){
-						return "来料加工";
+						return "来料对口";
 					}
 					if(value == '4'){
 						return "一般贸易";
@@ -206,7 +206,7 @@ function gridDG(){
 			{field:'consignor',title:'发货人',sortable:true},
 			{field:'myg',title:'贸易国',sortable:true},
 			{field:'qyg',title:'启运国',sortable:true},
-			{field:'cdBy',title:'报关人',sortable:true},
+			// {field:'cdBy',title:'报关人',sortable:true},
 			{field:'cdTime',title:'报关时间',sortable:true},
 			{field:'upAndDown',title:'是否上传报关单',sortable:true,
 				formatter : function(value, row, index) {

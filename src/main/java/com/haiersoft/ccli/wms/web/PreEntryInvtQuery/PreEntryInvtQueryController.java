@@ -1070,10 +1070,10 @@ public class PreEntryInvtQueryController extends BaseController {
 		}else{
 			invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(bisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
 		}
-		//非报关不生成报关单
-		if(invtHeadType.getDclcusFlag() == null || "2".equals(invtHeadType.getDclcusFlag())){
-			return "success";
-		}
+//		//非报关不生成报关单
+//		if(invtHeadType.getDclcusFlag() == null || "2".equals(invtHeadType.getDclcusFlag())){
+//			return "success";
+//		}
 		if (bisPreEntryInvtQuery.getInvtListType() == null || "[]".equals(bisPreEntryInvtQuery.getInvtListType())){
 			return "生成预报单时未获取到表体信息";
 		}else{

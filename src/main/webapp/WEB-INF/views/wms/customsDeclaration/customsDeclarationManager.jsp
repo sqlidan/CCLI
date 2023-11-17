@@ -57,16 +57,18 @@
 						<option value="1">报出</option>
 					</select>
 				</td>
-				<td>贸易方式：</td>
+				<td>监管方式：</td>
 				<td>
 					<select id="tradeMode" name="tradeMode" class="easyui-combobox" data-options="width:180">
 					</select>
 				</td>
 				<td>消费使用单位：</td>
 				<td>
-					<input type="hidden" id="clientName" name="clientName">
-					<select id="clientId" name="clientId" class="easyui-combobox" data-options="width:180">
-					</select>
+					<input type="text" id="clientName" name="clientName" class="easyui-validatebox" data-options="width: 180"
+						   value="${bsCustomsDeclaration.clientName}" >
+<%--					<input type="hidden" id="clientName" name="clientName">--%>
+<%--					<select id="clientId" name="clientId" class="easyui-combobox" data-options="width:180">--%>
+<%--					</select>--%>
 				</td>
 				<td>申报单位：</td>
 				<td>
@@ -124,13 +126,6 @@
 				<td>
 					<input type="text" id="qyg" name="qyg" class="easyui-validatebox" data-options="width: 180"
 						   value="${bsCustomsDeclaration.qyg}" maxlength="50" >
-				</td>
-			</tr>
-			<tr>
-				<td>报关人：</td>
-				<td>
-					<input type="text" id="cdBy" name="cdBy" class="easyui-validatebox"
-						   data-options="width: 180" value="${bsCustomsDeclaration.consignee}" maxlength="50">
 				</td>
 				<td>报关日期：</td>
 				<td>
@@ -214,7 +209,7 @@
 			type : "GET",
 			async : false,
 			url : "${ctx}/system/dict/json",
-			data : "filter_LIKES_type=tradeType",
+			data : "filter_LIKES_type=tradeType2",
 			dataType : "json",
 			success : function(date) {
 				$('#tradeMode').combobox({
@@ -227,33 +222,33 @@
 			}
 		});
 
-		//客户
-		var getstockId='${bsCustomsDeclaration.clientId}';
-		$('#clientId').combobox({
-			method:"GET",
-			url:"${ctx}/base/client/getClientAll?filter_EQS_clientSort=0&setid=${bsCustomsDeclaration.clientId}",
-			valueField: 'ids',
-			textField: 'clientName',
-			mode:'remote',
-			onChange:function(){
-				if(b==1){
-					a=1;
-					b=0;
-				}else{
-					a=0;
-				}
-			},
-			onSelect:function(){
-				a=1;
-				b=1;
-			},
-			onLoadSuccess:function(){
-				if(getstockId!=null && getstockId!=""){
-					$('#clientId').combobox("select",getstockId);
-					getstockId="";
-				}
-			}
-		});
+		<%--//客户--%>
+		<%--var getstockId='${bsCustomsDeclaration.clientId}';--%>
+		<%--$('#clientId').combobox({--%>
+		<%--	method:"GET",--%>
+		<%--	url:"${ctx}/base/client/getClientAll?filter_EQS_clientSort=0&setid=${bsCustomsDeclaration.clientId}",--%>
+		<%--	valueField: 'ids',--%>
+		<%--	textField: 'clientName',--%>
+		<%--	mode:'remote',--%>
+		<%--	onChange:function(){--%>
+		<%--		if(b==1){--%>
+		<%--			a=1;--%>
+		<%--			b=0;--%>
+		<%--		}else{--%>
+		<%--			a=0;--%>
+		<%--		}--%>
+		<%--	},--%>
+		<%--	onSelect:function(){--%>
+		<%--		a=1;--%>
+		<%--		b=1;--%>
+		<%--	},--%>
+		<%--	onLoadSuccess:function(){--%>
+		<%--		if(getstockId!=null && getstockId!=""){--%>
+		<%--			$('#clientId').combobox("select",getstockId);--%>
+		<%--			getstockId="";--%>
+		<%--		}--%>
+		<%--	}--%>
+		<%--});--%>
 		$('#serviceProject').combobox('select','${bsCustomsDeclaration.serviceProject}');
 
 		//表体
@@ -447,7 +442,7 @@
 
 	//表头保存
 	function submitForm() {
-		$("#clientName").val( $("#clientId").combobox("getText") );
+		// $("#clientName").val( $("#clientId").combobox("getText") );
 		$("#declarationUnit").val( $("#declarationUnitId").combobox("getText") );
 		if ($("#mainForm").form('validate')) {
 			//用ajax提交form
