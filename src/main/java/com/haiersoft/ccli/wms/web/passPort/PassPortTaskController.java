@@ -232,7 +232,6 @@ public class PassPortTaskController implements Job {
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
                     if ("1".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setLockage("2");//已过卡
-                        forBisPassPort.setLockageTime1(new Date());
                         forBisPassPort.setUpdateBy("SYSTEM");
                         forBisPassPort.setUpdateTime(new Date());
                         passPortService.merge(forBisPassPort);

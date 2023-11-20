@@ -328,7 +328,6 @@ public class CDController extends BaseController {
                 file.transferTo(f);
                 User user = UserUtil.getCurrentUser();
                 BsCustomsDeclaration bsCustomsDeclaration = CDService.get(forId);
-                bsCustomsDeclaration.setState("4");
                 bsCustomsDeclaration.setUpAndDown("1");//已上传
                 bsCustomsDeclaration.setUpBy(user.getName());//上传人
                 bsCustomsDeclaration.setUpTime(new Date());//上传时间

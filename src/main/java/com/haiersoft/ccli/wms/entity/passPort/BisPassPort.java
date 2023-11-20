@@ -107,12 +107,10 @@ public class BisPassPort implements java.io.Serializable {
 	private String col4;
 	@Column(name = "LOCKAGE")
 	private String lockage;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "LOCKAGE_TIME1")
-	private Date lockageTime1;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	private String lockageTime1;
 	@Column(name = "LOCKAGE_TIME2")
-	private Date lockageTime2;
+	private String lockageTime2;
 	@Column(name = "CHECK_RESULT")
 	private String checkResult;
 	@Column(name = "DCL_BY")
@@ -487,19 +485,19 @@ public class BisPassPort implements java.io.Serializable {
 		this.lockage = lockage;
 	}
 
-	public Date getLockageTime1() {
+	public String getLockageTime1() {
 		return lockageTime1;
 	}
 
-	public void setLockageTime1(Date lockageTime1) {
+	public void setLockageTime1(String lockageTime1) {
 		this.lockageTime1 = lockageTime1;
 	}
 
-	public Date getLockageTime2() {
+	public String getLockageTime2() {
 		return lockageTime2;
 	}
 
-	public void setLockageTime2(Date lockageTime2) {
+	public void setLockageTime2(String lockageTime2) {
 		this.lockageTime2 = lockageTime2;
 	}
 
