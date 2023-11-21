@@ -26,6 +26,10 @@ import com.haiersoft.ccli.wms.service.passPort.PassPortService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryInfoService;
 import com.haiersoft.ccli.wms.service.preEntry.PreEntryService;
 import com.haiersoft.ccli.wms.web.preEntry.HttpUtils;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.ConversionException;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.Converter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.xml.rpc.ServiceException;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,9 +75,6 @@ public class PassPortController extends BaseController {
     @RequestMapping(value = "checkTotalWt", method = RequestMethod.GET)
     @ResponseBody
     public String checkTotalWt(HttpServletRequest request) {
-        Long start = System.currentTimeMillis();
-        logger.info("STARTTIME:"+start+";MOTHED:checkTotalWt;PARAM:"+request.getParameter("PLATE_NO"));
-
         String totalWt = "";
 
         String PLATE_NO = request.getParameter("PLATE_NO");
@@ -81,9 +83,6 @@ public class PassPortController extends BaseController {
         }
         System.out.println("PLATE_NO："+PLATE_NO);
         totalWt = passPortService.getDataByVehicleNo(PLATE_NO);
-
-        Long end = System.currentTimeMillis();
-        logger.info("ENDTIME:"+end+";MOTHED:checkTotalWt;RESULT:"+totalWt);
 
         return totalWt;
     }
@@ -226,32 +225,32 @@ public class PassPortController extends BaseController {
     @RequestMapping(value = "synchronization/{id}")
     @ResponseBody
     public String synchronization(@PathVariable("id") String id) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd hh:mm:ss");
         User user = UserUtil.getCurrentUser();
         BisPassPort bisPassPort = passPortService.get(id);
         if (bisPassPort != null) {
             //调用申报核放单同步接口
             Map<String, Object> resultMap = passPortSynchronization(bisPassPort.getSeqNo());
+            logger.info("resultMap== "+resultMap.toString());
             if ("200".equals(resultMap.get("code").toString())) {
-                //处理结果
-                PassPortMessage passPortMessage = (PassPortMessage) resultMap.get("data");
-                String status = passPortMessage.getStatus();
-                bisPassPort.setState(status);
-                PassPortHead passPortHead = passPortMessage.getPassportHead();
-                if(passPortHead.getPassportNo()!=null && passPortHead.getPassportNo().toString().trim().length() > 0){
-                    bisPassPort.setPassportNo(passPortHead.getPassportNo().toString());
-                }
-                if(passPortHead.getPassStatus()!=null && passPortHead.getPassStatus().toString().trim().length() > 0){
-                    bisPassPort.setLockage(passPortHead.getPassStatus().toString());
-                }
-                if(passPortHead.getPassTime1()!=null && passPortHead.getPassTime1().toString().trim().length() > 0){
-                    Date passTime1 = simpleDateFormat.parse(passPortHead.getPassTime1().toString());
-                    bisPassPort.setLockageTime1(passTime1);
-                }
-                if(passPortHead.getPassTime2()!=null && passPortHead.getPassTime2().toString().trim().length() > 0){
-                    Date passTime2 = simpleDateFormat.parse(passPortHead.getPassTime2().toString());
-                    bisPassPort.setLockageTime2(passTime2);
-                }
+                    //处理结果
+                    PassPortMessage passPortMessage = (PassPortMessage) resultMap.get("data");
+                    String status = passPortMessage.getStatus()==null?"0":passPortMessage.getStatus();
+                    bisPassPort.setState(status);
+                    PassPortHead passPortHead = passPortMessage.getPassportHead();
+                    if (passPortHead !=null){
+                        if(passPortHead.getPassportNo()!=null && passPortHead.getPassportNo().trim().length() > 0){
+                            bisPassPort.setPassportNo(passPortHead.getPassportNo());
+                        }
+                        if(passPortHead.getPassStatus()!=null && passPortHead.getPassStatus().trim().length() > 0){
+                            bisPassPort.setLockage(passPortHead.getPassStatus());
+                        }
+                        if(passPortHead.getPassTime1()!=null && passPortHead.getPassTime1().trim().length() > 0){
+                            bisPassPort.setLockageTime1(passPortHead.getPassTime1());
+                        }
+                        if(passPortHead.getPassTime2()!=null && passPortHead.getPassTime2().trim().length() > 0){
+                            bisPassPort.setLockageTime2(passPortHead.getPassTime2());
+                        }
+                    }
             } else {
                 return resultMap.get("msg").toString();
             }
