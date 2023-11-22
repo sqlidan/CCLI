@@ -14,20 +14,34 @@
 				<span class="toolbar-item dialog-tool-separator"></span>
 				<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
 			</form>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" data-options="disabled:false" onclick="queryHZQD()">查询核注清单</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" data-options="disabled:false" onclick="queryHZQD()">同步核注清单(单条)</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="ck()">查看核注清单详情</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateOk()">初审通过</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateNo()">初审驳回</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateOk()">复审通过</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateNo()">复审驳回</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
+
 			<shiro:hasPermission name="wms:preEntryInvtQuery:synchronization">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="synchronization()">同步核注清单数据</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="synchronization()">同步核注清单(批量)</a>
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
 			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createPreEntry()">批量生成预报单</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOnePreEntry()">生成预报单(单条)</a>
+				<span class="toolbar-item dialog-tool-separator"></span>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createPreEntry()">生成预报单(批量)</a>
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
 			<shiro:hasPermission name="wms:preEntryInvtQuery:createClearance">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据(批量)</a>
 				<span class="toolbar-item dialog-tool-separator"></span>
 			</shiro:hasPermission>
 			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">
@@ -126,7 +140,7 @@ function gridDG(){
 		pageList : [20, 30, 50, 100 ],
 		singleSelect:true,
 		frozenColumns: [[
-			{field: 'id', title: 'ID',sortable:true},
+			{field: 'id', title: 'ID',hidden:true},
 			{field: 'bondInvtNo', title: '核注清单号',sortable:true},
 		]],
 	    columns:[[
@@ -295,6 +309,12 @@ function gridDG(){
 			{field:'etpsInnerInvtNo',title:'企业内部编号',sortable:true},
 			{field:'createBy',title:'创建人',sortable:true},
 			{field:'createTime',title:'创建日期',sortable:true},
+			{field:'jlAudit',title:'初审人',sortable:true},
+			{field:'jlAuditTime',title:'初审时间',sortable:true},
+			{field:'jlRejectReason',title:'初审驳回原因',sortable:true},
+			{field:'zgAudit',title:'复审人',sortable:true},
+			{field:'zgAuditTime',title:'复审时间',sortable:true},
+			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
 			// {field:'updateBy',title:'修改人',sortable:true},
 			// {field:'updateTime',title:'修改时间',sortable:true}
 	    ]],
@@ -345,6 +365,27 @@ function synchronization(){
 		}
 	});
 }
+//生成单条预报单
+function createOnePreEntry(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核注清单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '确定将选中数据生成预报单吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/createOnePreEntry/"+row.id,
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}else{
+			return;
+		}
+	});
+}
 //批量生成预报单
 function createPreEntry(){
 	parent.$.messager.confirm('提示', '确定批量生成预报单吗？', function(data){
@@ -378,7 +419,7 @@ function createClearance(){
 	});
 }
 //生成报关单
-function createOneBGD(){
+function  createOneBGD(){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条数据！", position: "bottomRight" });
@@ -424,6 +465,87 @@ function ck(){
 	if(rowIsNull(row)) return;
 	window.parent.mainpage.mainTabs.addModule('核注清单详情','wms/preEntryInvtQuery/invtDetail/' + row.id);
 }
+
+
+// ==============================审核===================================================
+//初审通过
+function jlUpdateOk(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核注清单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '您确定要将选中的核注清单信息审核通过？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/UpdateState/"+row.id+"/jlUpdateOk",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+//初审驳回
+function jlUpdateNo(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核注清单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.prompt('提示', '驳回原因：', function(content){
+		if (content){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/UpdateState/"+row.id+"/jlUpdateNo?reason="+content,
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+//复审通过
+function zgUpdateOk(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核注清单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.confirm('提示', '您确定要将选中的核注清单信息审核通过？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/UpdateState/"+row.id+"/zgUpdateOk",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+//复审驳回
+function zgUpdateNo(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)){
+		parent.$.messager.show({ title : "提示",msg: "请选择一条核注清单数据！", position: "bottomRight" });
+		return;
+	}
+	parent.$.messager.prompt('提示', '驳回原因：', function(content){
+		if (content){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/preEntryInvtQuery/UpdateState/"+row.id+"/zgUpdateNo?reason="+content,
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
+
+// =================================================================================
 </script>
 </body>
 </html>

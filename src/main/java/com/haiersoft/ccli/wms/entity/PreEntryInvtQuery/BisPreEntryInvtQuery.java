@@ -64,49 +64,26 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@Column(name = "CREATE_BGD")
 	private String createBgd;// 生成报关单 0-未生成；1-已生成
 
-	public String getCreateBgd() {
-		return createBgd;
-	}
+	@Column(name = "JL_AUDIT")
+	private String jlAudit; //初审人
 
-	public void setCreateBgd(String createBgd) {
-		this.createBgd = createBgd;
-	}
+	@Column(name = "JL_REJECT_REASON")
+	private String jlRejectReason; //初审驳回原因
 
-	public String getCreateClearance() {
-		return createClearance;
-	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "JL_AUDIT_TIME")
+	private Date jlAuditTime;  //初审时间
 
-	public void setCreateClearance(String createClearance) {
-		this.createClearance = createClearance;
-	}
+	@Column(name = "ZG_AUDIT")
+	private String zgAudit; //复审审核
 
-	public String getTdNo() {
-		return tdNo;
-	}
+	@Column(name = "ZG_REJECT_REASON")
+	private String zgRejectReason; //复审驳回原因
 
-	public void setTdNo(String tdNo) {
-		this.tdNo = tdNo;
-	}
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "ZG_AUDIT_TIME")
+	private Date zgAuditTime;  //复审时间
 
-	public Date getOrderTime() {
-		return orderTime;
-	}
-
-	public void setOrderTime(Date orderTime) {
-		this.orderTime = orderTime;
-	}
-
-	public String getCreatePreEntry() {
-		return createPreEntry;
-	}
-
-	public void setCreatePreEntry(String createPreEntry) {
-		this.createPreEntry = createPreEntry;
-	}
-
-	public static long getSerialVersionUID() {
-		return serialVersionUID;
-	}
 
 	public String getId() {
 		return id;
@@ -242,5 +219,93 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 
 	public void setSynchronization(String synchronization) {
 		this.synchronization = synchronization;
+	}
+
+	public String getCreatePreEntry() {
+		return createPreEntry;
+	}
+
+	public void setCreatePreEntry(String createPreEntry) {
+		this.createPreEntry = createPreEntry;
+	}
+
+	public Date getOrderTime() {
+		return orderTime;
+	}
+
+	public void setOrderTime(Date orderTime) {
+		this.orderTime = orderTime;
+	}
+
+	public String getTdNo() {
+		return tdNo;
+	}
+
+	public void setTdNo(String tdNo) {
+		this.tdNo = tdNo;
+	}
+
+	public String getCreateClearance() {
+		return createClearance;
+	}
+
+	public void setCreateClearance(String createClearance) {
+		this.createClearance = createClearance;
+	}
+
+	public String getCreateBgd() {
+		return createBgd;
+	}
+
+	public void setCreateBgd(String createBgd) {
+		this.createBgd = createBgd;
+	}
+
+	public String getJlAudit() {
+		return jlAudit;
+	}
+
+	public void setJlAudit(String jlAudit) {
+		this.jlAudit = jlAudit;
+	}
+
+	public String getJlRejectReason() {
+		return jlRejectReason;
+	}
+
+	public void setJlRejectReason(String jlRejectReason) {
+		this.jlRejectReason = jlRejectReason;
+	}
+
+	public Date getJlAuditTime() {
+		return jlAuditTime;
+	}
+
+	public void setJlAuditTime(Date jlAuditTime) {
+		this.jlAuditTime = jlAuditTime;
+	}
+
+	public String getZgAudit() {
+		return zgAudit;
+	}
+
+	public void setZgAudit(String zgAudit) {
+		this.zgAudit = zgAudit;
+	}
+
+	public String getZgRejectReason() {
+		return zgRejectReason;
+	}
+
+	public void setZgRejectReason(String zgRejectReason) {
+		this.zgRejectReason = zgRejectReason;
+	}
+
+	public Date getZgAuditTime() {
+		return zgAuditTime;
+	}
+
+	public void setZgAuditTime(Date zgAuditTime) {
+		this.zgAuditTime = zgAuditTime;
 	}
 }

@@ -51,8 +51,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.rpc.ServiceException;
 import java.io.*;
 import java.math.BigDecimal;
+import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -94,7 +96,7 @@ public class PreEntryInvtQueryController extends BaseController {
 	@RequestMapping(value = "json", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getData(HttpServletRequest request) {
-//		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 		Page<BisPreEntryInvtQuery> page = getPage(request);
@@ -124,15 +126,28 @@ public class PreEntryInvtQueryController extends BaseController {
 			invtHeadTypeVo.setListStat(forBisPreEntryInvtQuery.getListStat().replaceAll("\"","").replaceAll("'",""));
 
 			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
-//			invtHeadTypeVo.setUpdateBy(forBisPreEntryInvtQuery.getUpdateBy());
 			if(invtHeadType.getInvtDclTime()!=null && invtHeadType.getInvtDclTime().trim().length() > 0){
 				try {
 					invtHeadTypeVo.setCreateTime(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime())));
-//					invtHeadTypeVo.setUpdateTime(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime())));
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}
+
+			invtHeadTypeVo.setJlAudit(forBisPreEntryInvtQuery.getJlAudit());
+			if(forBisPreEntryInvtQuery.getJlAuditTime()!=null){
+				String date = simpleDateFormat.format(forBisPreEntryInvtQuery.getJlAuditTime());
+				date = date.substring(0,10);
+				invtHeadTypeVo.setJlAuditTime(date);
+			}
+			invtHeadTypeVo.setJlRejectReason(forBisPreEntryInvtQuery.getJlRejectReason());
+			invtHeadTypeVo.setZgAudit(forBisPreEntryInvtQuery.getZgAudit());
+			if(forBisPreEntryInvtQuery.getZgAuditTime()!=null) {
+				String date = simpleDateFormat.format(forBisPreEntryInvtQuery.getZgAuditTime());
+				date = date.substring(0,10);
+				invtHeadTypeVo.setZgAuditTime(date);
+			}
+			invtHeadTypeVo.setZgRejectReason(forBisPreEntryInvtQuery.getZgRejectReason());
 
 			invtHeadTypeVoList.add(invtHeadTypeVo);
 		}
@@ -392,6 +407,43 @@ public class PreEntryInvtQueryController extends BaseController {
 //
 //	}
 
+	//生成单条预报单
+	@RequestMapping(value="createOnePreEntry/{id}",method = RequestMethod.GET)
+	@ResponseBody
+	public String createOnePreEntry(@PathVariable("id") String id) {
+		String msg = "success";
+		//获取要生成预报单的核注清单号
+		BisPreEntryInvtQuery bisPreEntryInvtQuery = new BisPreEntryInvtQuery();
+		bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
+		if (bisPreEntryInvtQuery != null){
+			if (bisPreEntryInvtQuery.getBondInvtNo()!=null && bisPreEntryInvtQuery.getBondInvtNo().toString().trim().length() > 0){
+				//查询
+				String result = null;
+				try {
+					result = createPreEntry(bisPreEntryInvtQuery);
+				} catch (IOException | ClassNotFoundException | ParseException e) {
+					logger.info("生成单条预报单异常:"+e.getMessage());
+					e.printStackTrace();
+				}
+				if ("success".equals(result)){
+					User user = UserUtil.getCurrentUser();
+					bisPreEntryInvtQuery.setUpdateBy(user.getName());
+					bisPreEntryInvtQuery.setUpdateTime(new Date());
+					bisPreEntryInvtQuery.setCreatePreEntry("1");
+					preEntryInvtQueryService.merge(bisPreEntryInvtQuery);
+					logger.info("单条核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" 生成预报单成功");
+				}else{
+					msg = msg + "单条核注清单号："+bisPreEntryInvtQuery.getBondInvtNo()+" "+result +";";
+				}
+			}else{
+				return "核注清单号不可为空";
+			}
+		}else{
+			return "未找到对应的核注清单数据";
+		}
+		return msg;
+	}
+
 	//批量生成预报单
 	@RequestMapping(value="createPreEntry",method = RequestMethod.GET)
 	@ResponseBody
@@ -463,15 +515,19 @@ public class PreEntryInvtQueryController extends BaseController {
 		User user = UserUtil.getCurrentUser();
 		bisPreEntry.setCreateBy(user.getName());
 		if(invtHeadType.getInputTime()!=null){
-			bisPreEntry.setCreateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInputTime()))));
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(sdf2.parse(invtHeadType.getInputTime()));
+			calendar.add(Calendar.DAY_OF_MONTH, -1);
+			Date newDate = calendar.getTime();
+			bisPreEntry.setCreateTime(sdf1.parse(sdf1.format(newDate)));
 		}
 		bisPreEntry.setUpdateBy(user.getName());
 		if(invtHeadType.getInvtDclTime()!=null){
 			bisPreEntry.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 		}
-		bisPreEntry.setJlAudit(user.getName());
-		bisPreEntry.setJlAuditTime(bisPreEntry.getUpdateTime());
-		bisPreEntry.setZgAudit(user.getName());
+		bisPreEntry.setJlAudit("李晓静");
+		bisPreEntry.setJlAuditTime(bisPreEntry.getCreateTime());
+		bisPreEntry.setZgAudit("王巧玲");
 		bisPreEntry.setZgAuditTime(bisPreEntry.getUpdateTime());
 		bisPreEntry.setUpAndDown("0");
 		bisPreEntry.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
@@ -479,13 +535,40 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntry.setBillNum(bisPreEntryInvtQuery.getTdNo());//提单号
 		bisPreEntry.setCdNum(invtHeadType.getEntryNo() == null ? "" : invtHeadType.getEntryNo());//报关单号
 		bisPreEntry.setClientName(invtHeadType.getRltEntryBizopEtpsNm());//客户名称
-		bisPreEntry.setBillNum(invtHeadType.getApplyNo() == null ? "" : invtHeadType.getApplyNo().trim());//提单号
 		bisPreEntry.setCtnCont(0);//箱量
-		bisPreEntry.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
+//		bisPreEntry.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
+		if (invtHeadType.getTrspModecd() != null && invtHeadType.getTrspModecd().trim().length() > 0) {
+			if ("1".equals(invtHeadType.getTrspModecd())){
+				bisPreEntry.setTradeMode("进料加工");//贸易方式
+			}else if ("2".equals(invtHeadType.getTrspModecd())){
+				bisPreEntry.setTradeMode("保税仓库货物");//贸易方式
+			}else if ("3".equals(invtHeadType.getTrspModecd())){
+				bisPreEntry.setTradeMode("来料加工");//贸易方式
+			}else if ("4".equals(invtHeadType.getTrspModecd())){
+				bisPreEntry.setTradeMode("一般贸易");//贸易方式
+			}else if ("5".equals(invtHeadType.getTrspModecd())){
+				bisPreEntry.setTradeMode("其他");//贸易方式
+			}else{
+				bisPreEntry.setTradeMode(invtHeadType.getTrspModecd());//贸易方式
+			}
+		}
 		bisPreEntry.setCdSign(Integer.parseInt(invtHeadType.getDclcusFlag()));//报关标志
 		bisPreEntry.setConsignee(invtHeadType.getRcvgdEtpsNm() == null ? "" : invtHeadType.getRcvgdEtpsNm());//收货人
 		bisPreEntry.setConsignor(invtHeadType.getRltEntryBizopEtpsno());//发货人
-		bisPreEntry.setContryOragin(invtHeadType.getStshipTrsarvNatcd());//原产国
+//		bisPreEntry.setContryOragin(invtHeadType.getStshipTrsarvNatcd());//原产国
+		if (invtHeadType.getStshipTrsarvNatcd() != null && invtHeadType.getStshipTrsarvNatcd().trim().length() > 0) {
+			//起运国，从字典中依据编号转成名称
+			List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();
+			bisPreEntryDictDataList = preEntryService.getDictDataByCode("CUS_STSHIP_TRSARV_NATCD");
+			for (BisPreEntryDictData forBisPreEntryDictData : bisPreEntryDictDataList) {
+				if (forBisPreEntryDictData.getValue().equals(invtHeadType.getStshipTrsarvNatcd()) || forBisPreEntryDictData.getLabel().equals(invtHeadType.getStshipTrsarvNatcd())) {
+					bisPreEntry.setContryOragin(forBisPreEntryDictData.getLabel());//原产国
+					break;
+				}
+			}
+		} else {
+			bisPreEntry.setContryOragin(null);//原产国
+		}
 
 		bisPreEntry.setYLRTYBH(invtHeadType.getSeqNo());//预录入统一编号
 		bisPreEntry.setQDBH(invtHeadType.getBondInvtNo());//清单编号
@@ -1271,12 +1354,63 @@ public class PreEntryInvtQueryController extends BaseController {
 		return getEasyUIData(page);
 	}
 
-//	@RequestMapping(value = "jsonDJ/{id}", method = RequestMethod.GET)
-//	@ResponseBody
-//	public Map<String, Object> getDJData(HttpServletRequest request, @PathVariable("id") String id) {
-//
-//		return getEasyUIData(page);
-//	}
+	/**
+	 * 状态修改
+	 */
+	@RequestMapping(value = "UpdateState/{id}/{type}", method = RequestMethod.GET)
+	@ResponseBody
+	public String UpdateState(Model model, @PathVariable("id") String id, @PathVariable("type") String type, HttpServletRequest request) throws RemoteException, ServiceException {
+		User user = UserUtil.getCurrentUser();
+		BisPreEntryInvtQuery bisPreEntryInvtQuery = preEntryInvtQueryService.get(id);
+		if (bisPreEntryInvtQuery != null) {
+			String state = bisPreEntryInvtQuery.getListStat();
+			if ("jlUpdateOk".equals(type)) {//初审通过
+				if(!"0".equals(state)){
+					return "当前核注清单信息不能初审。";
+				}
+				bisPreEntryInvtQuery.setListStat("0");
+				bisPreEntryInvtQuery.setJlAudit(user.getName());
+				bisPreEntryInvtQuery.setJlAuditTime(new Date());
+			} else if ("jlUpdateNo".equals(type)) {//初审驳回
+				if(!"0".equals(state)){
+					return "当前核注清单信息不能初审驳回。";
+				}
+				bisPreEntryInvtQuery.setListStat("0");
+				if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
+					bisPreEntryInvtQuery.setJlRejectReason(request.getParameter("reason").toString().trim());
+				}else{
+					bisPreEntryInvtQuery.setJlRejectReason(null);
+				}
+				bisPreEntryInvtQuery.setJlAudit(user.getName());
+				bisPreEntryInvtQuery.setJlAuditTime(new Date());
+			} else if ("zgUpdateOk".equals(type)) {//复审通过
+				if(!"0".equals(state)){
+					return "当前核注清单信息不能复审。";
+				}
+				bisPreEntryInvtQuery.setListStat("0");
+				bisPreEntryInvtQuery.setZgAudit(user.getName());
+				bisPreEntryInvtQuery.setZgAuditTime(new Date());
+			} else if ("zgUpdateNo".equals(type)) {//复审驳回
+				if(!"2".equals(state) && !"3".equals(state)){
+					return "当前核注清单信息不能复审驳回。";
+				}
+				bisPreEntryInvtQuery.setListStat("0");
+				if(request.getParameter("reason")!=null && request.getParameter("reason").toString().trim().length() > 0){
+					bisPreEntryInvtQuery.setZgRejectReason(request.getParameter("reason").toString().trim());
+				}else{
+					bisPreEntryInvtQuery.setZgRejectReason(null);
+				}
+				bisPreEntryInvtQuery.setZgAudit(user.getName());
+				bisPreEntryInvtQuery.setZgAuditTime(new Date());
+			}
+			bisPreEntryInvtQuery.setUpdateBy(user.getName());//修改人
+			bisPreEntryInvtQuery.setUpdateTime(new Date());//修改时间
+			preEntryInvtQueryService.merge(bisPreEntryInvtQuery);
+			return "success";
+		} else {
+			return "error";
+		}
+	}
 
 //================================================================================================================================
 

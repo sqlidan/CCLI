@@ -12,6 +12,12 @@ public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable
     private String createTime;// 下单日期
     private String updateBy;// 修改人
     private String updateTime;// 修改日期
+    private String jlAudit; //初审人
+    private String jlRejectReason; //初审驳回原因
+    private String jlAuditTime;  //初审时间
+    private String zgAudit; //复审审核
+    private String zgRejectReason; //复审驳回原因
+    private String zgAuditTime;  //复审时间
 
     public String getId() {
         return id;
@@ -51,5 +57,53 @@ public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable
 
     public void setUpdateTime(String updateTime) {
         this.updateTime = updateTime;
+    }
+
+    public String getJlAudit() {
+        return jlAudit;
+    }
+
+    public void setJlAudit(String jlAudit) {
+        this.jlAudit = jlAudit;
+    }
+
+    public String getJlRejectReason() {
+        return jlRejectReason;
+    }
+
+    public void setJlRejectReason(String jlRejectReason) {
+        this.jlRejectReason = jlRejectReason;
+    }
+
+    public String getJlAuditTime() {
+        return jlAuditTime;
+    }
+
+    public void setJlAuditTime(String jlAuditTime) {
+        this.jlAuditTime = jlAuditTime;
+    }
+
+    public String getZgAudit() {
+        return zgAudit;
+    }
+
+    public void setZgAudit(String zgAudit) {
+        this.zgAudit = zgAudit;
+    }
+
+    public String getZgRejectReason() {
+        return zgRejectReason;
+    }
+
+    public void setZgRejectReason(String zgRejectReason) {
+        this.zgRejectReason = zgRejectReason;
+    }
+
+    public String getZgAuditTime() {
+        return zgAuditTime;
+    }
+
+    public void setZgAuditTime(String zgAuditTime) {
+        this.zgAuditTime = zgAuditTime;
     }
 }
