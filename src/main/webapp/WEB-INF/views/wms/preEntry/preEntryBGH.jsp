@@ -169,7 +169,7 @@ function gridDG(){
 					}
 				}},
 			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
-			// {field:'clientName',title:'客户名称',sortable:true},
+			{field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			// {field:'tradeMode',title:'贸易方式',sortable:true},
 			{field:'billNum',title:'提单号',sortable:true},

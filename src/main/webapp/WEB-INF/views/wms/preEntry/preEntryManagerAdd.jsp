@@ -33,15 +33,17 @@
 			</td>
 			<td>客户名称：</td>
 				<td>
-					<input type="hidden" id="clientName" name="clientName">
-					<select id="clientId" name="clientId" class="easyui-combobox" data-options="width:180, required:'required'" >
-					</select>
+<%--					<input type="hidden" id="clientName" name="clientName">--%>
+<%--					<select id="clientId" name="clientId" class="easyui-combobox" data-options="width:180, required:'required'" >--%>
+<%--					</select>--%>
+					<input id="clientName" name="clientName" type="text" class="easyui-validatebox"  data-options="width:180">
 				</td>
 			<td>报关公司：</td>
 				<td>
-				<input type="hidden" id="declarationUnit" name="declarationUnit" >
-				<select id="declarationUnitId" name="declarationUnitId" class="easyui-combobox" data-options="width:180, required:'required'"  maxlength="30" >
-				</select>
+<%--					<input type="hidden" id="declarationUnit" name="declarationUnit" >--%>
+<%--					<select id="declarationUnitId" name="declarationUnitId" class="easyui-combobox" data-options="width:180, required:'required'"  maxlength="30" >--%>
+<%--					</select>--%>
+					<input id="declarationUnit" name="declarationUnit" type="text" class="easyui-validatebox"  data-options="width:180">
 				</td>
 		</tr>
 		<tr>
@@ -129,21 +131,21 @@ function addInfo2(){
 }
 
 function selectAjax(){
-	//报关公司
-	  	var getorg='${preEntry.declarationUnitId}';
-	   $('#declarationUnitId').combobox({
-		   method:"GET",
-		   url:"${ctx}/base/client/getClientAll?setid=${preEntry.declarationUnitId}",
-		   valueField: 'ids',
-		   textField: 'clientName',
-		   mode:'remote',
-		   onLoadSuccess:function(){
-				if(getorg!=null && getorg!=""){
-					 $('#declarationUnitId').combobox("select",getorg);
-					 getorg="";
-				}
-		   }
-		});
+	<%--//报关公司--%>
+	<%--  	var getorg='${preEntry.declarationUnitId}';--%>
+	<%--   $('#declarationUnitId').combobox({--%>
+	<%--	   method:"GET",--%>
+	<%--	   url:"${ctx}/base/client/getClientAll?setid=${preEntry.declarationUnitId}",--%>
+	<%--	   valueField: 'ids',--%>
+	<%--	   textField: 'clientName',--%>
+	<%--	   mode:'remote',--%>
+	<%--	   onLoadSuccess:function(){--%>
+	<%--			if(getorg!=null && getorg!=""){--%>
+	<%--				 $('#declarationUnitId').combobox("select",getorg);--%>
+	<%--				 getorg="";--%>
+	<%--			}--%>
+	<%--	   }--%>
+	<%--	});--%>
 
    		//物流容器
    		$.ajax({
@@ -163,33 +165,33 @@ function selectAjax(){
 		}
 	});
 
-   	//客户
- 	var getstockId='${preEntry.clientId}';
-	   $('#clientId').combobox({
-	   method:"GET",
-	   url:"${ctx}/base/client/getClientAll?filter_EQS_clientSort=0&setid=${preEntry.clientId}",
-	   valueField: 'ids',
-	   textField: 'clientName',
-	   mode:'remote',
-	   onChange:function(){
-	   	  if(b==1){
-	   		a=1;
-	   		b=0;
-	   	   }else{
-	   	   	a=0;
-	   	   }
-	   },
-	   onSelect:function(){
-	   		a=1;
-	   		b=1;
-	   },
-	   onLoadSuccess:function(){
-			if(getstockId!=null && getstockId!=""){
-				 $('#clientId').combobox("select",getstockId);
-				 getstockId="";
-			}
-	   }
-   	});
+   	<%--//客户--%>
+ 	<%--var getstockId='${preEntry.clientId}';--%>
+	 <%--  $('#clientId').combobox({--%>
+	 <%--  method:"GET",--%>
+	 <%--  url:"${ctx}/base/client/getClientAll?filter_EQS_clientSort=0&setid=${preEntry.clientId}",--%>
+	 <%--  valueField: 'ids',--%>
+	 <%--  textField: 'clientName',--%>
+	 <%--  mode:'remote',--%>
+	 <%--  onChange:function(){--%>
+	 <%--  	  if(b==1){--%>
+	 <%--  		a=1;--%>
+	 <%--  		b=0;--%>
+	 <%--  	   }else{--%>
+	 <%--  	   	a=0;--%>
+	 <%--  	   }--%>
+	 <%--  },--%>
+	 <%--  onSelect:function(){--%>
+	 <%--  		a=1;--%>
+	 <%--  		b=1;--%>
+	 <%--  },--%>
+	 <%--  onLoadSuccess:function(){--%>
+		<%--	if(getstockId!=null && getstockId!=""){--%>
+		<%--		 $('#clientId').combobox("select",getstockId);--%>
+		<%--		 getstockId="";--%>
+		<%--	}--%>
+	 <%--  }--%>
+   	<%--});--%>
 }
 
 //清空
@@ -199,13 +201,9 @@ function clearIt(){
 
 //保存
 function submitForm(){
-	$("#clientName").val( $("#clientId").combobox("getText") );
-	$("#declarationUnit").val( $("#declarationUnitId").combobox("getText") );
+	// $("#clientName").val( $("#clientId").combobox("getText") );
+	// $("#declarationUnit").val( $("#declarationUnitId").combobox("getText") );
 	if($("#mainForm").form('validate')){
-		if(a == 0){
-			parent.$.messager.show({ title : "提示",msg: "下拉框选项请选择下拉框中的数据!", position: "bottomRight" });
-			return;
-		}else{
 		//用ajax提交form
  		$.ajax({
  	  		async: false,
@@ -219,7 +217,6 @@ function submitForm(){
  	  			}
  	  		}
  	  	});
- 	  	}
  	}
 }
 
