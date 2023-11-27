@@ -525,6 +525,10 @@ public class PreEntryInvtQueryController extends BaseController {
 		if(invtHeadType.getInvtDclTime()!=null){
 			bisPreEntry.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 		}
+		bisPreEntry.setfAudit("李晓静");
+		bisPreEntry.setfAuditTime(bisPreEntry.getCreateTime());
+		bisPreEntry.setsAudit("李晓静");
+		bisPreEntry.setsAuditTime(bisPreEntry.getCreateTime());
 		bisPreEntry.setJlAudit("李晓静");
 		bisPreEntry.setJlAuditTime(bisPreEntry.getCreateTime());
 		bisPreEntry.setZgAudit("王巧玲");

@@ -52,6 +52,26 @@ public class BisPreEntry implements java.io.Serializable {
 	@Column(name = "UPDATE_TIME")
 	private Date updateTime;  //修改日期
 
+	@Column(name = "F_AUDIT")
+	private String fAudit; //初审人
+
+	@Column(name = "F_REJECT_REASON")
+	private String fRejectReason; //初审驳回原因
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "F_AUDIT_TIME")
+	private Date fAuditTime;  //初审时间
+
+	@Column(name = "S_AUDIT")
+	private String sAudit; //初审人
+
+	@Column(name = "S_REJECT_REASON")
+	private String sRejectReason; //初审驳回原因
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "S_AUDIT_TIME")
+	private Date sAuditTime;  //初审时间
+
 	@Column(name = "JL_AUDIT")
 	private String jlAudit; //初审人
 
@@ -1031,5 +1051,53 @@ public class BisPreEntry implements java.io.Serializable {
 
 	public void setGLQDBH(String GLQDBH) {
 		this.GLQDBH = GLQDBH;
+	}
+
+	public String getfAudit() {
+		return fAudit;
+	}
+
+	public void setfAudit(String fAudit) {
+		this.fAudit = fAudit;
+	}
+
+	public String getfRejectReason() {
+		return fRejectReason;
+	}
+
+	public void setfRejectReason(String fRejectReason) {
+		this.fRejectReason = fRejectReason;
+	}
+
+	public Date getfAuditTime() {
+		return fAuditTime;
+	}
+
+	public void setfAuditTime(Date fAuditTime) {
+		this.fAuditTime = fAuditTime;
+	}
+
+	public String getsAudit() {
+		return sAudit;
+	}
+
+	public void setsAudit(String sAudit) {
+		this.sAudit = sAudit;
+	}
+
+	public String getsRejectReason() {
+		return sRejectReason;
+	}
+
+	public void setsRejectReason(String sRejectReason) {
+		this.sRejectReason = sRejectReason;
+	}
+
+	public Date getsAuditTime() {
+		return sAuditTime;
+	}
+
+	public void setsAuditTime(Date sAuditTime) {
+		this.sAuditTime = sAuditTime;
 	}
 }

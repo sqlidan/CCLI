@@ -9,6 +9,8 @@
 <div id="tb" style="padding:5px;height:auto">
 	<div>
 		<form id="searchFrom" action="">
+			<input type="text" name="filter_LIKES_checkListNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
+			<input type="text" name="filter_LIKES_cdNum" class="easyui-validatebox" data-options="width:150,prompt: '报关单号'"/>
 			<input type="text" name="filter_LIKES_billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
 			<select id="searchStock" name="filter_LIKES_clientName" class="easyui-combobox" data-options="width:150,prompt: '客户名称'" >
 			</select>
@@ -19,9 +21,11 @@
 			</select>
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '状态' " >
 				<option  value=""></option>
-				<option  value="0">待完善</option>
-				<option  value="1">待初审</option>
-				<option  value="2">待复审</option>
+				<option  value="0">待初审</option>
+				<option  value="A">待复审</option>
+				<option  value="B">待提交</option>
+				<option  value="1">待二次初审</option>
+				<option  value="2">待二次复审</option>
 				<option  value="3">待申报</option>
 				<option  value="4">申报核注清单中</option>
 				<option  value="5">核注清单通过</option>
@@ -50,22 +54,41 @@
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="ck()">查看预报单</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
+		<%--		第一次审核--%>
 		<shiro:hasPermission name="wms:preEntry:jlExamineOk">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateOk()">初审通过</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateOk(1)">初审通过</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntry:jlExamineNo">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateNo()">初审驳回</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateNo(1)">初审驳回</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntry:zgExamineOk">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateOk()">复审通过</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateOk(1)">复审通过</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
 		<shiro:hasPermission name="wms:preEntry:zgExamineNo">
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateNo()">复审驳回</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateNo(1)">复审驳回</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
+<%--		第二次审核--%>
+		<shiro:hasPermission name="wms:preEntry:jlExamineOk">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateOk(2)">二次初审通过</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="wms:preEntry:jlExamineNo">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="jlUpdateNo(2)">二次初审驳回</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="wms:preEntry:zgExamineOk">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateOk(2)">二次复审通过</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="wms:preEntry:zgExamineNo">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateNo(2)">二次复审驳回</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+		</shiro:hasPermission>
+
 		<shiro:hasPermission name="wms:preEntry:uploadBGD">
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="uploadBGD()">上传报关单</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
@@ -127,7 +150,9 @@ function gridDG(){
 		pageList : [ 20, 50, 100, 200, 500 ],
 		singleSelect:true,
 		frozenColumns: [[
-			{field:'forId',title:'预报单ID',sortable:true},
+			{field:'forId',title:'预报单ID',hidden:true},
+			{field:'checkListNo',title:'核注清单号',sortable:true},
+			{field:'cdNum',title:'报关单号',sortable:true},
 			{field:'serviceProject',title:'服务项目',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
@@ -140,13 +165,19 @@ function gridDG(){
 			{field:'state',title:'状态',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
-						return "待完善";
-					}
-					if(value == '1'){
 						return "待初审";
 					}
-					if(value == '2'){
+					if(value == 'A'){
 						return "待复审";
+					}
+					if(value == 'B'){
+						return "待提交";
+					}
+					if(value == '1'){
+						return "待二次初审";
+					}
+					if(value == '2'){
+						return "待二次复审";
 					}
 					if(value == '3'){
 						return "待申报";
@@ -166,8 +197,8 @@ function gridDG(){
 				}},
 		]],
 	    columns:[[
-			{field:'jlAudit',title:'初审人',sortable:true},
-			{field:'jlAuditTime',title:'初审时间',sortable:true,
+			{field:'fAudit',title:'初审人',sortable:true},
+			{field:'fAuditTime',title:'初审时间',sortable:true,
 				formatter : function(value, row, index) {
 					if(value !== undefined && value!== null && value.toString().length >= 10 ){
 						return value.toString().substring(0,10);
@@ -175,9 +206,9 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'jlRejectReason',title:'初审驳回原因',sortable:true},
-			{field:'zgAudit',title:'复审人',sortable:true},
-			{field:'zgAuditTime',title:'复审时间',sortable:true,
+			{field:'fRejectReason',title:'初审驳回原因',sortable:true},
+			{field:'sAudit',title:'复审人',sortable:true},
+			{field:'sAuditTime',title:'复审时间',sortable:true,
 				formatter : function(value, row, index) {
 					if(value !== undefined && value!== null && value.toString().length >= 10 ){
 						return value.toString().substring(0,10);
@@ -185,7 +216,27 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
+			{field:'sRejectReason',title:'复审驳回原因',sortable:true},
+			{field:'jlAudit',title:'二次初审人',sortable:true},
+			{field:'jlAuditTime',title:'二次初审时间',sortable:true,
+				formatter : function(value, row, index) {
+					if(value !== undefined && value!== null && value.toString().length >= 10 ){
+						return value.toString().substring(0,10);
+					}else{
+						return '';
+					}
+				}},
+			{field:'jlRejectReason',title:'二次初审驳回原因',sortable:true},
+			{field:'zgAudit',title:'二次复审人',sortable:true},
+			{field:'zgAuditTime',title:'二次复审时间',sortable:true,
+				formatter : function(value, row, index) {
+					if(value !== undefined && value!== null && value.toString().length >= 10 ){
+						return value.toString().substring(0,10);
+					}else{
+						return '';
+					}
+				}},
+			{field:'zgRejectReason',title:'二次复审驳回原因',sortable:true},
  	        {field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			// {field:'tradeMode',title:'贸易方式',sortable:true},
@@ -199,8 +250,6 @@ function gridDG(){
 			{field:'consignor',title:'发货人',sortable:true},
 			{field:'contryOragin',title:'原产国',sortable:true},
 			// {field:'seqNo',title:'通关一点通编号',sortable:true},
-			{field:'checkListNo',title:'核注清单号',sortable:true},
-			{field:'cdNum',title:'报关单号',sortable:true},
 			// {field:'remark',title:'备注',sortable:true},
 			{field:'cdBy',title:'报关人',sortable:true},
 			{field:'cdTime',title:'报关时间',sortable:true},
@@ -292,7 +341,7 @@ function del(){
 	});
 }
 //初审通过
-function jlUpdateOk(){
+function jlUpdateOk(num){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });
@@ -300,9 +349,13 @@ function jlUpdateOk(){
 	}
 	parent.$.messager.confirm('提示', '您确定要将选中的预报单信息审核通过？', function(data){
 		if (data){
+			var type = "jlUpdateOk1";
+			if(num == 2){
+				type = "jlUpdateOk";
+			}
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/jlUpdateOk",
+				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/"+type,
 				success: function(data){
 					successTip(data,dg);
 				},
@@ -311,7 +364,7 @@ function jlUpdateOk(){
 	});
 }
 //初审驳回
-function jlUpdateNo(){
+function jlUpdateNo(num){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });
@@ -319,9 +372,13 @@ function jlUpdateNo(){
 	}
 	parent.$.messager.prompt('提示', '驳回原因：', function(content){
 		if (content){
+			var type = "jlUpdateNo1";
+			if(num == 2){
+				type = "jlUpdateNo";
+			}
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/jlUpdateNo?reason="+content,
+				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/"+type+"?reason="+content,
 				success: function(data){
 					successTip(data,dg);
 				},
@@ -330,7 +387,7 @@ function jlUpdateNo(){
 	});
 }
 //复审通过
-function zgUpdateOk(){
+function zgUpdateOk(num){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });
@@ -338,9 +395,13 @@ function zgUpdateOk(){
 	}
 	parent.$.messager.confirm('提示', '您确定要将选中的预报单信息审核通过？', function(data){
 		if (data){
+			var type = "zgUpdateOk1";
+			if(num == 2){
+				type = "zgUpdateOk";
+			}
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/zgUpdateOk",
+				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/"+type,
 				success: function(data){
 					successTip(data,dg);
 				},
@@ -349,7 +410,7 @@ function zgUpdateOk(){
 	});
 }
 //复审驳回
-function zgUpdateNo(){
+function zgUpdateNo(num){
 	var row = dg.datagrid('getSelected');
 	if(rowIsNull(row)){
 		parent.$.messager.show({ title : "提示",msg: "请选择一条预报单数据！", position: "bottomRight" });
@@ -357,9 +418,13 @@ function zgUpdateNo(){
 	}
 	parent.$.messager.prompt('提示', '驳回原因：', function(content){
 		if (content){
+			var type = "zgUpdateNo1";
+			if(num == 2){
+				type = "zgUpdateNo";
+			}
 			$.ajax({
 				type:'get',
-				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/zgUpdateNo?reason="+content,
+				url:"${ctx}/wms/preEntry/UpdateState/"+row.forId+"/"+type+"?reason="+content,
 				success: function(data){
 					successTip(data,dg);
 				},

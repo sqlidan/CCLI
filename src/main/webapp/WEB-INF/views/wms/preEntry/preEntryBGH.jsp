@@ -9,6 +9,8 @@
 <div id="tb" style="padding:5px;height:auto">
 	<div>
 		<form id="searchFrom" action="">
+			<input type="text" name="filter_LIKES_checkListNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
+			<input type="text" name="filter_LIKES_cdNum" class="easyui-validatebox" data-options="width:150,prompt: '报关单号'"/>
       	    <input type="text" name="filter_LIKES_billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
       	    <select id="searchStock" name="filter_LIKES_clientName" class="easyui-combobox" data-options="width:150,prompt: '客户名称'" >
       	    </select>
@@ -19,9 +21,9 @@
 			</select>
 			<select name="filter_EQS_state" class="easyui-combobox" data-options="width:150,prompt: '状态' " >
 				<option  value=""></option>
-				<option  value="0">待完善</option>
-				<option  value="1">待初审</option>
-				<option  value="2">待复审</option>
+				<option  value="0">待提交</option>
+				<option  value="1">待二次初审</option>
+				<option  value="2">待二次复审</option>
 				<option  value="3">待申报</option>
 				<option  value="4">申报核注清单中</option>
 				<option  value="5">核注清单通过</option>
@@ -96,7 +98,7 @@ function ajaxS(){
 function gridDG(){	
 	dg=$('#dg').datagrid({    
 		method: "get",
-	    url:'${ctx}/wms/preEntry/json',
+	    url:'${ctx}/wms/preEntry/jsonBGH',
 	    fit : true,
 		fitColumns : true,
 		border : false,
@@ -110,7 +112,9 @@ function gridDG(){
 		pageList : [ 20, 50, 100, 200, 500 ],
 		singleSelect:true,
 		frozenColumns: [[
-			{field:'forId',title:'预报单ID',sortable:true},
+			{field:'forId',title:'预报单ID',hidden:true},
+			{field:'checkListNo',title:'核注清单号',sortable:true},
+			{field:'cdNum',title:'报关单号',sortable:true},
 			{field:'serviceProject',title:'服务项目',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
@@ -123,13 +127,19 @@ function gridDG(){
 			{field:'state',title:'状态',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
-						return "待完善";
-					}
-					if(value == '1'){
 						return "待初审";
 					}
-					if(value == '2'){
+					if(value == 'A'){
 						return "待复审";
+					}
+					if(value == 'B'){
+						return "待提交";
+					}
+					if(value == '1'){
+						return "待二次初审";
+					}
+					if(value == '2'){
+						return "待二次复审";
 					}
 					if(value == '3'){
 						return "待申报";
@@ -149,8 +159,8 @@ function gridDG(){
 				}},
 		]],
 	    columns:[[
-			{field:'jlAudit',title:'初审人',sortable:true},
-			{field:'jlAuditTime',title:'初审时间',sortable:true,
+			{field:'jlAudit',title:'二次初审人',sortable:true},
+			{field:'jlAuditTime',title:'二次初审时间',sortable:true,
 				formatter : function(value, row, index) {
 					if(value !== undefined && value!== null && value.toString().length >= 10 ){
 						return value.toString().substring(0,10);
@@ -158,9 +168,9 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'jlRejectReason',title:'初审驳回原因',sortable:true},
-			{field:'zgAudit',title:'复审人',sortable:true},
-			{field:'zgAuditTime',title:'复审时间',sortable:true,
+			{field:'jlRejectReason',title:'二次初审驳回原因',sortable:true},
+			{field:'zgAudit',title:'二次复审人',sortable:true},
+			{field:'zgAuditTime',title:'二次复审时间',sortable:true,
 				formatter : function(value, row, index) {
 					if(value !== undefined && value!== null && value.toString().length >= 10 ){
 						return value.toString().substring(0,10);
@@ -168,7 +178,7 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'zgRejectReason',title:'复审驳回原因',sortable:true},
+			{field:'zgRejectReason',title:'二次复审驳回原因',sortable:true},
 			{field:'clientName',title:'客户名称',sortable:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			// {field:'tradeMode',title:'贸易方式',sortable:true},
@@ -182,8 +192,6 @@ function gridDG(){
 			{field:'consignor',title:'发货人',sortable:true},
 			{field:'contryOragin',title:'原产国',sortable:true},
 			// {field:'seqNo',title:'通关一点通编号',sortable:true},
-			{field:'checkListNo',title:'核注清单号',sortable:true},
-			{field:'cdNum',title:'报关单号',sortable:true},
 			// {field:'remark',title:'备注',sortable:true},
 			{field:'cdBy',title:'报关人',sortable:true},
 			{field:'cdTime',title:'报关时间',sortable:true},
