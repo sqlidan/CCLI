@@ -74,7 +74,7 @@ public class PreEntryController extends BaseController {
     @ResponseBody
     public Map<String, Object> json(HttpServletRequest request) {
         Page<BisPreEntry> page = getPage(request);
-        page.orderBy("forId").order(Page.DESC);
+        page.orderBy("createTime").order(Page.DESC);
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         PropertyFilter filter = new PropertyFilter("NEQS_state", "-1");//已删除
         filters.add(filter);
@@ -89,7 +89,7 @@ public class PreEntryController extends BaseController {
     @ResponseBody
     public Map<String, Object> jsonBGH(HttpServletRequest request) {
         Page<BisPreEntry> page = getPage(request);
-        page.orderBy("forId").order(Page.DESC);
+        page.orderBy("createTime").order(Page.DESC);
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         PropertyFilter filter1 = new PropertyFilter("NEQS_state", "-1");//已删除
         PropertyFilter filter2 = new PropertyFilter("NEQS_state", "0");//新增

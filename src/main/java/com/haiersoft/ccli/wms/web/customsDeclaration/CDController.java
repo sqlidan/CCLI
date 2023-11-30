@@ -137,7 +137,7 @@ public class CDController extends BaseController {
         bsCustomsDeclarationInfo.setForId(forId);
         model.addAttribute("bsCustomsDeclarationInfo", bsCustomsDeclarationInfo);
         model.addAttribute("sbTime", bsCustomsDeclaration.getSbTime());
-        model.addAttribute("cdTime", new Date());
+        model.addAttribute("cdTime", bsCustomsDeclaration.getCdTime());
         model.addAttribute("user", user.getName());
         model.addAttribute("action", "update");
         return "wms/customsDeclaration/customsDeclarationManager";
@@ -207,6 +207,9 @@ public class CDController extends BaseController {
         }
         if (isNotNullOrEmpty(bsCustomsDeclaration.getSbTime())) {
             queryBsCustomsDeclaration.setSbTime(bsCustomsDeclaration.getSbTime());
+        }
+        if (isNotNullOrEmpty(bsCustomsDeclaration.getCdTime())) {
+            queryBsCustomsDeclaration.setCdTime(bsCustomsDeclaration.getCdTime());
         }
 
         User user = UserUtil.getCurrentUser();
