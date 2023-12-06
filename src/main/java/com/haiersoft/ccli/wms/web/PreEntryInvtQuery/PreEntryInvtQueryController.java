@@ -634,6 +634,8 @@ public class PreEntryInvtQueryController extends BaseController {
 		bisPreEntry.setBZ(invtHeadType.getRmk());//备注
 		bisPreEntry.setBGDTYBH(invtHeadType.getEntrySeqNo());//报关单统一编号
 		bisPreEntry.setCZYKH(invtHeadType.getIcCardNo());//操作员卡号
+		bisPreEntry.setCdBy(bisPreEntry.getDeclarationUnit());//报关人
+		bisPreEntry.setCdTime(bisPreEntry.getBGDSBRQ());//报关时间
 
 		String productName = "";
 		String hsNo = "";
@@ -1427,16 +1429,18 @@ public class PreEntryInvtQueryController extends BaseController {
 	 * @Param [invtQueryListRequest]
 	 **/
 	public Map<String,Object> InvtQueryListService(InvtQueryListRequest invtQueryListRequest) {
-		logger.info("保税核注清单列表查询服务:"+JSON.toJSONString(invtQueryListRequest));
+		logger.info("保税核注清单列表查询服务invtQueryListRequest:"+JSON.toJSONString(invtQueryListRequest));
 		Map<String,Object> resultMap = new HashMap<>();
 		InvtQueryListResponse baseResult = new InvtQueryListResponse();
 		String dataStr = "";
 		try {
 			invtQueryListRequest.setKey(ApiKey.保税监管_保税核注清单查询服务秘钥.getValue());
 			String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_保税核注清单列表查询服务接口.getValue(), JSON.toJSONString(invtQueryListRequest, SerializerFeature.WriteNullStringAsEmpty));
+			logger.info("保税核注清单列表查询服务RequestResult:"+s);
 			JSONObject jsonObject = JSON.parseObject(s);
 			String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
 			if ("200".equals(code)) {
+				logger.info("success");
 				Object data = jsonObject.get("data");
 				if (data != null) {
 					dataStr = data.toString();
@@ -1447,6 +1451,7 @@ public class PreEntryInvtQueryController extends BaseController {
 				resultMap.put("msg","success");
 				resultMap.put("data",baseResult);
 			} else {
+				logger.info("error");
 				Object data = jsonObject.get("msg");
 				if (data != null) {
 					dataStr = data.toString();

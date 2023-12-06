@@ -152,7 +152,7 @@ function gridDG(){
 		frozenColumns: [[
 			{field:'forId',title:'预报单ID',hidden:true},
 			{field:'checkListNo',title:'核注清单号',sortable:true},
-			{field:'cdNum',title:'报关单号',sortable:true},
+			{field:'cdNum',title:'报关单号',hidden:true},
 			{field:'serviceProject',title:'服务项目',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
@@ -206,7 +206,7 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'fRejectReason',title:'初审驳回原因',sortable:true},
+			{field:'fRejectReason',title:'初审驳回原因',hidden:true},
 			{field:'sAudit',title:'复审人',sortable:true},
 			{field:'sAuditTime',title:'复审时间',sortable:true,
 				formatter : function(value, row, index) {
@@ -216,7 +216,7 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'sRejectReason',title:'复审驳回原因',sortable:true},
+			{field:'sRejectReason',title:'复审驳回原因',hidden:true},
 			{field:'jlAudit',title:'二次初审人',sortable:true},
 			{field:'jlAuditTime',title:'二次初审时间',sortable:true,
 				formatter : function(value, row, index) {
@@ -226,7 +226,7 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'jlRejectReason',title:'二次初审驳回原因',sortable:true},
+			{field:'jlRejectReason',title:'二次初审驳回原因',hidden:true},
 			{field:'zgAudit',title:'二次复审人',sortable:true},
 			{field:'zgAuditTime',title:'二次复审时间',sortable:true,
 				formatter : function(value, row, index) {
@@ -236,18 +236,18 @@ function gridDG(){
 						return '';
 					}
 				}},
-			{field:'zgRejectReason',title:'二次复审驳回原因',sortable:true},
- 	        {field:'clientName',title:'客户名称',sortable:true},
+			{field:'zgRejectReason',title:'二次复审驳回原因',hidden:true},
+ 	        {field:'clientName',title:'客户名称',hidden:true},
 			{field:'declarationUnit',title:'报关公司',sortable:true},
 			// {field:'tradeMode',title:'贸易方式',sortable:true},
-			{field:'billNum',title:'提单号',sortable:true},
+			{field:'billNum',title:'提单号',hidden:true},
 			// {field:'ctnCont',title:'箱量',sortable:true},
 			{field:'productName',title:'品名',sortable:true},
 			{field:'hsNo',title:'HS编码',sortable:true},
 			{field:'price',title:'重量',sortable:true},//件数
 			// {field:'netWeight',title:'重量',sortable:true},
 			{field:'consignee',title:'收货人',sortable:true},
-			{field:'consignor',title:'发货人',sortable:true},
+			{field:'consignor',title:'发货人',hidden:true},
 			{field:'contryOragin',title:'原产国',sortable:true},
 			// {field:'seqNo',title:'通关一点通编号',sortable:true},
 			// {field:'remark',title:'备注',sortable:true},

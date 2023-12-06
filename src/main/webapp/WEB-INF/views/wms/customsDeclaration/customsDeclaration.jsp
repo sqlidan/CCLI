@@ -220,9 +220,9 @@ function gridDG(){
 						return "已下载";
 					}
 				}},
-			{field:'upFileName',title:'文件名称',sortable:true},
-			{field:'upBy',title:'上传人',sortable:true},
-			{field:'upTime',title:'上传时间',sortable:true},
+			// {field:'upFileName',title:'文件名称',sortable:true},
+			// {field:'upBy',title:'上传人',sortable:true},
+			// {field:'upTime',title:'上传时间',sortable:true},
 			{field:'upAndDown',title:'上传/下载',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
