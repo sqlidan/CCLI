@@ -189,7 +189,7 @@ function gridDG(){
 						return "区内物流货物";
 					}
 					if(value == '3'){
-						return "来料对口";
+						return "来料加工";
 					}
 					if(value == '4'){
 						return "一般贸易";

@@ -72,10 +72,12 @@
 				</td>
 				<td>申报单位：</td>
 				<td>
-					<input type="hidden" id="declarationUnit" name="declarationUnit">
-					<select id="declarationUnitId" name="declarationUnitId" class="easyui-combobox"
-							data-options="width:180" maxlength="30">
-					</select>
+					<input type="text" id="declarationUnit" name="declarationUnit" class="easyui-validatebox" data-options="width: 180"
+						   value="${bsCustomsDeclaration.declarationUnit}" >
+<%--					<input type="hidden" id="declarationUnit" name="declarationUnit">--%>
+<%--					<select id="declarationUnitId" name="declarationUnitId" class="easyui-combobox"--%>
+<%--							data-options="width:180" maxlength="30">--%>
+<%--					</select>--%>
 				</td>
 				<td>货物存放地点：</td>
 				<td>
@@ -188,21 +190,21 @@
 
 	function selectAjax() {
 		//表头
-		//报关公司
-		var getorg='${bsCustomsDeclaration.declarationUnitId}';
-		$('#declarationUnitId').combobox({
-			method:"GET",
-			url:"${ctx}/base/client/getClientAll?setid=${bsCustomsDeclaration.declarationUnitId}",
-			valueField: 'ids',
-			textField: 'clientName',
-			mode:'remote',
-			onLoadSuccess:function(){
-				if(getorg!=null && getorg!=""){
-					$('#declarationUnitId').combobox("select",getorg);
-					getorg="";
-				}
-			}
-		});
+		<%--//报关公司--%>
+		<%--var getorg='${bsCustomsDeclaration.declarationUnitId}';--%>
+		<%--$('#declarationUnitId').combobox({--%>
+		<%--	method:"GET",--%>
+		<%--	url:"${ctx}/base/client/getClientAll?setid=${bsCustomsDeclaration.declarationUnitId}",--%>
+		<%--	valueField: 'ids',--%>
+		<%--	textField: 'clientName',--%>
+		<%--	mode:'remote',--%>
+		<%--	onLoadSuccess:function(){--%>
+		<%--		if(getorg!=null && getorg!=""){--%>
+		<%--			$('#declarationUnitId').combobox("select",getorg);--%>
+		<%--			getorg="";--%>
+		<%--		}--%>
+		<%--	}--%>
+		<%--});--%>
 
 		//物流容器
 		$.ajax({
@@ -443,7 +445,7 @@
 	//表头保存
 	function submitForm() {
 		// $("#clientName").val( $("#clientId").combobox("getText") );
-		$("#declarationUnit").val( $("#declarationUnitId").combobox("getText") );
+		// $("#declarationUnit").val( $("#declarationUnitId").combobox("getText") );
 		if ($("#mainForm").form('validate')) {
 			//用ajax提交form
 			$.ajax({
