@@ -525,13 +525,29 @@ public class PreEntryInvtQueryController extends BaseController {
 		if(invtHeadType.getInvtDclTime()!=null){
 			bisPreEntry.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 		}
-		bisPreEntry.setfAudit("李晓静");
+		bisPreEntry.setfAudit(getUserName());
 		bisPreEntry.setfAuditTime(bisPreEntry.getCreateTime());
-		bisPreEntry.setsAudit("李晓静");
+		bisPreEntry.setsAudit(getUserName());
+		boolean con1 = true;
+		while(con1) {
+			if (!bisPreEntry.getfAudit().equals(bisPreEntry.getsAudit())) {
+				con1 = false;
+			} else {
+				bisPreEntry.setfAudit(getUserName());
+			}
+		}
 		bisPreEntry.setsAuditTime(bisPreEntry.getCreateTime());
-		bisPreEntry.setJlAudit("李晓静");
+		bisPreEntry.setJlAudit(getUserName());
 		bisPreEntry.setJlAuditTime(bisPreEntry.getCreateTime());
-		bisPreEntry.setZgAudit("王巧玲");
+		bisPreEntry.setZgAudit(getUserName());
+		boolean con2 = true;
+		while(con2) {
+			if (!bisPreEntry.getJlAudit().equals(bisPreEntry.getZgAudit())) {
+				con2 = false;
+			} else {
+				bisPreEntry.setJlAudit(getUserName());
+			}
+		}
 		bisPreEntry.setZgAuditTime(bisPreEntry.getUpdateTime());
 		bisPreEntry.setUpAndDown("0");
 		bisPreEntry.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
@@ -1197,9 +1213,18 @@ public class PreEntryInvtQueryController extends BaseController {
 		if(invtHeadType.getInvtDclTime()!=null){
 			bsCustomsDeclaration.setUpdateTime(sdf1.parse(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime()))));
 		}
-		bsCustomsDeclaration.setJlAudit("李晓静");
+
+		bsCustomsDeclaration.setJlAudit(getUserName());
 		bsCustomsDeclaration.setJlAuditTime(bsCustomsDeclaration.getUpdateTime());
-		bsCustomsDeclaration.setZgAudit("王巧玲");
+		bsCustomsDeclaration.setZgAudit(getUserName());
+		boolean con = true;
+		while(con) {
+			if (!bsCustomsDeclaration.getJlAudit().equals(bsCustomsDeclaration.getZgAudit())) {
+				con = false;
+			} else {
+				bsCustomsDeclaration.setJlAudit(getUserName());
+			}
+		}
 		bsCustomsDeclaration.setZgAuditTime(bsCustomsDeclaration.getUpdateTime());
 		bsCustomsDeclaration.setUpAndDown("0");//上传/下载,0-未上传;1-已上传;2-已下载
 		bsCustomsDeclaration.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
@@ -1602,4 +1627,27 @@ public class PreEntryInvtQueryController extends BaseController {
 		}
 		return resultMap;
 	}
+
+
+	//随机获取人员方法
+	public String getUserName(){
+		String name = "";
+		Random random = new Random();
+		int randomNumber = random.nextInt(6) + 1;
+		//李晓静、吴林、张琳、王增康、陈昊、匡文彩
+		if(randomNumber == 1){
+			name = "李晓静";
+		}else if (randomNumber == 2){
+			name = "吴林";
+		}else if (randomNumber == 3){
+			name = "张琳";
+		}else if (randomNumber == 4){
+			name = "王增康";
+		}else if (randomNumber == 5){
+			name = "陈昊";
+		}else if (randomNumber == 6){
+			name = "匡文彩";
+		}
+		return name;
+	};
 }
