@@ -537,17 +537,9 @@ public class PreEntryInvtQueryController extends BaseController {
 			}
 		}
 		bisPreEntry.setsAuditTime(bisPreEntry.getCreateTime());
-		bisPreEntry.setJlAudit(getUserName());
+		bisPreEntry.setJlAudit(bisPreEntry.getfAudit());
 		bisPreEntry.setJlAuditTime(bisPreEntry.getCreateTime());
-		bisPreEntry.setZgAudit(getUserName());
-		boolean con2 = true;
-		while(con2) {
-			if (!bisPreEntry.getJlAudit().equals(bisPreEntry.getZgAudit())) {
-				con2 = false;
-			} else {
-				bisPreEntry.setJlAudit(getUserName());
-			}
-		}
+		bisPreEntry.setZgAudit(bisPreEntry.getsAudit());
 		bisPreEntry.setZgAuditTime(bisPreEntry.getUpdateTime());
 		bisPreEntry.setUpAndDown("0");
 		bisPreEntry.setCheckListNo(invtHeadType.getBondInvtNo());//核注清单号
