@@ -81,14 +81,14 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append("			'COVER TORN' ");
 		sb.append("		END  ");
 		sb.append("	) AS enter_state,  ");
-		sb.append("	MAX(t.piece) AS piece,  ");
-		sb.append("	round(MAX(t.NET_WEIGHT), 2) AS NET_WEIGHT, ");
-		sb.append("	round(MAX(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
-		sb.append("FROM   ");
-		sb.append("	BIS_TRANSFER_STOCK_INFO t  ");
+		sb.append("	SUM(t.piece) AS piece,  ");
+		sb.append("	round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT, ");
+		sb.append("	round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM bis_transfer_stock_info t ");
+		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
 		sb.append("LEFT JOIN BIS_TRANSFER_STOCK m ON t.transfer_link_id = m.transfer_id      ");
-		sb.append("left join bis_asn a  ");
-		sb.append("  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)                  ");
 		sb.append("WHERE 1 = 1    ");
 		String transferId="";
 		if(!StringUtils.isNull(transferNum)){
@@ -103,9 +103,9 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		}
 		if(null!=ifBonded&&!"".equals(ifBonded)){
         	if("1".equals(ifBonded)){
-        		sb.append(" AND a.is_bonded='"+ifBonded+"'");
+        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
         	}else{
-        		sb.append(" AND (a.is_bonded ='0' or a.is_bonded is null)    ");
+        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
         	}
         }
 		sb.append("GROUP BY    "); 
@@ -151,15 +151,19 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append(" 		'COVER TORN'      ");
 		sb.append(" 	END                 ");
 		sb.append(" ) AS enter_state,     ");
-		sb.append(" MAX(t.piece) piece,   ");
-		sb.append(" round(MAX(t.NET_WEIGHT), 2) AS NET_WEIGHT,    ");
-		sb.append(" round(MAX(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
-		sb.append(" FROM                                          ");
-		sb.append(" 	BIS_TRANSFER_STOCK_INFO t                   ");
+		sb.append(" SUM(t.piece) piece,   ");
+		sb.append(" round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT,    ");
+		sb.append(" round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM bis_transfer_stock_info t ");
+		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//		sb.append(" FROM                                          ");
+//		sb.append(" 	BIS_TRANSFER_STOCK_INFO t                   ");
 		sb.append(" LEFT JOIN base_sku_base_info s ON s.SKU_ID = t.sku_id                    ");
 		sb.append(" LEFT JOIN BIS_TRANSFER_STOCK m ON t.transfer_link_id = m.transfer_id     ");
-		sb.append(" LEFT JOIN bis_asn a       ");
-		sb.append("   on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num) ");
+//		sb.append(" LEFT JOIN bis_asn a       ");
+//		sb.append("   on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num) ");
 		sb.append(" WHERE 1 = 1     ");
 		String transferId="";
 		if(!StringUtils.isNull(transferNum)){
@@ -174,9 +178,9 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		}
 		if(null!=ifBonded&&!"".equals(ifBonded)){
         	if("1".equals(ifBonded)){
-        		sb.append(" AND a.is_bonded='"+ifBonded+"'");
+        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
         	}else{
-        		sb.append(" AND (a.is_bonded ='0' or a.is_bonded is null)    ");
+        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
         	}
         }
 	    sb.append("GROUP BY            "); 
@@ -227,18 +231,22 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append("      'COVER TORN' ");
 		sb.append("    END ");
 		sb.append("  ) AS enter_state, ");
-		sb.append("  MAX(t.piece) AS piece,  ");
-		sb.append("  round(MAX(t.NET_WEIGHT), 2) AS NET_WEIGHT,  ");
-		sb.append("  round(MAX(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT, ");
+		sb.append("  SUM(t.piece) AS piece,  ");
+		sb.append("  round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT,  ");
+		sb.append("  round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT, ");
 		sb.append("  e.ORDER_NUM  ");
-		sb.append("FROM    ");
-		sb.append("  BIS_TRANSFER_STOCK_INFO t  ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM bis_transfer_stock_info t ");
+		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//		sb.append("FROM    ");
+//		sb.append("  BIS_TRANSFER_STOCK_INFO t  ");
 		sb.append("LEFT JOIN bis_enter_stock_info e ON t.bill_num = e.ITEM_NUM ");
 		sb.append("AND t.sku_id = e.sku   ");
 		sb.append("LEFT JOIN base_sku_base_info k ON k.sku_id = t.sku_id  ");
 		sb.append("LEFT JOIN BIS_TRANSFER_STOCK m ON t.transfer_link_id = m.transfer_id    ");
-		sb.append("LEFT JOIN bis_asn a   ");
-		sb.append("  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+//		sb.append("LEFT JOIN bis_asn a   ");
+//		sb.append("  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
 		sb.append("WHERE     ");
 		sb.append("  1 = 1    ");
 		String transferId="";
@@ -254,9 +262,9 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		}
 		if(null!=ifBonded&&!"".equals(ifBonded)){
         	if("1".equals(ifBonded)){
-        		sb.append(" AND a.is_bonded='"+ifBonded+"'");
+        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
         	}else{
-        		sb.append(" AND (a.is_bonded ='0' or a.is_bonded is null)    ");
+        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
         	}
         }
 		sb.append(" GROUP BY    "); 

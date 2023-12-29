@@ -1071,7 +1071,7 @@ public class InStockReportDao extends HibernateDao<Stock, String>{
     	sb.append("SELECT ");
     	sb.append("	m.transfer_id AS contactCode,");
     	sb.append("	t.cargo_name AS cargoName,");
-    	sb.append("	a.is_bonded AS isBonded,");
+    	sb.append("	t.is_bonded AS isBonded,");
     	sb.append("	t.bill_num AS billCode,");
     	sb.append("	t.ctn_num AS ctnNum,");
     	sb.append("	t.sku_id AS sku,");
@@ -1080,16 +1080,17 @@ public class InStockReportDao extends HibernateDao<Stock, String>{
     	sb.append("	m.receiver_name AS warehouse,");
     	sb.append("	m.stock_in AS clientName,");
     	sb.append("	(CASE t.enter_state WHEN '0' THEN 'INTACT' WHEN '1' THEN 'BROKEN' WHEN '2' THEN 'COVER TORN' END ) AS state, ");
-    	sb.append("	MAX(t.piece) AS nowNum,");
-    	sb.append("	MAX(t.NET_WEIGHT) AS allnet, ");
-    	sb.append("	MAX(t.GROSS_WEIGHT) AS allgross ");
-    	sb.append(" FROM  ");
-    	sb.append("	BIS_TRANSFER_STOCK_INFO t  ");
+    	sb.append("	SUM(t.piece) AS nowNum,");
+    	sb.append("	SUM(t.NET_WEIGHT) AS allnet, ");
+    	sb.append("	SUM(t.GROSS_WEIGHT) AS allgross ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM bis_transfer_stock_info t ");
+		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//    	sb.append(" FROM  ");
+//    	sb.append("	BIS_TRANSFER_STOCK_INFO t  ");
     	sb.append("LEFT JOIN BIS_TRANSFER_STOCK m ON t.transfer_link_id = m.transfer_id      ");
-    	sb.append("LEFT JOIN bis_asn a ON ( ");
-    	sb.append("	t.bill_num = a.bill_num   ");
-    	sb.append("	AND t.ctn_num = a.ctn_num ");
-    	sb.append(")  ");
+//    	sb.append("LEFT JOIN bis_asn a ON ( t.bill_num = a.bill_num	AND t.ctn_num = a.ctn_num ) ");
     	sb.append("WHERE 1 = 1  ");
 		String transferId="";
 		if(!StringUtils.isNull(transferNum)){
@@ -1104,15 +1105,15 @@ public class InStockReportDao extends HibernateDao<Stock, String>{
 		}
 		if(null!=isBonded&&!"".equals(isBonded)){
         	if("1".equals(isBonded)){
-        		sb.append(" AND a.is_bonded='"+isBonded+"'");
+        		sb.append(" AND t.is_bonded='"+isBonded+"'");
         	}else{
-        		sb.append(" AND (a.is_bonded ='0' or a.is_bonded is null)    ");
+        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
         	}
         }
 		sb.append("GROUP BY  "); 
 		sb.append(" M .transfer_id,");
 		sb.append("	T .cargo_name,");
-		sb.append("	A .is_bonded, ");
+		sb.append("	t .is_bonded, ");
 		sb.append(" T .bill_num,  ");
 		sb.append("	T .ctn_num,  ");
 		sb.append("	T .sku_id,  ");
