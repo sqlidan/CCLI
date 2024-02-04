@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.transform.Transformers;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.stereotype.Repository;
@@ -1552,18 +1554,27 @@ public class StandingBookDao extends HibernateDao<BisStandingBook, Integer> {
 		if(!StringUtils.isNull(stock.getFeeName())){
 			sb.append(" AND book.fee_name like '%"+stock.getFeeName()+"%'");
 		}
-		if(!StringUtils.isNull(stock.getCustomsNum())){
-			sb.append(" AND book.customs_num=:customsnum");
-			params.put("customsnum",stock.getCustomsNum());
-		}
-		if(!StringUtils.isNull(stock.getStraTime())){
-			sb.append(" AND book.input_date >= to_date(:strartTime, 'yyyy-mm-dd') ");
-			params.put("strartTime", stock.getStraTime());
-		}
-		if(!StringUtils.isNull(stock.getEndTime())){
-			sb.append(" AND book.input_date < to_date(:endTime, 'yyyy-mm-dd')+1 ");
-			params.put("endTime", stock.getEndTime());
-		}
+//		if(!StringUtils.isNull(stock.getCustomsNum())){
+//			sb.append(" AND book.customs_num=:customsnum");
+//			params.put("customsnum",stock.getCustomsNum());
+//		}
+//		if(!StringUtils.isNull(stock.getStraTime())){
+//			sb.append(" AND book.input_date >= to_date(:strartTime, 'yyyy-mm-dd') ");
+//			params.put("strartTime", stock.getStraTime());
+//		}
+//		if(!StringUtils.isNull(stock.getEndTime())){
+//			sb.append(" AND book.input_date < to_date(:endTime, 'yyyy-mm-dd')+1 ");
+//			params.put("endTime", stock.getEndTime());
+//		}
+        if(!StringUtils.isNull(stock.getCustomsNum())){
+            sb.append(" AND book.customs_num='"+stock.getCustomsNum()+"'");
+        }
+        if(!StringUtils.isNull(stock.getStraTime())){
+            sb.append(" AND book.input_date >= to_date('"+stock.getStraTime()+"', 'yyyy-mm-dd') ");
+        }
+        if(!StringUtils.isNull(stock.getEndTime())){
+            sb.append(" AND book.input_date < to_date('"+stock.getEndTime()+"', 'yyyy-mm-dd')+1 ");
+        }
 		sb.append(" AND EXAMINE_SIGN = 1                                           ");
 		sb.append(" GROUP BY                                                       ");
 		sb.append(" 	book.bill_num,                                               ");
@@ -1581,8 +1592,11 @@ public class StandingBookDao extends HibernateDao<BisStandingBook, Integer> {
 		sb.append(" 	temp.fee_name,                                               ");
 		sb.append(" 	temp.fee_code,                                               ");
 		sb.append(" 	temp.input_date                                              ");
-		SQLQuery sqlQuery = createSQLQuery(sb.toString(), params);
-		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        Session getSession=sessionFactory.openSession();;
+        SQLQuery sqlQuery = getSession.createSQLQuery(sb.toString());
+        List list = sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        getSession.close();
+        return list;
     }
 
     @SuppressWarnings("unchecked")
@@ -1661,18 +1675,27 @@ public class StandingBookDao extends HibernateDao<BisStandingBook, Integer> {
 		if(!StringUtils.isNull(stock.getFeeName())){
 			sb.append(" AND book.fee_name like '%"+stock.getFeeName()+"%'");
 		}
-		if(!StringUtils.isNull(stock.getCustomsNum())){
-			sb.append(" AND book.customs_num=:customsnum");
-			params.put("customsnum",stock.getCustomsNum());
-		}
-		if(!StringUtils.isNull(stock.getStraTime())){
-			sb.append(" AND book.input_date >= to_date(:strartTime, 'yyyy-mm-dd') ");
-			params.put("strartTime", stock.getStraTime());
-		}
-		if(!StringUtils.isNull(stock.getEndTime())){
-			sb.append(" AND book.input_date < to_date(:endTime, 'yyyy-mm-dd')+1 ");
-			params.put("endTime", stock.getEndTime());
-		}
+//		if(!StringUtils.isNull(stock.getCustomsNum())){
+//			sb.append(" AND book.customs_num=:customsnum");
+//			params.put("customsnum",stock.getCustomsNum());
+//		}
+//		if(!StringUtils.isNull(stock.getStraTime())){
+//			sb.append(" AND book.input_date >= to_date(:strartTime, 'yyyy-mm-dd') ");
+//			params.put("strartTime", stock.getStraTime());
+//		}
+//		if(!StringUtils.isNull(stock.getEndTime())){
+//			sb.append(" AND book.input_date < to_date(:endTime, 'yyyy-mm-dd')+1 ");
+//			params.put("endTime", stock.getEndTime());
+//		}
+        if(!StringUtils.isNull(stock.getCustomsNum())){
+            sb.append(" AND book.customs_num='"+stock.getCustomsNum()+"'");
+        }
+        if(!StringUtils.isNull(stock.getStraTime())){
+            sb.append(" AND book.input_date >= to_date('"+stock.getStraTime()+"', 'yyyy-mm-dd') ");
+        }
+        if(!StringUtils.isNull(stock.getEndTime())){
+            sb.append(" AND book.input_date < to_date('"+stock.getEndTime()+"', 'yyyy-mm-dd')+1 ");
+        }
 		sb.append(" AND EXAMINE_SIGN = 1                                           ");
 		sb.append(" GROUP BY                                                       ");
 		sb.append(" 	book.bill_num,                                               ");
@@ -1683,9 +1706,13 @@ public class StandingBookDao extends HibernateDao<BisStandingBook, Integer> {
 		sb.append(" 	book.if_receive,                                             ");
 		sb.append(" 	to_char (input_date, 'yyyy-mm-dd')                           ");
 		sb.append(" 	) temp                                                       ");
-		SQLQuery sqlQuery = createSQLQuery(sb.toString(), params);
-		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        Session getSession=sessionFactory.openSession();;
+        SQLQuery sqlQuery =getSession.createSQLQuery(sb.toString());
+        List list = sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        getSession.close();
+        return list;
     }
+
 
     @SuppressWarnings("unchecked")
 	public List<Map<String, Object>> suppliersum(BisStandingBook stock) {

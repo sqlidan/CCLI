@@ -5,11 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Rectangle;
+
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 import com.haiersoft.ccli.common.utils.PdfReportM1HeaderFooter;
@@ -45,6 +43,12 @@ public class MyPDFUtils {
             writer.setPdfVersion(PdfWriter.VERSION_1_4);
 
             document.open();
+
+            //TODO 即墨冷库使用，黄岛仓库未使用 2024-01-16 徐峥
+//            BaseFont baseFont = BaseFont.createFont("c://windows//fonts//simkai.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+//            Font font = new Font(baseFont, 4, Font.NORMAL);
+//            Paragraph paragraph = new Paragraph(sHTML, font);
+//            document.add(paragraph);
 
             //	setHeader(writer,pdfHead,pdfTitle) ;
             // 打开文档，将要写入内容

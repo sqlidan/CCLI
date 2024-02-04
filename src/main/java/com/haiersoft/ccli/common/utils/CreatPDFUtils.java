@@ -84,7 +84,10 @@ public class CreatPDFUtils {
 		sbHtml.append("<style>.htd{text-align:left;font-weight:800;font-size:17px;width:150px; } .ftd{text-align:left;font-weight:800;font-size:17px;width:150px;height:20px; }#ctable td{border:0px solid #000;}</style>");
 		sbHtml.append("<table style=\"width:100%;\">");
 		sbHtml.append("<tr><td style=\"width:50%;\" colspan=\"4\"><img src=\""+filePath+"/static/images/tpdf1.jpg\" /><img src=\""+filePath+"/static/images/tpdf2.jpg\" /></td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+cnTitle+"</td><td colspan=\"4\"></td></tr>");
+		//TODO 怡之航黄岛冷库使用 2024-01-17 徐峥
 		sbHtml.append("<tr><td style=\"width:50%;\" colspan=\"4\"> QingDao Port Eimskip Coldchain Logistics Co.Ltd<br/> Weisan Road , Qianwan Port, Huangdao District<br/> Qingdao ,Shandong 266500,China<br/> Tel: +86 532 82987866   Fax: +86 532 82987995<br/></td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+enTitle+"</td><td style=\"font-size:20px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"4\">"+rName+rCont+"</td></tr>");
+		//TODO 即墨冷库使用 2024-01-17 徐峥
+//		sbHtml.append("<tr><td style=\"width:50%;font-size:16px; font-family:宋体;\" colspan=\"4\"> 山港陆海智慧冷链物流(青岛)有限公司<br/> 山东省青岛市即墨区蓝村镇泉东村1号附4<br/> 中国山东青岛266500<br/> 电话：0532-89067231</td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+enTitle+"</td><td style=\"font-size:20px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"4\">"+rName+rCont+"</td></tr>");
 		sbHtml.append("</table>");
 		sbHtml.append(contHtml);
 		sbHtml.append("</body></html>");
@@ -99,7 +102,10 @@ public class CreatPDFUtils {
 		sbHtml.append("<style>.htd{text-align:left;font-weight:800;font-size:17px;width:150px; } .ftd{text-align:left;font-weight:800;font-size:17px;width:150px;height:20px; }#ctable td{border:0px solid #000;}</style>");
 		sbHtml.append("<table style=\"width:100%;\">");
 		sbHtml.append("<tr><td style=\"width:50%;\" colspan=\"4\"><img src=\""+filePath+"/static/images/tpdf1.jpg\" /><img src=\""+filePath+"/static/images/tpdf2.jpg\" /></td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+cnTitle+"</td><td colspan=\"4\"></td></tr>");
+		//TODO 怡之航黄岛冷库使用 2024-02-04 徐峥
 		sbHtml.append("<tr><td style=\"width:50%;\" colspan=\"4\"> QingDao Port Eimskip Coldchain Logistics Co.Ltd<br/> Weisan Road , Qianwan Port, Huangdao District<br/> Qingdao ,Shandong 266500,China<br/> Tel: +86 532 82987866   Fax: +86 532 82987995<br/></td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+enTitle+"<br/><br/> <br/></td><td style=\"font-size:20px; font-family:宋体;text-align:left;font-weight:900;\" colspan=\"4\">"+rName+"</td></tr>");
+		//TODO 即墨冷库使用 2024-02-04 徐峥
+//		sbHtml.append("<tr><td style=\"width:50%;font-size:16px; font-family:宋体;\" colspan=\"4\"> QingDao Port Eimskip Coldchain Logistics Co.Ltd<br/> 山东省青岛市即墨区蓝村镇泉东村1号附4<br/> Qingdao ,Shandong 266500,China<br/> Tel: +86 532 82987866   Fax: +86 532 82987995</td><td style=\"width:50%;font-size:24px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"2\">"+enTitle+"</td><td style=\"font-size:20px; font-family:宋体;text-align:center;font-weight:900;\" colspan=\"4\">"+rName+"</td></tr>");
 		sbHtml.append("</table>");
 		sbHtml.append(contHtml);
 		sbHtml.append("</body></html>");
