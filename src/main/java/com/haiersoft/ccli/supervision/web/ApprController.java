@@ -138,7 +138,11 @@ public class ApprController extends BaseController {
 					bisEnterStockInfoList = enterStockInfoService.search(enterStockFilters);
 					for (ApprInfo forApprInfo : apprInfoList) {
 						for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
-							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
+							//20240219 徐峥优化注释
+//							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
+							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())
+									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getCargoName())
+									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getHsItemname())) {
 								forApprInfo.setCodeTs(forBisEnterStockInfo.getHsCode());//HS编码/商品编码
 							}
 							apprInfoService.merge(forApprInfo);
