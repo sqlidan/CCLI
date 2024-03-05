@@ -1,0 +1,69 @@
+package com.haiersoft.ccli.wms.web.passPort;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.haiersoft.ccli.common.persistence.Page;
+import com.haiersoft.ccli.common.persistence.PropertyFilter;
+import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.system.entity.User;
+import com.haiersoft.ccli.system.utils.UserUtil;
+import com.haiersoft.ccli.wms.entity.apiEntity.*;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfo;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPortInfoDJ;
+import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
+import com.haiersoft.ccli.wms.service.passPort.PassPortInfoDJService;
+import com.haiersoft.ccli.wms.service.passPort.PassPortInfoService;
+import com.haiersoft.ccli.wms.service.passPort.PassPortService;
+import com.haiersoft.ccli.wms.web.preEntry.HttpUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.rpc.ServiceException;
+import java.rmi.RemoteException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@Controller
+@RequestMapping("wms/passPortApi")
+public class PassPortApiController extends BaseController {
+
+    private static Logger logger = LoggerFactory.getLogger(PassPortApiController.class);
+
+    @Autowired
+    private PassPortService passPortService;
+
+    /**
+     * 获取单条核放单信息中的总重量
+     */
+    @RequestMapping(value = "checkTotalWt", method = RequestMethod.GET)
+    @ResponseBody
+    public String checkTotalWt(HttpServletRequest request) {
+        String totalWt = "";
+
+        String PLATE_NO = request.getParameter("PLATE_NO");
+        System.out.println("PLATE_NO："+PLATE_NO);
+        if(PLATE_NO == null || PLATE_NO.trim().length() == 0){
+            return "承运车牌号为必填参数";
+        }
+//        String BOX_NO = request.getParameter("BOX_NO");
+//        System.out.println("BOX_NO："+BOX_NO);
+//        if(BOX_NO == null || BOX_NO.trim().length() == 0){
+//            return "车载箱号为必填参数";
+//        }
+        totalWt = passPortService.getDataByVehicleNo(PLATE_NO);
+
+        return totalWt;
+    }
+
+}

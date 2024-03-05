@@ -17,6 +17,9 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.haiersoft.ccli.wms.entity.*;
+import com.haiersoft.ccli.wms.service.*;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
@@ -54,17 +57,7 @@ import com.haiersoft.ccli.cost.service.StandingBookService;
 import com.haiersoft.ccli.remoting.hand.invoice.entity.BaseInvoice;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
-import com.haiersoft.ccli.wms.entity.AsnAction;
-import com.haiersoft.ccli.wms.entity.BisEnterStock;
-import com.haiersoft.ccli.wms.entity.BisLoadingInfo;
-import com.haiersoft.ccli.wms.entity.BisLoadingOrder;
-import com.haiersoft.ccli.wms.entity.BisLoadingOrderInfo;
-import com.haiersoft.ccli.wms.entity.BisOutStock;
-import com.haiersoft.ccli.wms.service.AsnActionService;
-import com.haiersoft.ccli.wms.service.EnterStockService;
-import com.haiersoft.ccli.wms.service.LoadingOrderInfoService;
-import com.haiersoft.ccli.wms.service.LoadingOrderService;
-import com.haiersoft.ccli.wms.service.OutStockService;
+
 /**
  * @author Connor.M
  * @ClassName: StandingBookController
@@ -97,6 +90,8 @@ public class StandingBookController extends BaseController {
     private BisPayInfoService bisPayInfoService;
     @Autowired
     private BaseInvoiceService baseInvoiceService;
+    @Autowired
+    private ASNService asnService;
 
 
     //台账页面
@@ -791,20 +786,38 @@ public class StandingBookController extends BaseController {
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         page = standingBookService.search(page, filters);
         if(!page.getResult().isEmpty()){
+            List<BisStandingBook> returnObjList = new ArrayList<>();
         	List<BisStandingBook> objList=page.getResult();
         	int size = objList.size();
         	String payNum="";
         	Integer payId=0;
-        	for(int i=0;i<size;i++){
-        		payId=objList.get(i).getPayId();
-        		if(null!=payId && payId!=0){
-        			BisPayInfo bisPayInfo=bisPayInfoService.get(objList.get(i).getPayId());
-        			if(null==bisPayInfo)
-        				continue;
-	        		payNum=bisPayInfoService.get(objList.get(i).getPayId()).getPayId();
-	        		objList.get(i).setPayNum(payNum);
-        		}
+            String feeCode="";
+            String asn="";
+            for(int i=0;i<size;i++){
+                feeCode=objList.get(i).getFeeCode();
+                if(null!=feeCode && feeCode.trim().length() > 0 && "crk".equals(feeCode)){
+                    asn=objList.get(i).getAsn();
+                    if(null!=asn && asn.trim().length() > 0){
+                        BisAsn bisAsn=asnService.get(objList.get(i).getAsn());
+                        if(null!=bisAsn && bisAsn.getAsnState()!=null && Integer.parseInt(bisAsn.getAsnState()) >= 3){
+                            //符合条件，继续执行
+                        }else{
+                            //跳过
+                            continue;
+                        }
+                    }
+                }
+                payId=objList.get(i).getPayId();
+                if(null!=payId && payId!=0){
+                    BisPayInfo bisPayInfo=bisPayInfoService.get(objList.get(i).getPayId());
+                    if(null==bisPayInfo)
+                        continue;
+                    payNum=bisPayInfoService.get(objList.get(i).getPayId()).getPayId();
+                    objList.get(i).setPayNum(payNum);
+                }
+                returnObjList.add(objList.get(i));
         	}
+            page.setResult(returnObjList);
         }
         return getEasyUIData(page);
     }

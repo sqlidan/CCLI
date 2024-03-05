@@ -1568,7 +1568,7 @@ public class EnterStockController extends BaseController {
 			FileInputStream in=new FileInputStream(f);
 				
 		//	SupervisionController task=new SupervisionController();
-		    uploadFile(ftpHost,ftpUserName, ftpUserName, ftpPort, ftpPath, title, in);
+		    uploadFile(ftpHost,ftpUserName, ftpPassword, ftpPort, ftpPath, title, in);
 		  
 		return "success";
 	}
