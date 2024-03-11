@@ -48,22 +48,24 @@ public class PassPortApiController extends BaseController {
      */
     @RequestMapping(value = "checkTotalWt", method = RequestMethod.GET)
     @ResponseBody
-    public String checkTotalWt(HttpServletRequest request) {
-        String totalWt = "";
+    public Map<String, Object> checkTotalWt(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
 
         String PLATE_NO = request.getParameter("PLATE_NO");
         System.out.println("PLATE_NO："+PLATE_NO);
-        if(PLATE_NO == null || PLATE_NO.trim().length() == 0){
-            return "承运车牌号为必填参数";
+        if(PLATE_NO != null && PLATE_NO.trim().length() > 0){
+
+        }else{
+            result.put("code", "500");
+            result.put("msg", "承运车牌号为必填参数!");
+            return result;
         }
 //        String BOX_NO = request.getParameter("BOX_NO");
 //        System.out.println("BOX_NO："+BOX_NO);
 //        if(BOX_NO == null || BOX_NO.trim().length() == 0){
 //            return "车载箱号为必填参数";
 //        }
-        totalWt = passPortService.getDataByVehicleNo(PLATE_NO);
-
-        return totalWt;
+        return passPortService.getDataByVehicleNo(PLATE_NO);
     }
 
 }

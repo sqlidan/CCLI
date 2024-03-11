@@ -70,25 +70,6 @@ public class PassPortController extends BaseController {
     private static final String icCode = "2100030046252";
 
     /**
-     * 获取单条核放单信息中的总重量
-     */
-    @RequestMapping(value = "checkTotalWt", method = RequestMethod.GET)
-    @ResponseBody
-    public String checkTotalWt(HttpServletRequest request) {
-        String totalWt = "";
-
-        String PLATE_NO = request.getParameter("PLATE_NO");
-        if(PLATE_NO == null || PLATE_NO.trim().length() == 0){
-            return "承运车牌号为必填参数";
-        }
-        System.out.println("PLATE_NO："+PLATE_NO);
-        totalWt = passPortService.getDataByVehicleNo(PLATE_NO);
-
-        return totalWt;
-    }
-
-
-    /**
      * 核放单页面
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)

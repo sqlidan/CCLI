@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +37,32 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		return passPortDao.findBy("id", id);
 	}
 
-	public String getDataByVehicleNo(String vehicleNo){
+	public Map<String, Object> getDataByVehicleNo(String vehicleNo){
+		Map<String, Object> result = new HashMap<>();
 		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo);
-		String totalWt = "";
-		if(bisPassPortDataMap!=null && bisPassPortDataMap.size() > 0){
-			totalWt = bisPassPortDataMap.get(0).get("TOTAL_WT")==null?"":bisPassPortDataMap.get(0).get("TOTAL_WT").toString();
+		if(bisPassPortDataMap == null || bisPassPortDataMap.size() == 0){
+			result.put("code", "500");
+			result.put("msg", "未找到核放单信息!");
+			return result;
+		}else{
+			if(bisPassPortDataMap.get(0) != null && "0".equals(bisPassPortDataMap.get(0).get("LOCKAGE").toString().trim()) ){
+				String totalWt = bisPassPortDataMap.get(0).get("TOTAL_WT")==null?"0":bisPassPortDataMap.get(0).get("TOTAL_WT").toString();
+				String flag = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("totalWt",totalWt);
+				map.put("flag",flag);//I-进区;E-出区
+
+				result.put("code", "200");
+				result.put("data", map);
+				result.put("msg", "success");
+				return result;
+			}else{
+				result.put("code", "500");
+				result.put("msg", "未找到核放单信息!");
+				return result;
+			}
 		}
-		return totalWt;
 	}
 
 	public List<BisPreEntryDictData> getDictDataByCode(String code){

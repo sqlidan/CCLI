@@ -30,6 +30,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import com.haiersoft.ccli.supervision.web.FTPUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -1428,11 +1430,11 @@ public class EnterStockController extends BaseController {
 	
 	/**
 	 * 修改入库联系单明细
-	 * 
-	 * @param user
+	 *
+	 * @param bisEnterStock
 	 * @param model
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@RequestMapping(value = "sendbsl", method = RequestMethod.POST)
 	@ResponseBody
@@ -1545,41 +1547,87 @@ public class EnterStockController extends BaseController {
 			output.write(data);
 			output.close();
 
-
-
-
-
 			///文件上传FTP
 			System.out.println("生成.FLJGRX成功");
 			String ftpHost="10.135.252.41";
 			String ftpUserName = "bsl";
 			String ftpPassword = "Bsl82987792";
-
 			int ftpPort = 21;
+
 			String ftpPath = "";
 			if (port.equals("3")){
-				ftpPath="qqct";
+				ftpPath="/qqct/";
 			}else if(port.equals("4")){
-				ftpPath="qqctu";
+				ftpPath="/qqctu/";
 			}else if(port.equals("5")){
-				ftpPath="qqctn";
+				ftpPath="/qqctn/";
 			}
 
 			FileInputStream in=new FileInputStream(f);
-				
+			boolean flag = uploadFile(ftpPath, title, in);
+            System.out.println("BSLflag="+flag);
+
 		//	SupervisionController task=new SupervisionController();
-		    uploadFile(ftpHost,ftpUserName, ftpPassword, ftpPort, ftpPath, title, in);
+//		    uploadFile(ftpHost,ftpUserName, ftpPassword, ftpPort, ftpPath, title, in);
 		  
 		return "success";
 	}
+
+    public boolean uploadFile(String path, String filename, InputStream input) {
+        FTPClient ftpClient = new FTPClient();
+        boolean success = false;
+        System.out.println("111111");
+        try {
+            int reply;
+            ftpClient.connect("10.135.252.41", 21);// 连接FTP服务器
+            // 如果采用默认端口，可以使用ftp.connect(url)的方式直接连接FTP服务器
+            ftpClient.login("bsl", "Bsl82987792");// 登录
+            reply = ftpClient.getReplyCode();
+            System.out.println("222222"+reply);
+            ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
+            ftpClient.enterLocalPassiveMode();//TODO 被动模式 看现场是否需要这个
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                System.out.println("333333");
+                ftpClient.disconnect();
+                return success;
+            }
+            System.out.println("444444");
+            Boolean result1 = ftpClient.changeWorkingDirectory(path);
+            System.out.println("555555"+result1);
+            Boolean result = ftpClient.storeFile(filename, input);
+            System.out.println("666666"+result);
+            input.close();
+        } catch (IOException e) {
+            throw new RuntimeException("向FTP服务器上传文件异常" , e);
+        } finally {
+            try {
+                // 登出服务器
+                ftpClient.logout();
+            } catch (IOException e) {
+                throw new RuntimeException("登录FTP服务器异常" , e);
+            } finally {
+                // 判断连接是否存在
+                if (ftpClient.isConnected()) {
+                    try {
+                        // 断开连接
+                        ftpClient.disconnect();
+                    } catch (IOException e) {
+                        throw new RuntimeException("关闭FTP服务器异常" , e);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+
 	/**
 	 * Description:             向FTP服务器上传文件
-	 * @param host              FTP服务器hostname
-	 * @param port              FTP服务器端口
-	 * @param username          FTP登录账号
-	 * @param password          FTP登录密码
-	 * @param basePath          FTP服务器基础目录
-	 * @param filePath          FTP服务器文件存放路径。例如分日期存放：/2015/01/01。文件的路径为basePath+filePath
+	 * @param ftpHost              FTP服务器hostname
+	 * @param ftpUserName          FTP登录账号
+     * @param ftpPassword          FTP登录密码
+     * @param ftpPort              FTP服务器端口
+     * @param ftpPath          FTP服务器文件存放路径。例如分日期存放：/2015/01/01。文件的路径为basePath+filePath
 	 * @param filename          上传到FTP服务器上的文件名
 	 * @param input             输入流
 	 * @return                  成功返回true，否则返回false
