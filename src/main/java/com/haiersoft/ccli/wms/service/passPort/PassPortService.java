@@ -37,9 +37,9 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		return passPortDao.findBy("id", id);
 	}
 
-	public Map<String, Object> getDataByVehicleNo(String vehicleNo){
+	public Map<String, Object> getDataByVehicleNo(String vehicleNo,String ioTypecd){
 		Map<String, Object> result = new HashMap<>();
-		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo);
+		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo,ioTypecd);
 		if(bisPassPortDataMap == null || bisPassPortDataMap.size() == 0){
 			result.put("code", "500");
 			result.put("msg", "未找到核放单信息!");
@@ -50,7 +50,7 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 				String flag = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
 
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("totalWt",totalWt);
+				map.put("totalWt",totalWt);//总重量
 				map.put("flag",flag);//I-进区;E-出区
 
 				result.put("code", "200");

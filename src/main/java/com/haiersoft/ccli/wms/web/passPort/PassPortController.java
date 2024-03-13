@@ -216,8 +216,10 @@ public class PassPortController extends BaseController {
                     //处理结果
                     PassPortMessage passPortMessage = (PassPortMessage) resultMap.get("data");
                     String status = passPortMessage.getStatus()==null?"0":passPortMessage.getStatus();
+                    logger.info("status== "+status);
                     bisPassPort.setState(status);
                     PassPortHead passPortHead = passPortMessage.getPassportHead();
+                    logger.info("passPortHead== "+JSON.toJSONString(passPortHead));
                     if (passPortHead !=null){
                         if(passPortHead.getPassportNo()!=null && passPortHead.getPassportNo().trim().length() > 0){
                             bisPassPort.setPassportNo(passPortHead.getPassportNo());
@@ -672,6 +674,7 @@ public class PassPortController extends BaseController {
             sasCommonSeqNoRequest.setKey(ApiKey.保税监管_保税核放单查询服务秘钥.getValue());
             String s = HttpUtils.HttpPostWithJson(ApiType.保税监管_核放单详细信息查询服务接口.getValue(), JSON.toJSONString(sasCommonSeqNoRequest, SerializerFeature.WriteNullStringAsEmpty));
             JSONObject jsonObject = JSON.parseObject(s);
+            logger.info("jsonObject==:"+jsonObject.toJSONString());
             String code = jsonObject.get("code") == null ? "500" : jsonObject.get("code").toString();
             if ("200".equals(code)) {
                 Object data = jsonObject.get("data");

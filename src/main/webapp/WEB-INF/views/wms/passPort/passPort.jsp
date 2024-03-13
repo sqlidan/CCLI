@@ -235,7 +235,7 @@ function gridDG(){
 			{field:'lockage',title:'是否过卡',sortable:true,
 				formatter : function(value, row, index) {
 					if(value == '0'){
-						return "已申请";
+						return "已审批";
 					}
 					if(value == '1'){
 						return "已审批(卡口放行)";

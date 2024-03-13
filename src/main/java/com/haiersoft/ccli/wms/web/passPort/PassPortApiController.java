@@ -60,12 +60,16 @@ public class PassPortApiController extends BaseController {
             result.put("msg", "承运车牌号为必填参数!");
             return result;
         }
-//        String BOX_NO = request.getParameter("BOX_NO");
-//        System.out.println("BOX_NO："+BOX_NO);
-//        if(BOX_NO == null || BOX_NO.trim().length() == 0){
-//            return "车载箱号为必填参数";
-//        }
-        return passPortService.getDataByVehicleNo(PLATE_NO);
+        String FLAG = request.getParameter("FLAG");
+        System.out.println("FLAG："+FLAG);
+        if(FLAG != null && FLAG.trim().length() > 0){
+
+        }else{
+            result.put("code", "500");
+            result.put("msg", "进出区标识为必填参数!");
+            return result;
+        }
+        return passPortService.getDataByVehicleNo(PLATE_NO,FLAG);
     }
 
 }
