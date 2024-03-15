@@ -48,10 +48,19 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 			if(bisPassPortDataMap.get(0) != null && "0".equals(bisPassPortDataMap.get(0).get("LOCKAGE").toString().trim()) ){
 				String totalWt = bisPassPortDataMap.get(0).get("TOTAL_WT")==null?"0":bisPassPortDataMap.get(0).get("TOTAL_WT").toString();
 				String flag = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+				String hfdNo = "";
+				if(bisPassPortDataMap.get(0).get("PASSPORT_NO")!=null && bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim().length() > 0){
+					hfdNo = bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim();
+				}else{
+					if(bisPassPortDataMap.get(0).get("SEQ_NO")!=null && bisPassPortDataMap.get(0).get("SEQ_NO").toString().trim().length() > 0){
+						hfdNo = bisPassPortDataMap.get(0).get("SEQ_NO").toString().trim();
+					}
+				}
 
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("totalWt",totalWt);//总重量
 				map.put("flag",flag);//I-进区;E-出区
+				map.put("hfdNo",hfdNo);//核放单号或预录入统一编号
 
 				result.put("code", "200");
 				result.put("data", map);
