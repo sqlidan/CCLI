@@ -375,11 +375,29 @@ public class BisEnterStock implements Serializable {
 	@Column(name = "CHINESE_NAME")
 	private  String chineseName;//中文船名
     //////////////////////////////////////////////////////////////////////////
-	
-	
-	
-	
-	
+
+
+	@Transient
+	private  String hsItemName;//海关品名
+	@Transient
+	private  String piece;//箱数(合计)
+
+	public String getHsItemName() {
+		return hsItemName;
+	}
+
+	public void setHsItemName(String hsItemName) {
+		this.hsItemName = hsItemName;
+	}
+
+	public String getPiece() {
+		return piece;
+	}
+
+	public void setPiece(String piece) {
+		this.piece = piece;
+	}
+
 	public Date getBgdhDate() {
 		return bgdhDate;
 	}

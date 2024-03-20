@@ -63,6 +63,8 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("   ST.IF_BAGGING AS ifBagging,                                  ");
 		sb.append("   ST.IF_WITH_WOODEN AS ifWithWooden,                           ");
 		sb.append("   ST.IF_MAC_ADMIT AS ifMacAdmit,INFOS.HS_CODE as hscode ,st.IS_SEND as isSend                             ");
+		sb.append("   ,info.HS_ITEMNAME AS hsItemName                            ");
+		sb.append("   ,info.PIECE AS piece                             ");
 		sb.append(" FROM                                                           ");
 		sb.append(" 	BIS_ENTER_STOCK st                                         ");
 		sb.append(" LEFT JOIN                                                      ");
@@ -70,12 +72,15 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("   SELECT                                                       ");
 		sb.append("      INFO.LINK_ID,                                             ");
 		sb.append("      INFO.ITEM_NUM,                                            ");
+		sb.append("      INFO.HS_ITEMNAME,                                            ");
+		sb.append("      SUM(INFO.PIECE) as PIECE,                                            ");
 		sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM   ");
 		sb.append("   FROM                                                         ");
-		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM) info        ");
+		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,HS_ITEMNAME,PIECE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,HS_ITEMNAME,PIECE) info        ");
 		sb.append("   GROUP BY                                                     ");
 		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM                                       ");
+		sb.append("      INFO.ITEM_NUM,                                       ");
+		sb.append("      INFO.HS_ITEMNAME                                       ");
 		sb.append(" ) info                                                         ");
 		sb.append(" ON                                                             ");
 		sb.append("   ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM        ");
@@ -235,7 +240,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         paramType.put("ifMacAdmit", String.class);//是否MSC认证
         paramType.put("hscode", String.class);//是否MSC认证
         paramType.put("isSend", String.class);//是否MSC认证
-            
+        paramType.put("hsItemName", String.class);//海关品名
+        paramType.put("piece", String.class);//箱数(合计)
+
         return findPageSql(page, sb.toString(), paramType, parme);
 	}
 	

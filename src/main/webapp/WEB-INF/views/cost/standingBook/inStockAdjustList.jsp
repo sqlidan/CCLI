@@ -56,9 +56,9 @@
         </shiro:hasPermission>
         
         <div style="float:right; text-align:right">
-            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-finished" plain="true"
-               data-options="disabled:false" onclick="showContract()">最新合同</a>
-            <span class="toolbar-item dialog-tool-separator"></span>
+<%--            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-finished" plain="true"--%>
+<%--               data-options="disabled:false" onclick="showContract()">最新合同</a>--%>
+<%--            <span class="toolbar-item dialog-tool-separator"></span>--%>
             <input id="editDate" name="editDate" class="easyui-my97" datefmt="yyyy-MM" data-options="width: 100"
                    readonly/>
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-full-time" plain="true"
