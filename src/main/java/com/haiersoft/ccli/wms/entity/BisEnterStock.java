@@ -378,16 +378,16 @@ public class BisEnterStock implements Serializable {
 
 
 	@Transient
-	private  String hsItemName;//海关品名
+	private  String cargoName;//品名
 	@Transient
 	private  String piece;//箱数(合计)
 
-	public String getHsItemName() {
-		return hsItemName;
+	public String getCargoName() {
+		return cargoName;
 	}
 
-	public void setHsItemName(String hsItemName) {
-		this.hsItemName = hsItemName;
+	public void setCargoName(String cargoName) {
+		this.cargoName = cargoName;
 	}
 
 	public String getPiece() {
