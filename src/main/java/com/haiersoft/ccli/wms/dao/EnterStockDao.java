@@ -79,8 +79,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE) info        ");
 		sb.append("   GROUP BY                                                     ");
 		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM,                                       ");
-		sb.append("      INFO.HS_ITEMNAME                                       ");
+		sb.append("      INFO.ITEM_NUM                                       ");
 		sb.append(" ) info                                                         ");
 		sb.append(" ON                                                             ");
 		sb.append("   ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM        ");

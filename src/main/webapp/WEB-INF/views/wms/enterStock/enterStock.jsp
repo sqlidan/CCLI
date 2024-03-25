@@ -205,7 +205,7 @@
                 {field: 'itemNum', title: '提单号', sortable: true, width: 150},
                 {field: 'hscode', title: 'HS编码', sortable: true, width: 150},
                 {field: 'vesselName', title: '箱号', sortable: true, width: 200},
-                {field: 'cargoName', title: '海关品名', sortable: true, width: 150},
+                {field: 'cargoName', title: '品名', sortable: true, width: 150},
                 {field: 'piece', title: '箱数(合计)', sortable: true, width: 125},
                 {field: 'feeId', title: '费用方案ID',hidden: true},
                 {field: 'feePlan', title: '费用方案', sortable: true, width: 200},
