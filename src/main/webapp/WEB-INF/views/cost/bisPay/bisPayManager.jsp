@@ -207,7 +207,7 @@ function gridDG(){
 	dg=$('#dg').datagrid({    
 		method: "GET",
 	    url:'${ctx}/cost/bispayinfo/json/'+payId, 
-	    fit : false,
+	    fit : true,//固定表头
 		fitColumns : true,
 		border : false,
 		striped:true,
