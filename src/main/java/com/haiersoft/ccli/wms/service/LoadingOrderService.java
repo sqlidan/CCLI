@@ -436,14 +436,15 @@ public class LoadingOrderService extends BaseService<BisLoadingOrder, String> {
     public Map<String, Object> checkSKUNum(BisLoadingOrder order) {
         Map<String, Object> retMap = new HashMap<String, Object>();
         retMap.put("retStr", "success");
-        if (order.getOutLinkId() != null && !"".equals(order.getOutLinkId())) {
-            //获取出库联系单对象
-            BisOutStock outStock = outStockService.get(order.getOutLinkId());
-            if (outStock != null) {
-                ///List<Map<String,Object>> getList=trayInfoService.findClientSKUTrayList(outStock.getStockInId());
-                retMap = checkSKUNum(order, outStock.getWarehouseId(), outStock.getStockInId());
-            }
-        }
+//        //2024-04-12 黄岛怡之航仓库取消质押数量判断逻辑 需求：韩飞；修改：徐峥
+//        if (order.getOutLinkId() != null && !"".equals(order.getOutLinkId())) {
+//            //获取出库联系单对象
+//            BisOutStock outStock = outStockService.get(order.getOutLinkId());
+//            if (outStock != null) {
+//                ///List<Map<String,Object>> getList=trayInfoService.findClientSKUTrayList(outStock.getStockInId());
+//                retMap = checkSKUNum(order, outStock.getWarehouseId(), outStock.getStockInId());
+//            }
+//        }
         return retMap;
     }
 

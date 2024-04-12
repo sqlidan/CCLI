@@ -808,10 +808,11 @@ public class OutStockController extends BaseController {
 	@ResponseBody
 	public String passOutStock(@PathVariable("outLinkId") String outLinkId) {
 		BisOutStock outStock = outStockService.get(outLinkId);
-		//检查出库数量是否大于质押后的可用数量
-		if(!checkPledgeNum(outStock)) {
-			return outLinkId +" 此条记录中的出库数量大于质押后的可用数量，请确认！";
-		}
+//		//2024-04-12 黄岛怡之航仓库取消质押数量判断逻辑 需求：韩飞；修改：徐峥
+//		//检查出库数量是否大于质押后的可用数量
+//		if(!checkPledgeNum(outStock)) {
+//			return outLinkId +" 此条记录中的出库数量大于质押后的可用数量，请确认！";
+//		}
 
 		outStock.setAuditingState("1");
 		outStock.setUpdateTime(new Date());
