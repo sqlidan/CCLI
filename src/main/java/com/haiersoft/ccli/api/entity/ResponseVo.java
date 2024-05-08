@@ -33,6 +33,21 @@ public class ResponseVo  extends HashMap<String, Object> {
 		return responseVo;
 	}
 
+	public static ResponseVo resDz(Object data,Object msg) {
+		ResponseVo responseVo = new ResponseVo();
+		responseVo.put("message", msg);
+		responseVo.put("result", data);
+		responseVo.put("success", true);
+		return responseVo;
+	}
+
+	public static ResponseVo errDz(Object data,Object msg) {
+		ResponseVo responseVo = new ResponseVo();
+		responseVo.put("message", msg);
+		responseVo.put("result", data);
+		responseVo.put("success", false);
+		return responseVo;
+	}
 	
 	public static ResponseVo error(Object msg) {
 		ResponseVo responseVo = new ResponseVo();
@@ -57,6 +72,13 @@ public class ResponseVo  extends HashMap<String, Object> {
 		responseVo.put("success", true);		
 		return responseVo;
 	}
-	
+
+	public static ResponseVo check(Boolean flag,String mes,String codeStr) {
+		ResponseVo responseVo = new ResponseVo();
+		responseVo.put("message", mes);
+		responseVo.put("success", flag);
+		responseVo.put("operaCode", codeStr);
+		return responseVo;
+	}
 	
 }

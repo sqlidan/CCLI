@@ -78,6 +78,8 @@
                 /cclisso/** = anon
                 /ws/** = anon
                 /wsgate/** = anon
+                /staple/** = anon
+                /wms/bulk/** = anon
                 /platform/api/reservation/** = anon
                 /login = authc
                 /login/** = authc

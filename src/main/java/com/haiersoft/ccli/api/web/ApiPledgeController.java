@@ -161,8 +161,8 @@ public class ApiPledgeController {
 		}
 		apiPledgeService.save(api);	
 		return ResponseVo.pledgeOk();
-		
 	}
+
 	//静态解押
 	private ResponseVo staticRelease(PledgeRequestVo requestVo) {
 		// 根据原质押唯一标识查询货物质押情况
@@ -221,10 +221,6 @@ public class ApiPledgeController {
 			return ResponseVo.pledgeOk();
 		
 	}
-
-
-
-
 
 	// 动态质押/解压
 	//@ApiPledgedCheck

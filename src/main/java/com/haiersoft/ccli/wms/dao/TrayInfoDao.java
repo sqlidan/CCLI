@@ -150,7 +150,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 			sb.append(" nvl((select sum(tt.out_num)  from bis_out_stock_info tt where tt.out_link_id =:outLinkId  and tt.ctn_num=c.ctn_num and tt.sku_id=c.sku_id and tt.enter_state=c.enter_state and tt.asn=c.asn),0) as has ");
 			parme.put("outLinkId", outLinkId);
 			sb.append(" from ( ");
-			sb.append(" select sum(t.now_piece) as now_piece,t.ctn_num,t.bill_num,t.SKU_ID,t.ENTER_STATE,t.ASN,max(t.stock_in ) as stock_in,max(t.STOCK_NAME) as STOCK_NAME,max(t.BEFORE_STOCK_IN) as BEFORE_STOCK_IN from bis_tray_info t ");
+			sb.append(" select t.PLEDGE_PIECE,sum(t.now_piece) as now_piece,t.ctn_num,t.bill_num,t.SKU_ID,t.ENTER_STATE,t.ASN,max(t.stock_in ) as stock_in,max(t.STOCK_NAME) as STOCK_NAME,max(t.BEFORE_STOCK_IN) as BEFORE_STOCK_IN from bis_tray_info t ");
 //			sb.append(" left join BASE_SKU_BASE_INFO ss on ss.SKU_ID = t.SKU_ID ");
 			sb.append(" where t.NOW_PIECE>0 and  t.ISTRUCK='0' and t.stock_in=:clientId and t.CARGO_STATE='01' ");
 			if(ckId!=null && !"".equals(ckId)){
@@ -169,7 +169,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 				sb.append(" and  lower(t.CTN_NUM) like lower(:getMr)");
 				parme.put("getMr", "%"+getMr+"%");
 			}
-			sb.append(" group by t.BILL_NUM,t.ASN,t.CTN_NUM,t.SKU_ID,t.ENTER_STATE ");
+			sb.append(" group by t.BILL_NUM,t.ASN,t.CTN_NUM,t.SKU_ID,t.ENTER_STATE,t.PLEDGE_PIECE ");
 			sb.append(" ) c left join base_sku_base_info s on s.sku_id=c.SKU_ID where s.del_flag=0 ");
 			if(getRk!=null && !"".equals(getRk)){
 				sb.append(" and  lower(s.RKDH) like lower(:getRk) ");
@@ -215,7 +215,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 			sb.append(" nvl((select sum(tt.out_num)  from bis_out_stock_info tt where tt.out_link_id =:outLinkId  and tt.ctn_num=c.ctn_num and tt.sku_id=c.sku_id and tt.enter_state=c.enter_state),0) as has ");
 			parme.put("outLinkId", outLinkId);
 			sb.append(" from ( ");
-			sb.append(" select sum(t.now_piece) as now_piece,t.ctn_num,t.bill_num,t.SKU_ID,t.ENTER_STATE,max(t.stock_in ) as stock_in,max(t.STOCK_NAME) as STOCK_NAME,max(t.BEFORE_STOCK_IN) as BEFORE_STOCK_IN from bis_tray_info t ");
+			sb.append(" select t.PLEDGE_PIECE,sum(t.now_piece) as now_piece,t.ctn_num,t.bill_num,t.SKU_ID,t.ENTER_STATE,max(t.stock_in ) as stock_in,max(t.STOCK_NAME) as STOCK_NAME,max(t.BEFORE_STOCK_IN) as BEFORE_STOCK_IN from bis_tray_info t ");
 //			sb.append(" left join BIS_ENTER_STOCK e on e.LINK_ID = t.CONTACT_NUM ");
 			sb.append(" where NOW_PIECE>0 and ISTRUCK='0' and t.stock_in=:clientId and CARGO_STATE='01' and t.before_stock_in = t.stock_in  ");
 			if(ckId!=null && !"".equals(ckId)){
@@ -234,7 +234,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 				sb.append(" and  lower(t.CTN_NUM) like lower(:getMr)");
 				parme.put("getMr", "%"+getMr+"%");
 			}
-			sb.append(" group by t.BILL_NUM,t.CTN_NUM,t.SKU_ID,t.ENTER_STATE ");
+			sb.append(" group by t.BILL_NUM,t.CTN_NUM,t.SKU_ID,t.ENTER_STATE,t.PLEDGE_PIECE ");
 			sb.append(" ) c left join base_sku_base_info s on s.sku_id=c.SKU_ID where s.del_flag=0 ");
 			if(getRk!=null && !"".equals(getRk)){
 				sb.append(" and  lower(s.RKDH) like lower(:getRk) ");
