@@ -296,7 +296,7 @@ public class UserController extends BaseController {
 	@ResponseBody
 	public String resetPwd(@PathVariable("id") Integer id) {
 		User user = userService.get(id);
-		user.setPlainPassword("123456");
+		user.setPlainPassword("Ll!@#2024");
 		userService.updatePwd(user);
 		return "success";
 
