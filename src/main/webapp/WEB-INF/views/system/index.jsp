@@ -225,7 +225,8 @@ function updatePwd(){
 				if($("#pwdForm").form('validate')){
 				    //校验密码格式
                     var plainPasswordi = $("#plainPasswordi").val();
-                    const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
+                    const regex = /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[~!#@$%^*&()_+{}\[\]|\\;:'",<.>\/?])[a-zA-Z\d~!#@$%^*&()_+{}\[\]|\\;:'",<.>\/?]*$/
+                    // const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
                     if(!regex.test(plainPasswordi)){
                         parent.$.messager.show({title: "提示", msg: "密码必须包含数字,特殊字符,小写字母,大写字母其中三项！", position: "bottomRight" });
                         return;
@@ -262,7 +263,8 @@ function updatePwdForce(){
                 if($("#pwdForm").form('validate')){
                     //校验密码格式
                     var plainPasswordi = $("#plainPasswordi").val();
-                    const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
+                    const regex = /^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?\d)(?=.*?[~!#@$%^*&()_+{}\[\]|\\;:'",<.>\/?])[a-zA-Z\d~!#@$%^*&()_+{}\[\]|\\;:'",<.>\/?]*$/
+                    // const regex = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]/
                     if(!regex.test(plainPasswordi)){
                         parent.$.messager.show({title: "提示", msg: "密码必须包含数字,特殊字符,小写字母,大写字母其中三项！", position: "bottomRight" });
                         return;
