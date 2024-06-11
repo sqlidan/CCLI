@@ -45,6 +45,9 @@ public class CDService extends BaseService<BsCustomsDeclaration, String> {
 	public Integer getCount(String bondInvtNo){
 		List<Map<String,Object>> mapList = new ArrayList<>();
 		mapList = CDDao.getCount(bondInvtNo);
+		if (mapList==null || mapList.size() == 0){
+			return 0;
+		}
 		return mapList.size();
 	}
 }
