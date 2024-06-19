@@ -208,8 +208,14 @@ public class TrayInfo implements Serializable{
     @Column(name = "UPLOAD_DATE")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	private Date uploadDate;//修改时间
-    
-    
+
+	@Column(name = "ACTUAL_STOREROOM_X")
+	private String actualStoreroomX;//实际托盘位置X
+	@Column(name = "ACTUAL_STOREROOM_Y")
+	private String actualStoreroomY;//实际托盘位置Y
+	@Column(name = "ACTUAL_STOREROOM_Z")
+	private String actualStoreroomZ;//实际托盘位置Z
+
     
 /*    @Column(name = "IS_ALL_FORWARD")
     private String isAllForward;//保税货物是否完全转一般贸易
@@ -673,5 +679,28 @@ public class TrayInfo implements Serializable{
 	public void setPledgeGrossWeight(Double pledgeGrossWeight) {
 		this.pledgeGrossWeight = pledgeGrossWeight;
 	}
-	
+
+	public String getActualStoreroomX() {
+		return actualStoreroomX;
+	}
+
+	public void setActualStoreroomX(String actualStoreroomX) {
+		this.actualStoreroomX = actualStoreroomX;
+	}
+
+	public String getActualStoreroomY() {
+		return actualStoreroomY;
+	}
+
+	public void setActualStoreroomY(String actualStoreroomY) {
+		this.actualStoreroomY = actualStoreroomY;
+	}
+
+	public String getActualStoreroomZ() {
+		return actualStoreroomZ;
+	}
+
+	public void setActualStoreroomZ(String actualStoreroomZ) {
+		this.actualStoreroomZ = actualStoreroomZ;
+	}
 }

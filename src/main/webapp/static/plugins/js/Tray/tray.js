@@ -2,6 +2,52 @@
  * 库位使用情况
  */ 
 // 入口 StartShowFra(data); StartShowInfo
+//货架框架
+function StartShowHJ(objBaseTray,width,MAXX,MAXZ) {
+	var Allheight = 30;//第一行高+数据行高
+	var Allwidth = 100;//第一列+最后一列 + 数据行列宽
+	$("#showtray").empty();
+	$("#showtray").attr("style","text-align: center; padding: 5px; height: 1px;width:1px;");
+	var iWith = MAXX;
+	var iHEGIHT = MAXZ;
+	var Allheight=iHEGIHT*30+Allheight;
+	var Allwidth=iWith*30+Allwidth;
+
+	$("#showtray").attr('style', 'text-align: center; padding: 5px; height:' + Allheight + 'px;width:' + Allwidth + 'px');
+
+	var Fli = "";
+	for(j = MAXZ;j > 0;j--) {
+		var sNum = j;
+		//each循环行,第一列
+		Fli = Fli + '<ul id="' + sNum + '"><li id="' + sNum + 'ls" style="height:25px; width:25px;" >' + sNum + '</li>';
+		//each循环行,循环列列
+		for (i = 1; i <= iWith; i++) {
+			var a =  i.toString()+"_"+j.toString();
+			Fli = Fli + '<li id="'+a+'" style="height:25px; width:25px;" class="bai"></li>';
+		}
+		Fli = Fli + '</ul>';
+	}
+	//最后一行第一列
+	Fli = Fli+ '<ul id="ul1"><li style="height:25px; width:25px;" >0</li>';
+	//最后一行循环列
+	for (i = 1; i <= iWith; i++) {
+		var b = String((i));
+		Fli = Fli + '<li style="height:25px; width:25px;" >' + b + '</li>';
+	}
+	//最后一行最后一列
+	Fli = Fli + '</ul>';
+	$(Fli).appendTo($("#showtray"));
+	StartShowInfoHJ(objBaseTray);
+}
+
+function StartShowInfoHJ(objTrayInfo) {
+	$(objTrayInfo).each(function() {
+		var XZ=this.XZ;
+		// 查询 并替换背景色
+		$('#'+XZ).attr('class','lan');
+	});
+}
+
 //区位框架
 function StartShowFra(objBaseTray,width) { 
 	var Allheight = 30;//第一行高+数据行高
