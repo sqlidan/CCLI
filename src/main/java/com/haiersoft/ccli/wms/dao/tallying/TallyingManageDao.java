@@ -2,6 +2,7 @@ package com.haiersoft.ccli.wms.dao.tallying;
 
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
+import com.haiersoft.ccli.wms.entity.TrayInfo;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -10,6 +11,6 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class TallyingManageDao extends HibernateDao<BisPreEntryInvtQuery, String>{
+public class TallyingManageDao extends HibernateDao<TrayInfo, Integer>{
 
 }

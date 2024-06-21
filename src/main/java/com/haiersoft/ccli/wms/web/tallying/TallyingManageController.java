@@ -5,6 +5,9 @@ import com.haiersoft.ccli.base.service.ClientService;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.utils.PropertiesUtil;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.remoting.hand.in.service.WarehousingWebService;
+import com.haiersoft.ccli.system.entity.User;
+import com.haiersoft.ccli.system.utils.UserUtil;
 import com.haiersoft.ccli.wms.entity.EnterTallyInfoToExcel;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.apiEntity.InvtHeadTypeVo;
@@ -36,10 +39,8 @@ public class TallyingManageController extends BaseController {
 	private static List<EnterTallyInfoToExcel> LIST = new ArrayList<>();
 	private static int TOTAL = 0;
 
-
 	@Autowired
-	private TallyingManageService tallyingService;
-
+	private WarehousingWebService warehousingWebService;
 
 	//理货入库
 	@RequestMapping(value = "tallying", method = RequestMethod.GET)
@@ -64,9 +65,9 @@ public class TallyingManageController extends BaseController {
 	@ResponseBody
 	public void fileDownLoad(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		String fileName = "入库理货托盘明细导入模板.xls";
-//		String filePath = PropertiesUtil.getPropertiesByName("downloadexcel", "application");
-//		String realpath = filePath + "WEB-INF\\classes\\importExcel\\入库理货托盘明细导入模板.xls";
-		String realpath = "E:\\projects\\CCLI\\src\\main\\resources\\importExcel\\入库理货托盘明细导入模板.xls";
+		String filePath = PropertiesUtil.getPropertiesByName("downloadexcel", "application");
+		String realpath = filePath + "WEB-INF\\classes\\importExcel\\入库理货托盘明细导入模板.xls";
+//		String realpath = "E:\\projects\\CCLI\\src\\main\\resources\\importExcel\\入库理货托盘明细导入模板.xls";
 		BufferedInputStream bis = null;
 		BufferedOutputStream bos = null;
 		OutputStream fos = null;
@@ -138,9 +139,24 @@ public class TallyingManageController extends BaseController {
 			if (list != null && list.size() > 0) {
 				int i = 2;
 				for (EnterTallyInfoToExcel getObj : list) {
-					if (getObj.getTallyNo() == null) {
+					Boolean e = false;
+					if (getObj.getTallyNo() == null || getObj.getTallyNo().trim().length() == 0) {
+						e = true;
+					}
+					if (getObj.getAsn() == null || getObj.getAsn().trim().length() == 0) {
+						e = true;
+					}
+					if (getObj.getSku() == null || getObj.getSku().trim().length() == 0) {
+						e = true;
+					}
+					String r = warehousingWebService.getTallyWarehousing(getObj.getAsn(),getObj.getSku());
+					if (!r.contains("操作成功")){
+						e = true;
+					}
+					if (e){
 						error += String.valueOf(i) + ",";
-					} else {
+						i++;
+					}else{
 						enterTallyInfoToExcelList.add(getObj);
 					}
 				}
@@ -163,7 +179,17 @@ public class TallyingManageController extends BaseController {
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
 	public String save(@RequestBody List<EnterTallyInfoToExcel> enterTallyInfoToExcels) {
+		User user = UserUtil.getCurrentUser();
 		System.out.println("enterTallyInfoToExcels"+enterTallyInfoToExcels.toString());
+		if (enterTallyInfoToExcels!=null && enterTallyInfoToExcels.size() > 0){
+			for (EnterTallyInfoToExcel forEnterTallyInfoToExcel:enterTallyInfoToExcels) {
+				String result = warehousingWebService.inStorageTally(forEnterTallyInfoToExcel.getAsn(),forEnterTallyInfoToExcel.getSku(),forEnterTallyInfoToExcel.getTallyNo(),
+						forEnterTallyInfoToExcel.getState(),forEnterTallyInfoToExcel.getNum(),user.getName());
+				if (!result.contains("操作成功")){
+					return result;
+				}
+			}
+		}
 		LIST = new ArrayList<>();
 		TOTAL = 0;
 		return "success";

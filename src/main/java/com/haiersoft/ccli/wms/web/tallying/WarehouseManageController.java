@@ -1,8 +1,12 @@
 package com.haiersoft.ccli.wms.web.tallying;
 
+import com.alibaba.fastjson.JSON;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.remoting.hand.in.service.WarehousingWebService;
+import com.haiersoft.ccli.system.entity.User;
+import com.haiersoft.ccli.system.utils.UserUtil;
 import com.haiersoft.ccli.wms.entity.EnterTallyInfoToExcel;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.TrayInfo;
@@ -44,7 +48,8 @@ public class WarehouseManageController extends BaseController {
 		Page<TrayInfo> page = getPage(request);
 		page.orderBy("enterStockTime").order(Page.DESC);
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
-		PropertyFilter filter = new PropertyFilter("NEQS_cargoState", "01");//已删除
+		//默认为00 00已收货（理货确认）01已上架（库管确认）10出库中（装车单）11出库理货（库管确认）12已出库（理货确认）20待回库 21回库收货（理货确认）  99报损货物状态
+		PropertyFilter filter = new PropertyFilter("EQS_cargoState", "00");
 		filters.add(filter);
 		page = warehouseService.search(page, filters);
 		return getEasyUIData(page);
@@ -60,7 +65,7 @@ public class WarehouseManageController extends BaseController {
 		String areaNum = request.getParameter("areaNum");// 区号
 		String storeRoomNum = request.getParameter("storeRoomNum");// 库房号
 		String layers = request.getParameter("layers");// 货架层数
-		List<Map<String,Object>> trayFram = warehouseService.GetData(ids,buildingNum,floorNum,roomNum,areaNum,storeRoomNum,layers);
+		List<Map<String,Object>> trayFram = warehouseService.GetData(ids,buildingNum,floorNum,roomNum,areaNum,storeRoomNum,layers,null);
 		return trayFram;
 	}
 	//获取框架数据
@@ -91,11 +96,20 @@ public class WarehouseManageController extends BaseController {
 	}
 
 
-	@RequestMapping(value = "confirm/{ids}/{target}", method = RequestMethod.GET)
+	@RequestMapping(value = "confirm/{location}", method = RequestMethod.POST)
 	@ResponseBody
-	public String confirm(@PathVariable("ids") String ids,@PathVariable("target") String target) {
-		System.out.println("ids"+ids.toString());
-		System.out.println("target"+target.toString());
+	public String confirm(@RequestBody List<TrayInfo> trayInfoList,@PathVariable("location") String location) {
+		User user = UserUtil.getCurrentUser();
+		System.out.println("trayInfoList"+ JSON.toJSONString(trayInfoList));
+		System.out.println("location"+location);
+		if (trayInfoList!=null && trayInfoList.size() > 0){
+			for (TrayInfo forTrayInfo:trayInfoList){
+				String result = warehouseService.inStorageConfirm(forTrayInfo.getTrayId(),location,user.getName(), forTrayInfo.getActualStoreroomX(), forTrayInfo.getActualStoreroomZ());
+				if (!result.contains("操作成功")){
+					return result;
+				}
+			}
+		}
 		return "success";
 	}
 }

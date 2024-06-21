@@ -75,7 +75,9 @@
 			columns: [[
 				{field: 'asn', title: 'ASN', sortable: true, width: 150},
 				{field: 'sku', title: 'SKU', sortable: true, width: 150},
-				{field: 'tallyNo', title: '托盘号', sortable: true, width: 150}
+				{field: 'tallyNo', title: '托盘号', sortable: true, width: 150},
+				{field: 'state', title: '状态', sortable: true, width: 150},
+				{field: 'num', title: '数量', sortable: true, width: 150}
 			]],
 			// onLoadSuccess: function () {
 			// 	insertSum();

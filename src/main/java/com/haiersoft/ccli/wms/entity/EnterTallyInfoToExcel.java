@@ -18,6 +18,10 @@ public class EnterTallyInfoToExcel implements Serializable {
 	private String sku;//SKU
 	@Excel(name="托盘号")
 	private String tallyNo;//托盘号
+	@Excel(name="状态")
+	private String state;//状态0成品，1货损
+	@Excel(name="数量")
+	private String num;//数量
 
 
 	public String getAsn() {
@@ -42,5 +46,21 @@ public class EnterTallyInfoToExcel implements Serializable {
 
 	public void setTallyNo(String tallyNo) {
 		this.tallyNo = tallyNo;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public String getNum() {
+		return num;
+	}
+
+	public void setNum(String num) {
+		this.num = num;
 	}
 }

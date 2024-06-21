@@ -29,7 +29,7 @@
 </div>
 <div data-options="region:'center'" style="width:700px;height:auto;padding:5px;">
 	<div id="tb2" style="padding:5px;height:auto">
-		<div data-options="region:'center'" title="仓位信息">
+		<div data-options="region:'center'" title="货架信息">
 			<div style="padding:5px;height:auto" class="datagrid-toolbar">
 				<form id="searchFrom2" action="">
 <%--					<input type="text" id="buildingNum" name="buildingNum" class="easyui-validatebox" data-options="width:150,prompt: '楼号'"/>--%>
@@ -202,15 +202,17 @@
 		for(var i=0; i<rows.length; i++){
 			ids.push(rows[i].id);
 		}
-		var target = floorNum+"-"+roomNum+"-"+areaNum+"-"+layers;
+		var target = floorNum+"-"+roomNum+"-"+areaNum;
 		parent.$.messager.confirm('提示', '确认入库后无法恢复您确定要入库么？', function(data){
 			if (data){
 				$.ajax({
-					type: 'get',
-					url: "${ctx}/wms/warehouse/confirm/" + ids +"/" + target,
-					success: function(data){
+					async: false,
+					type: 'POST',
+					url: "${ctx}/wms/warehouse/confirm/"+target,
+					data: JSON.stringify(rows),
+					success: function(res){
 						dg.datagrid('clearSelections');
-						successTip(data, dg);
+						successTip(res, dg);
 					}
 				});
 			}

@@ -43,8 +43,15 @@ function StartShowHJ(objBaseTray,width,MAXX,MAXZ) {
 function StartShowInfoHJ(objTrayInfo) {
 	$(objTrayInfo).each(function() {
 		var XZ=this.XZ;
+		var color=this.COL;
 		// 查询 并替换背景色
-		$('#'+XZ).attr('class','lan');
+		if (color == '1'){
+			$('#'+XZ).attr('class','lan');
+		}
+		if (color == '2'){
+			$('#'+XZ).attr('class','green');
+		}
+
 	});
 }
 
