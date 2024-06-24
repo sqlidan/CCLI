@@ -143,6 +143,7 @@
                 {field: 'clientName', title: '客户名称', sortable: true, width: 150},
                 {field: 'warehouse', title: '仓库名', sortable: true, width: 80},
                 {field: 'locationCode', title: '库位号', sortable: true, width: 80},
+                {field: 'xz', title: '货位号', sortable: true, width: 80},
                 {field: 'cargoName', title: '产品名称', sortable: true, width: 100},
                 {field: 'nowNum', title: '现有数量', sortable: true, width: 100},
                 {field: 'netWeight', title: '净重', sortable: true, width: 100},

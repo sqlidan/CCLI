@@ -56,6 +56,7 @@ public class StockReportDao extends HibernateDao<Stock, String> {
                 + " sum(t.now_piece * t.gross_single)over(partition by null) as allgross, "
                 + " st.BGDHDATE as bgdhdate, "
                 + " st.OPERATOR as createUser, "
+                + " nvl(t.ACTUAL_STOREROOM_X, 0) || '_' || nvl(t.ACTUAL_STOREROOM_Z, 0) AS xz, "
                 + " months_between(sysdate,st.BGDHDATE) days,t.is_bonded as isBonded,t.UPLOADER as  uploader,t.UPLOAD_DATE  as uploadDate "
                + " FROM bis_tray_info t "
                 + " LEFT JOIN BIS_ENTER_STOCK st ON "
@@ -143,7 +144,8 @@ public class StockReportDao extends HibernateDao<Stock, String> {
         parm.put("isBonded",  String.class);
         parm.put("uploader",  String.class);
         parm.put("uploadDate", Date.class);
-        
+        parm.put("xz", String.class);
+
         return findPageSql(page, sql.toString(), parm, params);
     }
 

@@ -110,7 +110,9 @@ public class Stock implements Serializable {
 	private String accountBook;//账册商品序号
     private String uploader;//保税转一般贸易人员
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
-	private Date uploadDate;//修改时间  
+	private Date uploadDate;//修改时间
+
+    private String xz;//货位号
     
     ////////////////////////////////////////////////////////////
     
@@ -616,6 +618,14 @@ public class Stock implements Serializable {
 
     public void setInTime(Date inTime) {
         this.inTime = inTime;
+    }
+
+    public String getXz() {
+        return xz;
+    }
+
+    public void setXz(String xz) {
+        this.xz = xz;
     }
 
     @Override
