@@ -18,9 +18,16 @@
 					<span class="toolbar-item dialog-tool-separator"></span>
 					<input type="text" name="filter_LIKES_skuId" class="easyui-validatebox" data-options="width:150,prompt: 'SKU'"/>
 					<span class="toolbar-item dialog-tool-separator"></span>
-					<input type="text" name="filter_LIKES_trayId" class="easyui-validatebox" data-options="width:150,prompt: '托盘号'"/>
+                    <input type="text" name="filter_LIKES_billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
+                    <span class="toolbar-item dialog-tool-separator"></span>
+					<input type="text" name="filter_LIKES_ctnNum" class="easyui-validatebox" data-options="width:150,prompt: '箱号'"/>
 					<span class="toolbar-item dialog-tool-separator"></span>
+					<input type="text" name="filter_LIKES_trayId" class="easyui-validatebox" data-options="width:150,prompt: '托盘号'"/>
+                    <span class="toolbar-item dialog-tool-separator"></span>
 					<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
+                    <span class="toolbar-item dialog-tool-separator"></span>
+                    <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="clearSearch()">重置</a>
+					<span class="toolbar-item dialog-tool-separator"></span>
 				</form>
 			</div>
 		</div>
@@ -101,13 +108,13 @@
 				{field: 'id', title: 'ID',hidden:true},
 			]],
 			columns:[[
+                {field:'asn',title:'ASN',sortable:true},
+                {field:'skuId',title:'SKU',sortable:true},
+                {field:'billNum',title:'提单号',sortable:true},
+                {field:'ctnNum',title:'箱号',sortable:true},
 				{field:'trayId',title:'托盘号',sortable:true},
-				{field:'ctnNum',title:'箱号',sortable:true},
-				{field:'billNum',title:'提单号',sortable:true},
-				{field:'asn',title:'ASN',sortable:true},
-				{field:'skuId',title:'SKU',sortable:true},
-				{field:'actualStoreroomX',title:'X坐标',sortable:true},
-				{field:'actualStoreroomZ',title:'Z坐标',sortable:true}
+				{field:'cargoType',title:'产品类型',sortable:true},
+				{field:'cargoName',title:'产品名称',sortable:true},
 			]],
 			enableHeaderClickMenu: true,
 			enableHeaderContextMenu: true,
@@ -118,9 +125,15 @@
 
 	//搜索
 	function cx(){
+		dg.datagrid('clearSelections');
 		var obj=$("#searchFrom1").serializeObject();
 		dg.datagrid('load',obj);
 	}
+    //清空搜索条件
+    function clearSearch(){
+		dg.datagrid('clearSelections');
+		$('#searchFrom1').form('clear');
+    }
 	//预览
 	function preview(){
 		// var buildingNum = $("#buildingNum").val();//楼号
@@ -193,10 +206,10 @@
 			parent.$.messager.show({title: "提示", msg: "请输入区号号！", position: "bottomRight"});
 			return;
 		}
-		if (layers == "") {
-			parent.$.messager.show({title: "提示", msg: "请输入货架层数号！", position: "bottomRight"});
-			return;
-		}
+		// if (layers == "") {
+		// 	parent.$.messager.show({title: "提示", msg: "请输入货架层数号！", position: "bottomRight"});
+		// 	return;
+		// }
 		var rows = dg.datagrid('getSelections');
 		var ids= [];
 		for(var i=0; i<rows.length; i++){

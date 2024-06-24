@@ -294,10 +294,10 @@
             }
         });
     }
-   
-    
-    
-    
+
+
+
+
     //修改上架件数
     function changeThePiece() {
         var row = dg.datagrid('getSelected');

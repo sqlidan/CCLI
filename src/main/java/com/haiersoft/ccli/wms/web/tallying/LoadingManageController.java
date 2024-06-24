@@ -1,7 +1,10 @@
 package com.haiersoft.ccli.wms.web.tallying;
 
 import com.haiersoft.ccli.common.persistence.Page;
+import com.haiersoft.ccli.common.utils.parameterReflect;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.report.entity.Stock;
+import com.haiersoft.ccli.report.service.StockReportService;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.apiEntity.InvtHeadTypeVo;
 import com.haiersoft.ccli.wms.service.tallying.LoadingManageService;
@@ -27,6 +30,8 @@ public class LoadingManageController extends BaseController {
 	private static final Logger logger = LoggerFactory.getLogger(LoadingManageController.class);
 	@Autowired
 	private LoadingManageService loadingService;
+	@Autowired
+	private StockReportService stockReportService;
 
 	//装车理货
 	@RequestMapping(value = "loading", method = RequestMethod.GET)
@@ -37,13 +42,10 @@ public class LoadingManageController extends BaseController {
 	@RequestMapping(value = "json", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getData(HttpServletRequest request) {
-		Page<BisPreEntryInvtQuery> page = getPage(request);
-		//解析数据
-		List<InvtHeadTypeVo> invtHeadTypeVoList = new ArrayList<>();
-		//返回数据
-		Page<InvtHeadTypeVo> page2 = getPage(request);
-		page2.setResult(invtHeadTypeVoList);
-		page2.setTotalCount(page.getTotalCount());
-		return getEasyUIData(page2);
+		Page<Stock> page = getPage(request);
+		Stock stock = new Stock();
+		parameterReflect.reflectParameter(stock, request);//转换对应实体类参数
+		page = stockReportService.searchStockReport(page, stock);
+		return getEasyUIData(page);
 	}
 }
