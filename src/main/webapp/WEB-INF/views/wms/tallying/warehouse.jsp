@@ -58,6 +58,7 @@
 			</div>
 			<div id="divFram" style='margin-left: auto; margin-right:auto; text-align:center; '>
 				<div style="text-align: center; padding: 5px; height: auto;">货架情况汇总图</div>
+				<div id="warehouseData"></div>
 				<div  style='text-align: center;  vertical-align:middle;   padding: 5px; height: auto;'>
 					<div id="showtray" style="text-align: center; padding: 5px; height: auto; width:200px" >
 						展示
@@ -154,6 +155,7 @@
 			parent.$.messager.show({title: "提示", msg: "请输入区号号！", position: "bottomRight"});
 			return;
 		}
+		$("#warehouseData").empty();
 		var rows = dg.datagrid('getSelections');
 		var ids= [];
 		if(rows !== undefined && rows !== null && rows.length > 0){
@@ -164,11 +166,15 @@
 			for(var i=0; i<rows.length; i++){
 				ids.push(rows[i].id);
 			}
+			var sStr = $('<div style=" text-align:center ; color:Red; margin:20px; ">合计：选中并预览了 '+rows.length+' 条托盘信息。</div>');
+			$(sStr).appendTo($("#warehouseData"));
 		}
+
 		GetTray(ids,floorNum,roomNum,areaNum,layers);
 	}
 
 	function GetTray(ids,floorNum,roomNum,areaNum,layers) {
+		var allData;
 		$.ajax({
 			type : 'POST',
 			url : '${ctx}/wms/warehouse/GetData?ids='+ids+'&floorNum='+floorNum+'&roomNum='+roomNum+'&areaNum='+areaNum+'&layers='+layers,
@@ -176,6 +182,7 @@
 			dataType : "json",
 			success : function(data) {
 				if (data != null && jQuery.trim(data.toString()).length > 0) {
+					allData = data;
 					StartShowHJ(data,$(document).width(),data[0].MAXX,data[0].MAXZ);
 				} else {
 					$("#showtray").empty();
@@ -185,6 +192,34 @@
 				}
 			}
 		});
+
+
+		//点击事件
+		$(function(){
+			$('#showtray li').click(function(){
+				var id = this.id;
+				$(allData).each(function() {
+					var XZ=this.XZ;
+					if (id == XZ){
+						var str = "托盘信息：ASN:"+this.ASN+";";
+						str = str + " SKU："+this.SKU_ID+";";
+						str = str + " 提单号："+this.BILL_NUM+";";
+						str = str + " 箱号："+this.CTN_NUM+";";
+						str = str + " 托盘号："+this.TRAY_ID+";";
+						str = str + " 仓库号："+this.WAREHOUSE+";";
+						str = str + " 楼号："+this.BUILDING_NUM+";";
+						str = str + " 楼层号："+this.FLOOR_NUM+";";
+						str = str + " 房间号："+this.ROOM_NUM+";";
+						str = str + " 区位号："+this.AREA_NUM+";";
+						str = str + " 货位号："+this.XZ+";";
+						str = str + " 货品名称："+this.CARGO_NAME+";";
+						str = str + " 货品类型："+this.CARGO_TYPE+";";
+						alert(str);
+					}
+				});
+			});
+		});
+
 	}
 	// =================================================================================
 	function confirm(){

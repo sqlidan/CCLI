@@ -68,6 +68,7 @@
 			</div>
 			<div id="divFram" style='margin-left: auto; margin-right:auto; text-align:center; '>
 				<div style="text-align: center; padding: 5px; height: auto;">货架情况汇总图</div>
+				<div id="warehouseData"></div>
 				<div  style='text-align: center;  vertical-align:middle;   padding: 5px; height: auto;'>
 					<div id="showtray" style="text-align: center; padding: 5px; height: auto; width:200px" >
 						展示
@@ -171,6 +172,7 @@
 			parent.$.messager.show({title: "提示", msg: "请输入区号号！", position: "bottomRight"});
 			return;
 		}
+		$("#warehouseData").empty();
 		var rows = dg.datagrid('getSelections');
 		var ids= [];
 		if(rows !== undefined && rows !== null && rows.length > 0){
@@ -181,6 +183,8 @@
 			for(var i=0; i<rows.length; i++){
 				ids.push(rows[i].id);
 			}
+			var sStr = $('<div style=" text-align:center ; color:Red; margin:20px; ">合计：选中并预览了 '+rows.length+' 条托盘信息。</div>');
+			$(sStr).appendTo($("#warehouseData"));
 		}
 		GetTray(ids,floorNum,roomNum,areaNum,layers);
 	}

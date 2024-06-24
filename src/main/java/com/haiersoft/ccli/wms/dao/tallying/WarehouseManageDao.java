@@ -33,8 +33,8 @@ public class WarehouseManageDao extends HibernateDao<TrayInfo, Integer>{
         List<Map<String, Object>> getList = null;
         StringBuffer sql = new StringBuffer();
 
-        sql.append(" select DISTINCT a.ID,a.BUILDING_NUM,a.FLOOR_NUM,a.ROOM_NUM,a.AREA_NUM,a.STOREROOM_NUM, ");
-        sql.append(" a.TRAY_ID,a.BILL_NUM,a.ENTER_STOCK_TIME, ");
+        sql.append(" select DISTINCT a.ID,a.WAREHOUSE,a.BUILDING_NUM,a.FLOOR_NUM,a.ROOM_NUM,a.AREA_NUM,a.STOREROOM_NUM, ");
+        sql.append(" a.ASN,a.SKU_ID,a.BILL_NUM,a.CTN_NUM,a.TRAY_ID,a.ENTER_STOCK_TIME,a.CARGO_NAME,a.CARGO_TYPE, ");
         sql.append(" nvl(a.ACTUAL_STOREROOM_X,0) as ACTUAL_STOREROOM_X,nvl(a.ACTUAL_STOREROOM_Y,0) as ACTUAL_STOREROOM_Y,nvl(a.ACTUAL_STOREROOM_Z,0) as ACTUAL_STOREROOM_Z,nvl( ACTUAL_STOREROOM_X, 0 ) || '_' || nvl( ACTUAL_STOREROOM_Z, 0 ) AS XZ, ");
         sql.append(" b.maxX,b.maxY,b.maxZ,b.num ");
         sql.append(" from bis_Tray_info a ");
