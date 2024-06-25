@@ -96,7 +96,7 @@ public class WarehouseManageService extends BaseService<TrayInfo, Integer> {
 			}
 		}
 
-		int cg = 4;//没配置的货架位的托盘默认层高为4
+		int cg = 8;//没配置的货架位的托盘默认层高为4
 		int maxX = 1;//预计最大列数
 		int maxZ = cg;//预计最大层数
 		//循环提单托盘数据
