@@ -136,9 +136,12 @@ public class WarehouseManageService extends BaseService<TrayInfo, Integer> {
 			int num = 0;
 			if (count > 0){//存在，把提单下的托盘数按指定层高计算列数
 				//如果之前提单动态生成的列数已大于有货架位的托盘的X坐标值
-				if (maxX >= MAXX){
-					//数据异常
-					return new ArrayList<>();
+				if (maxX > MAXX){
+					//数据异常，现有的托盘动态摆放位置后的X坐标值大于之前生成的货架位X坐标
+					//场景一：如果异常可以返回空集合，不显示动态托盘位置图
+					//场景二：不做处理，可能在动态显示托盘位置时在同一位置重复渲染托盘信息
+					//当前使用场景二逻辑，遇到异常时可以将托盘对应的提单号下所有的托盘货架位都置为空
+//					return new ArrayList<>();
 				}else{
 					//将有货架位的托盘的X坐标值左侧的X坐标值赋值为当前的最大X坐标值
 					maxX = MAXX;

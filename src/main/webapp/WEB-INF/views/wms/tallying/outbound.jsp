@@ -10,28 +10,39 @@
 	<div data-options="region:'center'" title="出库拣货">
 		<div style="padding:5px;height:auto" class="datagrid-toolbar">
 			<form id="searchFrom" action="">
-				<input type="text" name="trayCode" class="easyui-validatebox" data-options="width:120,prompt: '托盘号'"/>
-				<input type="text" name="billCode" class="easyui-validatebox" data-options="width:120,prompt: '提单号'"/>
-				<input type="text" name="ctnNum" class="easyui-validatebox" data-options="width:120,prompt: '箱号'"/>
-				<input type="text" name="asn" class="easyui-validatebox" data-options="width:120,prompt: 'ASN'"/>
-				<input type="text" name="sku" class="easyui-validatebox" data-options="width:120,prompt: 'SKU'"/>
-				<input type="text" name="contactCode" class="easyui-validatebox" data-options="width:120,prompt: '联系单号'"/>
-				<select id="state" name="state" class="easyui-combobox" data-options="width:120,prompt: '库存状态'">
-					<option></option>
-					<option value='00'>已收货</option>
-					<option value='01'>已上架</option>
-					<option value='10'>出库中</option>
-					<option value='11'>出库理货</option>
-					<option value='12'>已出库</option>
-					<option value='20'>待回库</option>
-					<option value='21'>回库收货</option>
-					<option value='99'>报损</option>
-				</select>
-				<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-				<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="clearSearch()">重置</a>
+					<input type="text" id="loadingPlanNum" name="filter_LIKES_loadingPlanNum" class="easyui-validatebox"
+						   data-options="width:150,prompt: '订单号'"/>
+					<input type="text" id="loadingTruckNum" name="filter_LIKES_loadingTruckNum" class="easyui-validatebox"
+						   data-options="width:150,prompt: '装车单号'"/>
+					<input type="text" id="outLinkId" name="filter_LIKES_outLinkId" class="easyui-validatebox"
+						   data-options="width:150,prompt: '出库联系单号'"/>
+					<input type="text" id="billNum" name="filter_LIKES_billNum" class="easyui-validatebox"
+						   data-options="width:150,prompt: '提单号'"/>
+					<input type="text" id="carNo" name="filter_LIKES_carNo" class="easyui-validatebox"
+						   data-options="width:150,prompt: '车牌号'"/>
+					<input type="text" id="sku" name="filter_LIKES_skuId" class="easyui-validatebox"
+						   data-options="width:150,prompt: 'SKU'"/>
+					<select type="text" id="loadingState" name="filter_LIKES_loadingState"
+							class="easyui-combobox" data-options="width:150,prompt: '状态'">
+						<option></option>
+						<option value='0'>已分配</option>
+						<option value='1'>已拣货</option>
+						<option value='2'>已装车</option>
+						<option value='5'>回库理货</option>
+						<option value='6'>已回库</option>
+					</select>
+
+					<input type="text" id="operator" name="filter_LIKES_operator" class="easyui-validatebox"
+						   data-options="width:150,prompt: '客服人员'"/>
+					<select id="searchStock" name="filter_LIKES_stockId" class="easyui-combobox"
+							data-options="width:150,prompt: '存货方'">
+					</select>
+					<span class="toolbar-item dialog-tool-separator"></span>
+					<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
+					<span class="toolbar-item dialog-tool-separator"></span>
+					<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="clearSearch()">重置</a>
 			</form>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="save()">保存</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="save()">拣货确认</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		</div>
 	</div>
@@ -69,77 +80,76 @@
 				{field: 'id', title: 'ID',hidden:true},
 			]],
 			columns:[[
-				{field: 'trayCode', title: '托盘号', sortable: true, width: 100},
-				{field: 'billCode', title: '提单号', sortable: true, width: 130},
-				{field: 'isBonded', title: '是否一般贸易', sortable: true, width: 70,
-					formatter:function(val,rowData,rowIndex){
-						if(val=="0")
-							return "是";
-						else
-							return "";
+				{field: 'trayId', title: '托盘号', sortable: false, width: 100},
+				{field: 'outLinkId', title: '出库联系单', sortable: false, width: 180},
+				{field: 'loadingPlanNum', title: '订单号', sortable: false, width: 150},
+				{field: 'loadingTruckNum', title: '装车号', sortable: false, width: 150},
+				{
+					field: 'loadingState', title: '装车状态', sortable: false, formatter: function (value, row, index) {
+						var retStr = "";
+						switch (value) {
+							case '1':
+								retStr = "已拣货";
+								break;
+							case '2':
+								retStr = "已装车";
+								break;
+							case '3':
+								retStr = "已置换";
+								break;
+							case '0':
+								retStr = "已分配";
+								break;
+							case '4':
+								retStr = "待回库";
+								break;
+							case '5':
+								retStr = "回库理货";
+								break;
+							case '6':
+								retStr = "已回库";
+								break;
+						}
+						return retStr;
 					}
 				},
-				{field: 'ctnNum', title: '箱号', sortable: true, width: 130},
-				{field: 'bgdhdate', title: '报关单申报时间', sortable: true, width: 130},
-				{field: 'createUser', title: '客服员', sortable: true, width: 130},
-				{field: 'asn', title: 'ASN', sortable: true, width: 90},
-				{field: 'sku', title: 'SKU', sortable: true, width: 120},
-				{field: 'contactCode', title: '联系单号', sortable: true, width: 135},
-				{field: 'clientName', title: '客户名称', sortable: true, width: 150},
-				{field: 'warehouse', title: '仓库名', sortable: true, width: 80},
-				{field: 'locationCode', title: '库位号', sortable: true, width: 80},
-				{field: 'cargoName', title: '产品名称', sortable: true, width: 100},
-				{field: 'nowNum', title: '现有数量', sortable: true, width: 100},
-				{field: 'netWeight', title: '净重', sortable: true, width: 100},
-				{field: 'grossWeight', title: '毛重', sortable: true, width: 100},
-				{field: 'allpiece', title: '总数量', hidden: true},
-				{field: 'allnet', title: '总净重', hidden: true},
-				{field: 'allgross', title: '总毛重', hidden: true},
-				{field: 'units', title: '单位', sortable: true, width: 100,
+				{field: 'loadingTime', title: '装车时间', sortable: false, width: 180},
+				{
+					field: 'stockId', title: '存货方', sortable: false, width: 200,
 					formatter: function (value, row, index) {
-						if (value == '1') {
-							return '千克';
-						}
-						if (value == '2') {
-							return '吨';
-						}
+						var aa = "";
+						$.ajax({
+							async: false,
+							type: 'get',
+							url: "${ctx}/base/client/getname/" + value,
+							success: function (data) {
+								aa = data;
+							}
+						});
+						return aa;
 					}
 				},
-				{field: 'state', title: '状态', sortable: true, width: 100,
-					formatter: function (value, row, index) {
-						if (value == '00') {
-							return '已收货';
-						}
-						if (value == '01') {
-							return '已上架';
-						}
-						if (value == '10') {
-							return '出库中';
-						}
-						if (value == '11') {
-							return '出库理货';
-						}
-						if (value == '12') {
-							return '已出库';
-						}
-						if (value == '20') {
-							return '待回库';
-						}
-						if (value == '21') {
-							return '回库收货';
-						}
-						if (value == '99') {
-							return '货损';
+				{field: 'mscNum', title: 'msc号', sortable: false, width: 100},
+				{field: 'lotNum', title: 'lot号', sortable: false, width: 100},
+				{field: 'typeSize', title: '规格', sortable: false, width: 100},
+				{field: 'carNo', title: '车牌号', sortable: false, width: 100},
+				{field: 'operator', title: '客服人员', sortable: false, width: 100},
+				{field: 'cargoName', title: '品名', sortable: false, width: 200},
+				{field: 'piece', title: '件数', sortable: false, width: 100},
+				{field: 'cargoLocation', title: '库位号', sortable: false, width: 100},
+				{field: 'ctnNum', title: '箱号', sortable: false, width: 100},
+				{field: 'skuId', title: 'SKU', sortable: false, width: 180},
+				{field: 'loadingPerson', title: '理货员', sortable: false, width: 100},
+				{field: 'libraryManager', title: '库管员', sortable: false, width: 100},
+				{
+					field: 'enterState', title: '货物状态', sortable: false, formatter: function (value, row, index) {
+						if ("1" == value) {
+							return "货损"
+						} else if ("0" == value) {
+							return "成品"
 						}
 					}
-				},
-				{field: 'enterTime', title: '入库理货时间', sortable: true, width: 130},
-				{field: 'inTime', title: '入库确认时间', sortable: true, width: 130},
-				{field: 'uploader', title: '转一般贸易操作人', sortable: true, width: 130},
-				{field: 'uploadDate', title: '转一般贸易时间', sortable: true, width: 130},
-				{field: 'enterPerson', title: '入库理货员', sortable: true, width: 100},
-				{field: 'enterOp', title: '入库操作员', sortable: true, width: 100},
-				{field: 'days', title: '月数差', sortable: true, width: 100}
+				}
 			]],
 			enableHeaderClickMenu: true,
 			enableHeaderContextMenu: true,
@@ -160,10 +170,29 @@
 		$('#searchFrom').form('clear');
 	}
 	// =================================================================================
+	//拣货确认
 	function save() {
 		var row = dg.datagrid('getSelected');
 		if(rowIsNull(row)) return;
-		console.log("出库拣货row==>>",row)
+		d = $("#dlg").dialog({
+			title: "拣货确认",
+			width: 450,
+			height: 450,
+			href: '${ctx}/wms/outbound/outbound/' + row.id,
+			maximizable: true,
+			modal: true,
+			buttons: [{
+				text: '确认',
+				handler: function () {
+					$("#mainform3").submit();
+				}
+			}, {
+				text: '取消',
+				handler: function () {
+					d.panel('close');
+				}
+			}]
+		});
 	}
 </script>
 </body>

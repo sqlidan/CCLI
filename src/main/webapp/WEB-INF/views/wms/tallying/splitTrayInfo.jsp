@@ -15,7 +15,7 @@
 				<input  type="hidden" id="id" name="id" value="${trayInfo.id}">
 				<td>原托盘号：</td>
 				<td>
-					<input class="easyui-validatebox" data-options="width:150" value="${trayInfo.trayId}" readonly>
+					<input class="easyui-validatebox" data-options="width:150" value="${trayInfo.trayId}" style="background:#eee" readonly>
 				</td>
 			</tr>
 			<tr>
@@ -32,15 +32,15 @@
 			</tr>
 			<tr>
 				<td>原托盘件数：</td>
-				<td><input type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.nowPiece}" readonly></td>
+				<td><input type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.nowPiece}" style="background:#eee" readonly></td>
 			</tr>
 			<tr>
 				<td>SKU：</td>
-				<td><input  type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.skuId}" readonly></td>
+				<td><input  type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.skuId}" style="background:#eee" readonly></td>
 			</tr>
 			<tr>
 				<td>品名：</td>
-				<td><input type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.cargoName}" readonly></td>
+				<td><input type="text" class="easyui-validatebox"  data-options="width: 150 " value="${trayInfo.cargoName}" style="background:#eee" readonly></td>
 			</tr>
 		</table>
 	</form>
