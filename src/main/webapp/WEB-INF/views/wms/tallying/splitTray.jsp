@@ -65,7 +65,7 @@
 				{field:'billNum',title:'提单号',sortable:true},
 				{field:'ctnNum',title:'箱号',sortable:true},
 				{field:'trayId',title:'托盘号',sortable:true},
-				{field:'cargoType',title:'产品类型',sortable:true},
+				// {field:'cargoType',title:'产品类型',sortable:true},
 				{field:'cargoName',title:'产品名称',sortable:true},
 				{field:'warehouse',title:'仓库号',sortable:true},
 				{field:'buildingNum',title:'楼号',sortable:true},
