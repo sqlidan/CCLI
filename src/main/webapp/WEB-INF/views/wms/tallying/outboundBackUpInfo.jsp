@@ -12,23 +12,17 @@
 	<form id="mainform3" action="${ctx}/wms/outbound/${action}" method="post"  enctype="multipart/form-data">
 		<table class="formTable">
 			<tr>
-				<td>装车单：</td>
+				<td>托盘号：</td>
 				<td>
-					<input type="text" id="loadingTruckNum" name="loadingTruckNum" class="easyui-validatebox" data-options="width:150" value="${trayInfo.loadingTruckNum}" style="background:#eee" readonly>
+					<input type="text" id="trayId" name="trayId" class="easyui-validatebox" data-options="width: 150" value="${trayInfo.trayId}" style="background:#eee" readonly >
 				</td>
 			</tr>
-<%--			<tr>--%>
-<%--				<td>托盘号：</td>--%>
-<%--				<td>--%>
-<%--					<input type="text" id="trayId" name="trayId" class="easyui-validatebox" data-options="width: 150" value="${trayInfo.trayId}" style="background:#eee" readonly >--%>
-<%--				</td>--%>
-<%--			</tr>--%>
-<%--			<tr>--%>
-<%--				<td>原托盘号：</td>--%>
-<%--				<td>--%>
-<%--					<input type="text" id="changeTrayId" name="changeTrayId" class="easyui-validatebox" data-options="width: 150, required:'required' " maxlength="20" >--%>
-<%--				</td>--%>
-<%--			</tr>--%>
+			<tr>
+				<td>库位号：</td>
+				<td>
+					<input type="text" id="cargoLocation" name="cargoLocation" class="easyui-validatebox" data-options="width: 150, required:'required' " >
+				</td>
+			</tr>
 		</table>
 	</form>
 </div>

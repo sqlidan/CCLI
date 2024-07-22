@@ -74,6 +74,41 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		}
 	}
 
+	public Map<String, Object> passButNotPassGate(String vehicleNo,String ioTypecd){
+		Map<String, Object> result = new HashMap<>();
+		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo,ioTypecd);
+		if(bisPassPortDataMap == null || bisPassPortDataMap.size() == 0){
+			result.put("code", "500");
+			result.put("msg", "未找到核放单信息!");
+			return result;
+		}else{
+			if(bisPassPortDataMap.get(0) != null && "B".equals(bisPassPortDataMap.get(0).get("STATE").toString().trim()) && "0".equals(bisPassPortDataMap.get(0).get("LOCKAGE").toString().trim()) ){
+				String flag = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+				String hfdNo = "";
+				if(bisPassPortDataMap.get(0).get("PASSPORT_NO")!=null && bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim().length() > 0){
+					hfdNo = bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim();
+				}else{
+					if(bisPassPortDataMap.get(0).get("SEQ_NO")!=null && bisPassPortDataMap.get(0).get("SEQ_NO").toString().trim().length() > 0){
+						hfdNo = bisPassPortDataMap.get(0).get("SEQ_NO").toString().trim();
+					}
+				}
+
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("flag",flag);//I-进区;E-出区
+				map.put("hfdNo",hfdNo);//核放单号或预录入统一编号
+
+				result.put("code", "200");
+				result.put("data", map);
+				result.put("msg", "success");
+				return result;
+			}else{
+				result.put("code", "500");
+				result.put("msg", "未找到核放单信息!");
+				return result;
+			}
+		}
+	}
+
 	public List<BisPreEntryDictData> getDictDataByCode(String code){
 		List<Map<String,Object>> bisPreEntryDictDataMap = passPortDao.getDictDataByCode(code);
 		List<BisPreEntryDictData> bisPreEntryDictDataList = new ArrayList<>();

@@ -4,6 +4,7 @@ import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.utils.parameterReflect;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.remoting.hand.goBack.service.GoBackStockWebService;
 import com.haiersoft.ccli.remoting.hand.out.service.OutboundWebService;
 import com.haiersoft.ccli.report.entity.Stock;
 import com.haiersoft.ccli.report.service.StockReportService;
@@ -47,6 +48,8 @@ public class OutboundManageController extends BaseController {
 	private LoadingInfoService loadingInfoService;
 	@Autowired
 	private OutboundWebService outboundWebService;
+	@Autowired
+	private GoBackStockWebService goBackStockWebService;
 
 	//出库拣货
 	@RequestMapping(value = "outbound", method = RequestMethod.GET)
@@ -75,7 +78,35 @@ public class OutboundManageController extends BaseController {
 	@ResponseBody
 	public String outboundSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) {
 		User user = UserUtil.getCurrentUser();
-		String result = outboundWebService.outSortingConfirm(bisLoadingInfo.getLoadingTruckNum(),bisLoadingInfo.getTrayId(),bisLoadingInfo.getChangeTrayId(),user.getName());
+		//依据装车单号获取全部的装车单
+		List<BisLoadingInfo> loadings = loadingInfoService.getLoadingByNum(bisLoadingInfo.getLoadingTruckNum());
+		//判断扫描的托盘号是否存在
+		if (null != loadings && loadings.size() > 0) {
+			for (BisLoadingInfo forBisLoadingInfo:loadings) {
+//				String result = outboundWebService.outSortingConfirm(bisLoadingInfo.getLoadingTruckNum(),forBisLoadingInfo.getTrayId(),forBisLoadingInfo.getChangeTrayId(),user.getName());
+				String result = outboundWebService.outSortingConfirm(bisLoadingInfo.getLoadingTruckNum(),forBisLoadingInfo.getTrayId(),forBisLoadingInfo.getTrayId(),user.getName());
+				if (!result.contains("操作成功")){
+					return result;
+				}
+			}
+		}
+		return "success";
+	}
+
+	//跳转回库上架弹窗
+	@RequestMapping(value = "backUp/{id}", method = RequestMethod.GET)
+	public String backUp(Model model, @PathVariable("id") Integer id) {
+		BisLoadingInfo bisLoadingInfo = loadingInfoService.get(id);
+		model.addAttribute("trayInfo", bisLoadingInfo);
+		model.addAttribute("action", "backUpSave");
+		return "wms/tallying/outboundBackUpInfo";
+	}
+
+	@RequestMapping(value="backUpSave",method = RequestMethod.GET)
+	@ResponseBody
+	public String backUpSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) throws ParseException {
+		User user = UserUtil.getCurrentUser();
+		String result = goBackStockWebService.getBackStockUpConfirm(bisLoadingInfo.getTrayId(),bisLoadingInfo.getCargoLocation(),user.getName());
 		if (!result.contains("操作成功")){
 			return result;
 		}

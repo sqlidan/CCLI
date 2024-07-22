@@ -278,8 +278,8 @@ public class ASNService extends BaseService<BisAsn, String> {
                 getObj.setStockIn(obj.getStockIn());
                 getObj.setStockName(obj.getStockName());
                 getObj.setRemark(obj.getRemark());
-                getObj.setCreateUser(obj.getCreateUser()!=null?obj.getCreateUser():"");
-                getObj.setCreateTime(obj.getCreateTime()!=null?obj.getCreateTime():null);
+//                getObj.setCreateUser(obj.getCreateUser()!=null?obj.getCreateUser():"");
+//                getObj.setCreateTime(obj.getCreateTime()!=null?obj.getCreateTime():null);
                 this.update(getObj);
             }
             /****************************ASN明细信息更新************************************************/

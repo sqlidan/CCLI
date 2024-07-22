@@ -44,6 +44,8 @@
 			</form>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="save()">拣货确认</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="backUp()">回库上架</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
 		</div>
 	</div>
 </div>
@@ -179,6 +181,30 @@
 			width: 450,
 			height: 450,
 			href: '${ctx}/wms/outbound/outbound/' + row.id,
+			maximizable: true,
+			modal: true,
+			buttons: [{
+				text: '确认',
+				handler: function () {
+					$("#mainform3").submit();
+				}
+			}, {
+				text: '取消',
+				handler: function () {
+					d.panel('close');
+				}
+			}]
+		});
+	}
+	//回库上架
+	function backUp() {
+		var row = dg.datagrid('getSelected');
+		if(rowIsNull(row)) return;
+		d = $("#dlg").dialog({
+			title: "拣货确认",
+			width: 450,
+			height: 450,
+			href: '${ctx}/wms/outbound/backUp/' + row.id,
 			maximizable: true,
 			modal: true,
 			buttons: [{

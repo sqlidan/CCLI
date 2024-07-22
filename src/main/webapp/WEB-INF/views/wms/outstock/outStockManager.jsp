@@ -1269,7 +1269,7 @@ function makeOrder(){
 					window.parent.mainpage.mainTabs.addModule('制作出库订单管理',href,'icon-hamburg-customers');
 				}
 			}
-		});	
+		});
 } 
 
 //导出

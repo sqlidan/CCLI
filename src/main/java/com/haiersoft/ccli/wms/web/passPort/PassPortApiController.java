@@ -72,4 +72,33 @@ public class PassPortApiController extends BaseController {
         return passPortService.getDataByVehicleNo(PLATE_NO,FLAG);
     }
 
+    /**
+     * 校验核放单审核通过但未过闸数据
+     */
+    @RequestMapping(value = "passButNotPassGate", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> passButNotPassGate(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+
+        String PLATE_NO = request.getParameter("PLATE_NO");
+        System.out.println("PLATE_NO："+PLATE_NO);
+        if(PLATE_NO != null && PLATE_NO.trim().length() > 0){
+
+        }else{
+            result.put("code", "500");
+            result.put("msg", "承运车牌号为必填参数!");
+            return result;
+        }
+        String FLAG = request.getParameter("FLAG");
+        System.out.println("FLAG："+FLAG);
+        if(FLAG != null && FLAG.trim().length() > 0){
+
+        }else{
+            result.put("code", "500");
+            result.put("msg", "进出区标识为必填参数!");
+            return result;
+        }
+        return passPortService.passButNotPassGate(PLATE_NO,FLAG);
+    }
+
 }

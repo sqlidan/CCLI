@@ -17,12 +17,12 @@
 					<input type="text" id="loadingTruckNum" name="loadingTruckNum" class="easyui-validatebox" data-options="width:150" value="${trayInfo.loadingTruckNum}" style="background:#eee" readonly>
 				</td>
 			</tr>
-			<tr>
-				<td>托盘号：</td>
-				<td>
-					<input type="text" id="trayId" name="trayId" class="easyui-validatebox" data-options="width: 150, required:'required' " value="${trayInfo.trayId}" maxlength="20" >
-				</td>
-			</tr>
+<%--			<tr>--%>
+<%--				<td>托盘号：</td>--%>
+<%--				<td>--%>
+<%--					<input type="text" id="trayId" name="trayId" class="easyui-validatebox" data-options="width: 150, required:'required' " value="${trayInfo.trayId}" maxlength="20" >--%>
+<%--				</td>--%>
+<%--			</tr>--%>
 			<tr>
 				<td>品名：</td>
 				<td>

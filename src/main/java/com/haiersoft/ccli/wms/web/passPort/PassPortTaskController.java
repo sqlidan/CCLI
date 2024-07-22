@@ -36,7 +36,6 @@ import java.util.Map;
 /**
  * 执行核放单回执
  */
-@Service
 @DisallowConcurrentExecution
 public class PassPortTaskController implements Job {
 
@@ -101,9 +100,8 @@ public class PassPortTaskController implements Job {
                     }
                 }
             }
-        } else {
-            return;
         }
+        return;
     }
 
     //解析数据执行业务逻辑
@@ -172,14 +170,14 @@ public class PassPortTaskController implements Job {
             if (bisPassPortList != null && bisPassPortList.size() == 1) {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1-通过2-转人工3-退单Y-入库成功Z-入库失败
-                    //2-通过;4-转人工;5-退单;Y-入库成功;Z-入库失败;
+                    //状态-1-删除;0-新增;1-申报成功;4-成功发送海关;5-海关接收成功;6-海关接收失败;B-海关终审通过;C-退单;E-删除;T-转人工;
                     if ("1".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
-                        forBisPassPort.setState("2");//通过
+                        forBisPassPort.setState("B");//通过
                         //反写核放单号
                         forBisPassPort.setPassportNo(hdeApprResultMap.get("businessId") == null ? "未获取到核放单号" : hdeApprResultMap.get("businessId").toString());
                     }
                     if ("2".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
-                        forBisPassPort.setState("4");//转人工
+                        forBisPassPort.setState("T");//转人工
                         if (SAS221.get("CheckInfo") != null && SAS221.get("CheckInfo").toString().trim().length() > 0) {
                             JSONObject CheckInfo = JSONObject.parseObject(SAS221.get("CheckInfo").toString());
                             Map<String, Object> checkInfoMap = JSON.parseObject(CheckInfo.toString());
@@ -189,7 +187,7 @@ public class PassPortTaskController implements Job {
                         }
                     }
                     if ("3".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
-                        forBisPassPort.setState("5");//退单
+                        forBisPassPort.setState("C");//退单
                     }
                     if ("Y".equals(hdeApprResultMap.get("manageResult") == null ? "" : hdeApprResultMap.get("manageResult").toString())) {
                         forBisPassPort.setState("Y");//入库成功

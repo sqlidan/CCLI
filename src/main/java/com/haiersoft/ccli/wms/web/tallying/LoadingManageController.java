@@ -41,6 +41,8 @@ public class LoadingManageController extends BaseController {
 	private LoadingManageService loadingService;
 	@Autowired
 	private LoadingInfoService loadingInfoService;
+	@Autowired
+	private OutboundWebService outboundWebService;
 
 	//装车理货
 	@RequestMapping(value = "loading", method = RequestMethod.GET)
@@ -61,6 +63,20 @@ public class LoadingManageController extends BaseController {
 	@RequestMapping(value = "loading/{id}", method = RequestMethod.GET)
 	public String updateContractForm(Model model, @PathVariable("id") Integer id) {
 		BisLoadingInfo bisLoadingInfo = loadingInfoService.get(id);
+		//依据装车单号获取全部的装车单
+		List<BisLoadingInfo> loadings = loadingInfoService.getLoadingByNum(bisLoadingInfo.getLoadingTruckNum());
+		if (null != loadings && loadings.size() > 0) {
+			List<String> cargoNameList = new ArrayList<>();
+			Integer piece = 0;
+			for (BisLoadingInfo forBisLoadingInfo:loadings) {
+				if (!cargoNameList.contains(forBisLoadingInfo.getCargoName())){
+					cargoNameList.add(forBisLoadingInfo.getCargoName());
+				}
+				piece += forBisLoadingInfo.getPiece();
+			}
+			bisLoadingInfo.setCargoName(cargoNameList.toString());
+			bisLoadingInfo.setPiece(piece);
+		}
 		model.addAttribute("trayInfo", bisLoadingInfo);
 		model.addAttribute("action", "loadingSave");
 		return "wms/tallying/loadingInfo";
@@ -69,9 +85,34 @@ public class LoadingManageController extends BaseController {
 	@ResponseBody
 	public String outboundSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) {
 		User user = UserUtil.getCurrentUser();
-		String result = loadingService.outStorageLoadingCar(bisLoadingInfo.getLoadingTruckNum(),bisLoadingInfo.getTrayId(),bisLoadingInfo.getPlatformNum(),bisLoadingInfo.getCarNo(),user.getName());
-		if (!result.contains("操作成功")){
-			return result;
+		//依据装车单号获取全部的装车单
+		List<BisLoadingInfo> loadings = loadingInfoService.getLoadingByNum(bisLoadingInfo.getLoadingTruckNum());
+		//判断扫描的托盘号是否存在
+		if (null != loadings && loadings.size() > 0) {
+			for (BisLoadingInfo forBisLoadingInfo:loadings) {
+				String result = loadingService.outStorageLoadingCar(bisLoadingInfo.getLoadingTruckNum(),forBisLoadingInfo.getTrayId(),bisLoadingInfo.getPlatformNum(),bisLoadingInfo.getCarNo(),user.getName());
+				if (!result.contains("操作成功")){
+					return result;
+				}
+			}
+		}
+		return "success";
+	}
+
+	//回库
+	@RequestMapping(value = "back/{ids}", method = RequestMethod.GET)
+	@ResponseBody
+	public String back(Model model, @PathVariable("ids") List<Integer> ids) {
+		User user = UserUtil.getCurrentUser();
+		//判断扫描的托盘号是否存在
+		if (null != ids && ids.size() > 0) {
+			for (Integer id:ids) {
+				BisLoadingInfo bisLoadingInfo = loadingInfoService.get(id);
+				String result = outboundWebService.comeBackStockConfirm(bisLoadingInfo.getLoadingTruckNum(),user.getName());
+				if (!result.contains("操作成功")){
+					return result;
+				}
+			}
 		}
 		return "success";
 	}

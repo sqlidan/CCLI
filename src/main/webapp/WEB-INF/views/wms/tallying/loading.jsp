@@ -44,6 +44,8 @@
 			</form>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="save()">理货确认</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="back()">回库</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
 		</div>
 	</div>
 </div>
@@ -75,7 +77,7 @@
 			pageNumber:1,
 			pageSize : 20,
 			pageList : [20, 30, 50, 100 ],
-			singleSelect:true,
+			singleSelect:false,
 			frozenColumns: [[
 				{field: 'id', title: 'ID',hidden:true},
 			]],
@@ -172,8 +174,14 @@
 	// =================================================================================
 	//理货确认
 	function save() {
+
 		var row = dg.datagrid('getSelected');
 		if(rowIsNull(row)) return;
+		var rows = dg.datagrid('getSelections');
+		if (rows.length > 1){
+			parent.$.messager.show({title: "提示", msg: "请选择一行数据！", position: "bottomRight"});
+			return;
+		}
 		d = $("#dlg").dialog({
 			title: "理货确认",
 			width: 450,
@@ -192,6 +200,31 @@
 					d.panel('close');
 				}
 			}]
+		});
+	}
+	//回库
+	function back() {
+		var rows = dg.datagrid('getSelections');
+		var del = dg.datagrid('getSelected');
+		if (del == null) {
+			parent.$.messager.show({title: "提示", msg: "请选择行数据！", position: "bottomRight"});
+			return;
+		}
+		var ids = [];
+		for (var i = 0; i < rows.length; i++) {
+			ids.push(rows[i].id);
+		}
+		parent.$.messager.confirm('提示', '您确定要将选中数据进行回库吗？', function (data) {
+			if (data) {
+				$.ajax({
+					type: 'get',
+					url: "${ctx}/wms/loading/back/" + ids,
+					success: function (data) {
+						dg.datagrid('clearSelections');
+						successTip(data, dg);
+					}
+				});
+			}
 		});
 	}
 </script>
