@@ -1581,8 +1581,23 @@ public class OutStockController extends BaseController {
         BisOutStock bisOutStock = outStockService.get(outLinkId);
         model.addAttribute("bisOutStock", bisOutStock);       
         List<BisOutStockInfo> oldList = outStockInfoService.getList(outLinkId);
-       
-        model.addAttribute("bisOutStockInfo", JSON.toJSONString(oldList));
+        BigDecimal pieces = new BigDecimal(0);
+        BigDecimal net = new BigDecimal(0);
+        BigDecimal gross = new BigDecimal(0);
+		for (BisOutStockInfo forBisOutStockInfo:oldList) {
+			if (forBisOutStockInfo.getPiece()!=null && forBisOutStockInfo.getPiece().toString().trim().length() > 0){
+				pieces = pieces.add(new BigDecimal(forBisOutStockInfo.getPiece().toString()));
+			}
+			if (forBisOutStockInfo.getNetWeight()!=null && forBisOutStockInfo.getNetWeight().toString().trim().length() > 0){
+				net = net.add(new BigDecimal(forBisOutStockInfo.getNetWeight().toString()));
+			}
+			if (forBisOutStockInfo.getGrossWeight()!=null && forBisOutStockInfo.getGrossWeight().toString().trim().length() > 0){
+				gross = gross.add(new BigDecimal(forBisOutStockInfo.getGrossWeight().toString()));
+			}
+		}
+        model.addAttribute("pieces", pieces);
+        model.addAttribute("net", net);
+        model.addAttribute("gross", gross.setScale(2, BigDecimal.ROUND_HALF_UP));
         return "wms/outstock/apprForm";
 
     }

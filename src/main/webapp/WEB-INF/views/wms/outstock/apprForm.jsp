@@ -68,26 +68,17 @@
 	</div>
 
 	<script type="text/javascript">
-		var list = '${bisOutStockInfo}';
-	//	console.log(list);
-		var resultList = JSON.parse(list);
+		var pieces = "${pieces}";
+		var net = "${net}";
+		var gross = "${gross}";
 		$(function() {
 			resetForm();
 		});
 
 		function resetForm() {
-			var pieces = 0;
-			var net = 0;
-			var gross = 0;
-			for (var i = 0; i < resultList.length; i++) {
-				pieces += Number(resultList[i]['piece']);
-				net = Number(resultList[i]['netWeight']);
-				gross += Number(resultList[i]['grossWeight']);
-
-			}
 			$("#PackNo").val(pieces);
 			$("#net").val(net);
-			$("#GrossWt").val(gross.toFixed(2));
+			$("#GrossWt").val(gross);
 
 			$("#ApprType").combobox({
 				data : [ {
@@ -107,7 +98,7 @@
 				textField : 'text',
 				editable:false  
 			});
-
+			console.log("2222");
 			$("#IoType").combobox({
 				data : [ {
 					'value' : '0',
@@ -123,12 +114,13 @@
 				textField : 'text',
 				editable:false  
 			});
+			console.log("33333");
 			$("#CustomsCode").val('4258');
 			$("#EmsNo").val("NH4230210001");
 			$("#BondInvtNo").val("");
 			$("#GNo").val("");
 			$("#DNote").val("");
-
+			console.log("44444");
 		}
 		
 		//提交表单
