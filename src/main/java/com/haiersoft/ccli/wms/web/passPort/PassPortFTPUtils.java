@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Comparator;
 
 
 public class PassPortFTPUtils {
@@ -51,18 +53,18 @@ public class PassPortFTPUtils {
         InputStream is = null;
         try {
             // 读取配置文件
-            url ="10.135.252.42"; // 设置服务器地址
-            port ="21"; // 设置端口
-            username ="yzh"; // 设置用户名
-//            password ="yzh"; // 设置密码
-            password ="Eimskip0804"; // 设置密码
-            rootDirectory ="/Send/"; //设置文件存放根目录
-            // 读取配置文件
-//            url ="192.168.84.89"; // 设置服务器地址
+//            url ="10.135.252.42"; // 设置服务器地址
 //            port ="21"; // 设置端口
-//            username ="administrator"; // 设置用户名
-//            password ="XZ"; // 设置密码
+//            username ="yzh"; // 设置用户名
+////            password ="yzh"; // 设置密码
+//            password ="Eimskip0804"; // 设置密码
 //            rootDirectory ="/Send/"; //设置文件存放根目录
+            // 读取配置文件
+            url ="localhost"; // 设置服务器地址
+            port ="21"; // 设置端口
+            username ="administrator"; // 设置用户名
+            password ="XZ"; // 设置密码
+            rootDirectory ="/Send/"; //设置文件存放根目录
         } finally {
             // 判断输入流是否为空
             if (null != is) {
@@ -209,6 +211,16 @@ public class PassPortFTPUtils {
             ftpClient.changeWorkingDirectory(remotePath);
             // 列出该目录下所有文件
             fs = ftpClient.listFiles();
+            Arrays.sort(fs, new Comparator() {
+                @Override
+                public int compare(Object o1, Object o2) {
+                    File file1 = (File)o1;
+                    File file2 = (File)o2;
+                    if (file1.lastModified() > file2.lastModified()) { return 1; }
+                    else if (file1.lastModified() < file2.lastModified()) { return -1; }
+                    else { return 0; }
+                }
+            });
             return fs;
         } catch (IOException e) {
             logger.error("从FTP服务器下载文件异常"+e.getMessage());
@@ -266,7 +278,7 @@ public class PassPortFTPUtils {
                         result = true;
 
                         //暂时不删除
-//                        ftp.deleteFile(fileName);//删除FTP原文件(已下载至服务器E:/HZQDHZ/下或转移至FTP服务器/BAK/HZQDHZ/下)
+//                        ftp.deleteFile(fileName);//删除FTP原文件
                     }
                 }
             }
