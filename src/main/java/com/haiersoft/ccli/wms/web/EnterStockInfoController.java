@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.haiersoft.ccli.cost.entity.BisStandingBook;
+import com.haiersoft.ccli.cost.service.StandingBookService;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
@@ -81,6 +83,8 @@ public class EnterStockInfoController extends BaseController {
     private ASNService asnService;
     @Autowired
     private TrayInfoService trayInfoService;
+    @Autowired
+    private StandingBookService standingBookService;
     
     @Autowired
     private ItemnameService ItemnameService;
@@ -800,7 +804,98 @@ public class EnterStockInfoController extends BaseController {
         os.close(); // 关闭流
     }
 
-    
+    /**
+     * 查验作业计费单
+     */
+    @RequestMapping(value = "exportCheckFeeExcel/{linkIdStr}", method = RequestMethod.POST)
+    @ResponseBody
+    public void exportCheckFeeExcel(HttpServletRequest request, HttpServletResponse response, @PathVariable("linkIdStr") String linkIdStr) throws IOException {
+        String linkId = linkIdStr.split("_")[0];
+        String itemNum = linkIdStr.split("_")[1];
+        Map<String, Object> map = new HashMap<String, Object>();
+        TemplateExportParams params = new TemplateExportParams("exceltemplate/enterStockCheckFeeExcel.xls");
+        String excelName = "查验作业计费单.xls";
+        //数据查询
+        BisEnterStock bisEnterStock = enterStockService.exportCheckFeeData(linkId);
+        map.put("linkId", bisEnterStock.getLinkId()==null?"无":bisEnterStock.getLinkId());
+        map.put("customerName", bisEnterStock.getRemark()==null?"无":bisEnterStock.getRemark());
+        map.put("itemNum", bisEnterStock.getItemNum()==null?"无":bisEnterStock.getItemNum());
+        map.put("vesselName", bisEnterStock.getVesselName()==null?"无":bisEnterStock.getVesselName());
+        map.put("cargoName", bisEnterStock.getCargoName()==null?"无":bisEnterStock.getCargoName());
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        map.put("now",sdf.format(new Date()));
+        List<PropertyFilter> filters = new ArrayList<>();
+        PropertyFilter filter1 = new PropertyFilter("EQS_linkId", linkId);
+        PropertyFilter filter2 = new PropertyFilter("EQI_ifReceive", "1");
+        PropertyFilter filter3 = new PropertyFilter("EQS_billNum", itemNum);
+        filters.add(filter1);
+        filters.add(filter2);
+        filters.add(filter3);
+        List<BisStandingBook> maplist = standingBookService.search(filters);
+        if (null != maplist && maplist.size() > 0) {
+            List<Map<String, Object>> list = new ArrayList<>();
+            Double allAmount = new Double(0.00);
+            for (BisStandingBook forBisStandingBook:maplist) {
+                Map<String, Object> mapTemp = new HashMap<String, Object>();
+                mapTemp.put("feeName",forBisStandingBook.getFeeName()==null?" ":forBisStandingBook.getFeeName());
+                mapTemp.put("num",forBisStandingBook.getNum()==null?" ":forBisStandingBook.getNum());
+                mapTemp.put("price",forBisStandingBook.getPrice()==null?" ":forBisStandingBook.getPrice());
+                mapTemp.put("receiveAmount",forBisStandingBook.getReceiveAmount()==null?" ":forBisStandingBook.getReceiveAmount());
+                list.add(mapTemp);
+                allAmount = allAmount + (forBisStandingBook.getReceiveAmount()==null?0.00:forBisStandingBook.getReceiveAmount());
+            }
+            map.put("maplist", list);
+            map.put("allAmount", allAmount);
+            String allAmountStr = convert(allAmount);
+            map.put("allAmountStr", allAmountStr);
+        }
+        //汇总金额查询
+        Workbook workbook = ExcelExportUtil.exportExcel(params, map);
+        workbook.getSheetAt(0).setForceFormulaRecalculation(true);//强制执行公式
+
+        String formatFileName = new String(excelName.getBytes("GB2312"), "ISO-8859-1");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + formatFileName + "\"");// 设定输出文件头
+        response.setContentType("application/msexcel");// 定义输出类型
+        OutputStream os = response.getOutputStream();
+        workbook.write(os); // 写入文件
+        os.close(); // 关闭流
+    }
+
+    private static final char[] CN_NUMBERS = {'零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'};
+    private static final char[] CN_UNITS = {'分', '角', '元', '拾', '佰', '仟', '万', '拾', '佰', '仟', '亿', '拾', '佰', '仟'};
+
+    public static String convert(double money) {
+        StringBuilder result = new StringBuilder();
+        int yuan = (int) Math.floor(money);
+        int jiao = (int) Math.floor(money * 10 % 10); // 角
+        int fen = (int) Math.floor(money * 100 % 10); // 分
+
+        if (yuan > 0) {
+            String yuanStr = String.valueOf(yuan);
+            for (int i = 0; i < yuanStr.length(); i++) {
+                result.append(CN_NUMBERS[yuanStr.charAt(i) - '0']);
+                result.append(CN_UNITS[yuanStr.length() - 1 - i + 2]);
+            }
+        } else {
+            result.append(CN_NUMBERS[0]);
+        }
+//        result.append(CN_UNITS[2]); // 元
+
+        if (jiao > 0) {
+            result.append(CN_NUMBERS[jiao]);
+            result.append(CN_UNITS[1]);
+        } else if (jiao == 0 && result.charAt(result.length() - 1) == '元') {
+            result.append(CN_NUMBERS[0]);
+            result.append(CN_UNITS[1]);
+        }
+
+        if (fen > 0) {
+            result.append(CN_NUMBERS[fen]);
+            result.append(CN_UNITS[0]);
+        }
+
+        return result.toString();
+    }
     
     /**
             * 分类监管核放单

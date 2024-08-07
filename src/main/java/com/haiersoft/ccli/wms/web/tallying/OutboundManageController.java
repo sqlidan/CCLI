@@ -74,7 +74,7 @@ public class OutboundManageController extends BaseController {
 		model.addAttribute("action", "outboundSave");
 		return "wms/tallying/outboundInfo";
 	}
-	@RequestMapping(value="outboundSave",method = RequestMethod.GET)
+	@RequestMapping(value="outboundSave",method = RequestMethod.POST)
 	@ResponseBody
 	public String outboundSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) {
 		User user = UserUtil.getCurrentUser();
@@ -102,7 +102,7 @@ public class OutboundManageController extends BaseController {
 		return "wms/tallying/outboundBackUpInfo";
 	}
 
-	@RequestMapping(value="backUpSave",method = RequestMethod.GET)
+	@RequestMapping(value="backUpSave",method = RequestMethod.POST)
 	@ResponseBody
 	public String backUpSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) throws ParseException {
 		User user = UserUtil.getCurrentUser();

@@ -43,6 +43,9 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	public Page<BisEnterStock> getEnterStocks(Page<BisEnterStock> page,BisEnterStock obj) {
 		 return enterStockDao.getEnterStocks(page,obj);
 	}
+	public BisEnterStock exportCheckFeeData(String linkId) {
+		return enterStockDao.exportCheckFeeData(linkId);
+	}
 	/**
 	 * 按条件查询入库联系单和货转联系单集合
 	 * @param page

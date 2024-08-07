@@ -81,7 +81,7 @@ public class LoadingManageController extends BaseController {
 		model.addAttribute("action", "loadingSave");
 		return "wms/tallying/loadingInfo";
 	}
-	@RequestMapping(value="loadingSave",method = RequestMethod.GET)
+	@RequestMapping(value="loadingSave",method = RequestMethod.POST)
 	@ResponseBody
 	public String outboundSave(@Valid BisLoadingInfo bisLoadingInfo, Model model, HttpServletRequest request) {
 		User user = UserUtil.getCurrentUser();

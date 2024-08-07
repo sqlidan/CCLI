@@ -244,6 +244,50 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 
         return findPageSql(page, sb.toString(), paramType, parme);
 	}
+
+    public BisEnterStock exportCheckFeeData(String linkId) {
+        BisEnterStock bisEnterStock = new BisEnterStock();
+        StringBuffer sb = new StringBuffer();
+        HashMap<String, Object> parme = new HashMap<String, Object>();
+        sb.append(" SELECT                                                         ");
+        sb.append("   ST.LINK_ID AS linkId,                                        ");
+        sb.append("   ST.ITEM_NUM AS itemNum,                                      ");
+        sb.append("   info.CTN_NUM AS vesselName,                                  ");
+        sb.append("   ST.REMARK AS remark,                                         ");
+        sb.append("   info.CARGO_NAME AS cargoName                            ");
+        sb.append(" FROM                                                           ");
+        sb.append(" 	BIS_ENTER_STOCK st                                         ");
+        sb.append(" LEFT JOIN                                                      ");
+        sb.append(" (                                                              ");
+        sb.append("   SELECT                                                       ");
+        sb.append("      INFO.LINK_ID,                                             ");
+        sb.append("      INFO.ITEM_NUM,                                            ");
+        sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
+        sb.append("      SUM(INFO.PIECE) as PIECE,                                            ");
+        sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM   ");
+        sb.append("   FROM                                                         ");
+        sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE) info        ");
+        sb.append("   GROUP BY                                                     ");
+        sb.append("      INFO.LINK_ID,                                             ");
+        sb.append("      INFO.ITEM_NUM                                       ");
+        sb.append(" ) info                                                         ");
+        sb.append(" ON                                                             ");
+        sb.append("   ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM        ");
+        sb.append(" where 1=1 and ST.DEL_FLAG='0' AND ST.LINK_ID=:linkId                                  ");
+        sb.append(" ORDER BY ST.OPERATE_TIME DESC"                                  );
+        parme.put("linkId", linkId);
+        SQLQuery sqlQuery = createSQLQuery(sb.toString(), parme);
+        List<Map<String, Object>> mapList = sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        if (mapList!=null && mapList.size() > 0){
+            Map<String, Object> map = mapList.get(0);
+            bisEnterStock.setLinkId(linkId);
+            bisEnterStock.setItemNum(map.get("ITEMNUM")==null?"":map.get("ITEMNUM").toString().trim());
+            bisEnterStock.setRemark(map.get("REMARK")==null?"":map.get("REMARK").toString().trim());
+            bisEnterStock.setVesselName(map.get("VESSELNAME")==null?"":map.get("VESSELNAME").toString().trim());
+            bisEnterStock.setCargoName(map.get("CARGONAME")==null?"":map.get("CARGONAME").toString().trim());
+        }
+        return bisEnterStock;
+    }
 	
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Map<String, Object>> findList(Page page, String value) {

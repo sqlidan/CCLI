@@ -154,6 +154,9 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true"
                onclick="appr()">申请单申请</a>
             <span class="toolbar-item dialog-tool-separator"></span>
+<%--        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true"--%>
+<%--           onclick="checkFee()">查验作业计费单</a>--%>
+<%--        <span class="toolbar-item dialog-tool-separator"></span>--%>
         <%-- <shiro:hasPermission name="wms:enterStock:report">
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true"
                onclick="report()">入库报告书</a>
@@ -569,7 +572,17 @@
     function exportInfo() {
         var row = dg.datagrid('getSelected');
         if (rowIsNull(row)) return;
-        var url = "/ccli/wms/enterStockInfo/exportinfo/" + row.linkId;
+        var url = "${ctx}/wms/enterStockInfo/exportinfo/" + row.linkId;
+        $("#infoForm").attr("action", url).submit();
+    }
+
+    //查验作业计费单
+    function checkFee() {
+        var row = dg.datagrid('getSelected');
+        if (rowIsNull(row)) return;
+        console.log("row.linkId",row.linkId)
+        console.log("row.itemNum",row.itemNum)
+        var url = "${ctx}/wms/enterStockInfo/exportCheckFeeExcel/" + (row.linkId + "_" + row.itemNum);
         $("#infoForm").attr("action", url).submit();
     }
 
