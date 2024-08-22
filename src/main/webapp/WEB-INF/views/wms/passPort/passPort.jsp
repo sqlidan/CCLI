@@ -99,6 +99,10 @@
 		<shiro:hasPermission name="wms:passPort:submit">
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronization()">同步</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronizationStatus()">手动同步状态</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="createScheduledExecutor()">手动创建定时任务(测试)</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
 		</shiro:hasPermission>
         </div>
 </div>
@@ -358,7 +362,35 @@ function synchronization(){
 		}
 	});
 }
+//获取最新状态
+function synchronizationStatus(){
+	parent.$.messager.confirm('提示', '您确定要同步核放单状态信息吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/passPort/synchronizationStatus",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
 
+//手动创建定时任务
+function createScheduledExecutor(){
+	parent.$.messager.confirm('提示', '您确定要同步核放单状态信息吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/wms/passPort/createScheduledExecutor",
+				success: function(data){
+					successTip(data,dg);
+				},
+			});
+		}
+	});
+}
 </script>
 </body>
 </html>

@@ -53,18 +53,18 @@ public class PassPortFTPUtils {
         InputStream is = null;
         try {
             // 读取配置文件
-//            url ="10.135.252.42"; // 设置服务器地址
-//            port ="21"; // 设置端口
-//            username ="yzh"; // 设置用户名
-////            password ="yzh"; // 设置密码
-//            password ="Eimskip0804"; // 设置密码
-//            rootDirectory ="/Send/"; //设置文件存放根目录
-            // 读取配置文件
-            url ="localhost"; // 设置服务器地址
+            url ="10.135.252.42"; // 设置服务器地址
             port ="21"; // 设置端口
-            username ="administrator"; // 设置用户名
-            password ="XZ"; // 设置密码
+            username ="yzh"; // 设置用户名
+//            password ="yzh"; // 设置密码
+            password ="Eimskip0804"; // 设置密码
             rootDirectory ="/Send/"; //设置文件存放根目录
+            // 读取配置文件
+//            url ="localhost"; // 设置服务器地址
+//            port ="21"; // 设置端口
+//            username ="administrator"; // 设置用户名
+//            password ="XZ"; // 设置密码
+//            rootDirectory ="/Send/"; //设置文件存放根目录
         } finally {
             // 判断输入流是否为空
             if (null != is) {
