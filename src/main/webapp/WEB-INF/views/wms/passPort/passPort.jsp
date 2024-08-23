@@ -99,10 +99,10 @@
 		<shiro:hasPermission name="wms:passPort:submit">
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronization()">同步</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronizationStatus()">手动同步状态</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="synchronizationStatus()">手动同步状态(勿点)</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
-			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="createScheduledExecutor()">手动创建定时任务(测试)</a>
-			<span class="toolbar-item dialog-tool-separator"></span>
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="createScheduledExecutor()">手动创建定时任务(勿点)</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
 		</shiro:hasPermission>
         </div>
 </div>
