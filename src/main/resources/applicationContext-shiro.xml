@@ -80,6 +80,7 @@
                 /wsgate/** = anon
                 /staple/** = anon
                 /wms/bulk/** = anon
+                /wms/passPortApi/** = anon
                 /platform/api/reservation/** = anon
                 /login = authc
                 /login/** = authc

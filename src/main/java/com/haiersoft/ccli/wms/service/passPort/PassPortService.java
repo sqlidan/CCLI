@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,14 +77,20 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 
 	public Map<String, Object> passButNotPassGate(String vehicleNo,String ioTypecd){
 		Map<String, Object> result = new HashMap<>();
-		List<Map<String,Object>> bisPassPortDataMap = passPortDao.getDataByVehicleNo(vehicleNo,ioTypecd);
+		List<Map<String,Object>> bisPassPortDataMap = passPortDao.passButNotPassGate(vehicleNo,ioTypecd);
 		if(bisPassPortDataMap == null || bisPassPortDataMap.size() == 0){
 			result.put("code", "500");
 			result.put("msg", "未找到核放单信息!");
 			return result;
 		}else{
-			if(bisPassPortDataMap.get(0) != null && "B".equals(bisPassPortDataMap.get(0).get("STATE").toString().trim()) && "0".equals(bisPassPortDataMap.get(0).get("LOCKAGE").toString().trim()) ){
-				String flag = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+			if(bisPassPortDataMap.get(0) != null){
+				String inAndOut = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+				BigDecimal vehicleWeight = bisPassPortDataMap.get(0).get("VEHICLE_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("VEHICLE_WT").toString());//车自重
+				BigDecimal vehicleFrameWeight = bisPassPortDataMap.get(0).get("VEHICLE_FRAME_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("VEHICLE_FRAME_WT").toString());//车架重
+				BigDecimal containerWeight = bisPassPortDataMap.get(0).get("CONTAINER_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("CONTAINER_WT").toString());//箱重
+				BigDecimal totalGrossWeight = bisPassPortDataMap.get(0).get("TOTAL_GROSS_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("TOTAL_GROSS_WT").toString());//货毛重
+				BigDecimal totalNetWeight = bisPassPortDataMap.get(0).get("TOTAL_NET_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("TOTAL_NET_WT").toString());//货净重
+				BigDecimal totalWeight = bisPassPortDataMap.get(0).get("TOTAL_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("TOTAL_WT").toString());//总重
 				String hfdNo = "";
 				if(bisPassPortDataMap.get(0).get("PASSPORT_NO")!=null && bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim().length() > 0){
 					hfdNo = bisPassPortDataMap.get(0).get("PASSPORT_NO").toString().trim();
@@ -94,8 +101,25 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 				}
 
 				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("flag",flag);//I-进区;E-出区
+				map.put("cph",vehicleNo);//车牌号
+				map.put("inAndOut",inAndOut);//I-进区;E-出区
+				if ("I".equals(inAndOut)){
+					map.put("inAndOutStr","进区");
+				}else if ("E".equals(inAndOut)){
+					map.put("inAndOutStr","出区");
+				}else{
+					map.put("inAndOutStr","");
+				}
 				map.put("hfdNo",hfdNo);//核放单号或预录入统一编号
+				map.put("carWeight",vehicleWeight.add(vehicleFrameWeight));//车自重+车架重
+				map.put("productWeight",totalGrossWeight);//货重(货毛重)
+				map.put("totalWeight",totalWeight);//总重(车自重+车架重+箱重+货毛重)
+
+				map.put("vehicleWeight",vehicleWeight);//车自重
+				map.put("vehicleFrameWeight",vehicleFrameWeight);//车架重
+				map.put("containerWeight",containerWeight);//箱重
+				map.put("totalGrossWeight",totalGrossWeight);//货毛重
+				map.put("totalNetWeight",totalNetWeight);//货净重
 
 				result.put("code", "200");
 				result.put("data", map);

@@ -35,4 +35,20 @@ public class PassPortDao extends HibernateDao<BisPassPort, String> {
         SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
         return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
     }
+
+    public List<Map<String,Object>> passButNotPassGate(String vehicleNo,String ioTypecd) {
+        StringBuffer sql = new StringBuffer();
+        sql.append(" SELECT * FROM ( ");
+        sql.append(" SELECT SEQ_NO,PASSPORT_NO,IO_TYPECD,VEHICLE_WT,VEHICLE_FRAME_WT,CONTAINER_WT,TOTAL_GROSS_WT,TOTAL_NET_WT,TOTAL_WT ");
+        sql.append(" FROM BIS_PASSPORT ");
+        sql.append(" where VEHICLE_NO=:vehicleNo and IO_TYPECD=:ioTypecd and state = 'B' and (lockage = '0' or lockage = '1' or lockage = '2' or lockage = '6') ");
+        sql.append(" order by CREATE_TIME desc ");
+        sql.append(" ) x ");
+        sql.append(" where ROWNUM = 1 ");
+        HashMap<String,Object> parme=new HashMap<String,Object>();
+        parme.put("vehicleNo", vehicleNo);
+        parme.put("ioTypecd", ioTypecd);
+        SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
+        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+    }
 }
