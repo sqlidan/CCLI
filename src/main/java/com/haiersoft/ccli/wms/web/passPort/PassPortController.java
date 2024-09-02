@@ -186,7 +186,8 @@ public class PassPortController extends BaseController {
                 //调用申报核放单接口
                 Map<String, Object> resultMap = passPortNullify(id);
                 if ("200".equals(resultMap.get("code").toString())) {
-                    bisPassPort.setState(type);
+                    bisPassPort.setState("E");
+                    bisPassPort.setLockage("6");//已作废
                     //作废申请成功
                     System.out.println("作废申请成功");
                 } else {
@@ -1069,6 +1070,9 @@ public class PassPortController extends BaseController {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1-通过2-转人工3-退单Y-入库成功Z-入库失败
                     //状态-1-删除;0-新增;1-申报成功;4-成功发送海关;5-海关接收成功;6-海关接收失败;B-海关终审通过;C-退单;E-删除;T-转人工;
+                    if ("6".equals(forBisPassPort.getLockage())){
+                        continue;
+                    }
                     if ("1".equals(manageResult)) {
                         forBisPassPort.setState("B");//通过
                         //反写核放单号
@@ -1138,6 +1142,9 @@ public class PassPortController extends BaseController {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1.已过卡2.未过卡
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
+                    if ("6".equals(forBisPassPort.getLockage())){
+                        continue;
+                    }
                     if ("1".equals(manageResult)) {
                         forBisPassPort.setLockage("2");//已过卡
                         forBisPassPort.setUpdateBy("SYSTEM");
@@ -1213,6 +1220,9 @@ public class PassPortController extends BaseController {
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //2.拒绝过卡 3.卡口放行
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
+                    if ("6".equals(forBisPassPort.getLockage())){
+                        continue;
+                    }
                     if ("2".equals(manageResult)) {
                         forBisPassPort.setLockage("6");//拒绝过卡
                     }
