@@ -186,7 +186,7 @@ public class PassPortController extends BaseController {
                 //调用申报核放单接口
                 Map<String, Object> resultMap = passPortNullify(id);
                 if ("200".equals(resultMap.get("code").toString())) {
-                    bisPassPort.setState("E");
+                    bisPassPort.setState("E");//E-删除；C-退单
                     bisPassPort.setLockage("6");//已作废
                     //作废申请成功
                     System.out.println("作废申请成功");
