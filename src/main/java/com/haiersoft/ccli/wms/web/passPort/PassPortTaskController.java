@@ -349,7 +349,7 @@ public class PassPortTaskController implements Job {
                 logger.info("SAS221解析后执行查询有数据");
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1-通过2-转人工3-退单Y-入库成功Z-入库失败
-                    //状态-1-删除;0-新增;1-申报成功;4-成功发送海关;5-海关接收成功;6-海关接收失败;B-海关终审通过;C-退单;E-删除;T-转人工;
+                    //状态-1-删除;0-新增;1-申报成功;4-成功发送海关;5-海关接收成功;6-海关接收失败;B-海关终审通过;C-退单;E-删除;T-转人工;Y-入库成功;Z-入库失败;
                     if ("6".equals(forBisPassPort.getLockage())){
                         continue;
                     }

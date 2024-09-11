@@ -37,6 +37,8 @@
 				<option value="C">退单</option>
 				<option value="E">删除</option>
 				<option value="T">转人工</option>
+				<option value="Y">入库成功</option>
+				<option value="Z">入库失败</option>
 			</select>
 			<select name="filter_EQS_bindTypecd" class="easyui-combobox" data-options="width:150,prompt: '绑定类型' " >
 				<option value=""></option>
@@ -215,6 +217,10 @@ function gridDG(){
 						return "删除";
 					}else if(value == 'T'){
 						return "转人工";
+					}else if(value == 'Y'){
+						return "入库成功";
+					}else if(value == 'Z'){
+						return "入库失败";
 					}
 				}},
 			{field:'areainEtpsNm',title:'区内企业名称',sortable:true},
