@@ -51,8 +51,11 @@
 
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
             <span class="toolbar-item dialog-tool-separator"></span>
-
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="cancel()">取消预约</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="update()">编辑</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="deleteMothed()">删除</a>
             <span class="toolbar-item dialog-tool-separator"></span>
         </form>
         <form id="searchFrom3" action="">
@@ -134,9 +137,9 @@
                 {field: 'num', title: '件数', width: 50},
                 {field: 'netWeight', title: '净重（KG)', width: 50},
                 {field: 'carNumber', title: '车牌号', width: 70,},
-                {field: 'driverName', title: '司机姓名', width: 70},
+                // {field: 'driverName', title: '司机姓名', width: 70},
                 {field: 'driverMobile', title: '联系电话', width: 100},
-                {field: 'driverIdNumber', title: '身份证号', width: 100},
+                // {field: 'driverIdNumber', title: '身份证号', width: 100},
                 {field: 'appointDate', title: '预约日期', width: 100},
                 {field: 'storageTemperature', title: '存放温度', width: 60},
                 {
@@ -157,22 +160,28 @@
                         return val == "1" ? '是' : '否';
                     }
                 },
-                {field: 'sealNo', title: '铅封号', width: 60},
-                {field: 'originCountry', title: '原产国', width: 100},
-                {field: 'factoryNo', title: '厂号', width: 50},
-                {field: 'reportNumber', title: '报关单号', width: 100},
-                {field: 'shippingPort', title: '启运港', width: 100},
-                {field: 'txmtgs', title: '提箱码头公司', width: 100},
-                {field: 'arrivePortTime', title: '冻柜到港时间', width: 130},
-                {field: 'customsClearanceTime', title: '海关放行时间', width: 130},
-                {field: 'reportBillContact', title: '报关单境内收货人', width: 100},
-                {field: 'reportBillConsignor', title: '报关单境内发货人', width: 100},
-                {field: 'checkInstructions', title: '查验指令', width: 60},
-                {field: 'dgfkcz', title: '冻柜返空场站', width: 100},
-                {field: 'customsDeclarationValue', title: '报关单货值（美元）', width: 70},
-                {field: 'disinfectionReportCustomer', title: '消毒报告客户名称', width: 70},
-                {field: 'nucleicAcidProofCustomer', title: '核酸证明客户名', width: 100},
-                {field: 'yyid', title: '预约id', width: 100}
+                // {field: 'sealNo', title: '铅封号', width: 60},
+                // {field: 'originCountry', title: '原产国', width: 100},
+                // {field: 'factoryNo', title: '厂号', width: 50},
+                // {field: 'reportNumber', title: '报关单号', width: 100},
+                // {field: 'shippingPort', title: '启运港', width: 100},
+                // {field: 'txmtgs', title: '提箱码头公司', width: 100},
+                // {field: 'arrivePortTime', title: '冻柜到港时间', width: 130},
+                // {field: 'customsClearanceTime', title: '海关放行时间', width: 130},
+                // {field: 'reportBillContact', title: '报关单境内收货人', width: 100},
+                // {field: 'reportBillConsignor', title: '报关单境内发货人', width: 100},
+                // {field: 'checkInstructions', title: '查验指令', width: 60},
+                // {field: 'dgfkcz', title: '冻柜返空场站', width: 100},
+                // {field: 'customsDeclarationValue', title: '报关单货值（美元）', width: 70},
+                // {field: 'disinfectionReportCustomer', title: '消毒报告客户名称', width: 70},
+                // {field: 'nucleicAcidProofCustomer', title: '核酸证明客户名', width: 100},
+                // {field: 'yyid', title: '预约id', width: 100},
+                {
+                    field: 'type', title: '类型', width: 60,
+                    formatter: function (val, row, index) {
+                        return val == "1" ? '系统生成' : '同步生成';
+                    }
+                }
 
             ]],
             enableHeaderClickMenu: true,
@@ -196,6 +205,11 @@
 
         if(rowIsNull(row)) return;
 
+        if(row.type=='1'){
+            parent.$.messager.alert("提示","该信息不能取消预约");
+            return;
+        }
+
         if(row.status!='0'){
             parent.$.messager.alert("提示","该状态不能取消预约");
             return;
@@ -206,6 +220,68 @@
                 $.ajax({
                     type:'get',
                     url:"${ctx}/platform/reservation/inbound/cancel/"+id,
+                    success: function(data){
+                        successTip(data,dg);
+                    }
+                });
+            }
+        });
+    }
+
+    //编辑
+    function update() {
+        var row = dg.datagrid('getSelected');
+        if (rowIsNull(row)) return;
+
+        if(row.type!='1'){
+            parent.$.messager.alert("提示","该信息不能编辑");
+            return;
+        }
+
+        d = $("#dlg").dialog({
+            title: '编辑',
+            width: 380,
+            height: 380,
+            href: '${ctx}/platform/reservationData/updateInbound/' + row.id,
+            maximizable: true,
+            modal: true,
+            buttons: [{
+                text: '确认',
+                handler: function () {
+                    if ($("#mainform").form('validate')) {
+                        $("#mainform").submit();
+                        d.panel('close');
+                    }
+                }
+            }, {
+                text: '取消',
+                handler: function () {
+                    d.panel('close');
+                }
+            }],
+            onClose: function () {
+                window.setTimeout(function () {
+                    cx()
+                }, 100);
+            }
+        });
+    }
+
+    //删除
+    function deleteMothed(){
+        var row = dg.datagrid('getSelected');
+        if(rowIsNull(row)) return;
+
+        if(row.type!='1'){
+            parent.$.messager.alert("提示","该信息不能删除");
+            return;
+        }
+        var id = row.id;
+        parent.$.messager.confirm('提示', '您确定要取消预约信息吗？', function(data){
+            if (data){
+                $.ajax({
+                    type:'get',
+                    url:"${ctx}/platform/reservationData/deleteInbound/"+id,
                     success: function(data){
                         successTip(data,dg);
                     }

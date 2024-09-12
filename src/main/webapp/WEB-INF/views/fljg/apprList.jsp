@@ -42,7 +42,7 @@
         	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="applyDetail()">更新详情（测试用）</a>
         	<span class="toolbar-item dialog-tool-separator"></span>
         	
-        	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="virtualmani()">生成虚拟核放单</a>
+        	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="·" plain="true" onclick="virtualmani()">生成虚拟核放单</a>
         	<span class="toolbar-item dialog-tool-separator"></span>
 
         </div>

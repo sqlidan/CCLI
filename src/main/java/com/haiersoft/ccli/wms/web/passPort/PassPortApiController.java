@@ -63,7 +63,9 @@ public class PassPortApiController extends BaseController {
         String FLAG = request.getParameter("FLAG");
         System.out.println("FLAG："+FLAG);
         if(FLAG != null && FLAG.trim().length() > 0){
-
+            if ("O".equals(FLAG.trim())){
+                FLAG = "E";
+            }
         }else{
             result.put("code", "500");
             result.put("msg", "进出区标识为必填参数!");
@@ -92,7 +94,9 @@ public class PassPortApiController extends BaseController {
         String FLAG = request.getParameter("FLAG");
         System.out.println("FLAG："+FLAG);
         if(FLAG != null && FLAG.trim().length() > 0){
-
+            if ("O".equals(FLAG.trim())){
+                FLAG = "E";
+            }
         }else{
             result.put("code", "500");
             result.put("msg", "进出区标识为必填参数!");

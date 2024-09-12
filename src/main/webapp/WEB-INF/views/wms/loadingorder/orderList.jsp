@@ -62,11 +62,15 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-user-edit" plain="true" onclick="unlock()">解控</a>
             <span class="toolbar-item dialog-tool-separator"></span>
         </shiro:hasPermission>
-
-                    <a href="javascript:void(0)" class="easyui-linkbutton"
-                        iconCls="icon-hamburg-old-versions" plain="true"
-                        onclick="mani()">核放单申请</a>
-                    <span class="toolbar-item dialog-tool-separator"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton"
+            iconCls="icon-hamburg-old-versions" plain="true"
+            onclick="mani()">核放单申请</a>
+        <span class="toolbar-item dialog-tool-separator"></span>
+        <shiro:hasPermission name="bis:loading:update">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-old-versions" plain="true"
+               onclick="createReservation()">生成预约出库信息</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+        </shiro:hasPermission>
     </div>
 
 </div>
@@ -497,6 +501,24 @@
                     d.panel('close');
                 }
             }]
+        });
+    }
+
+    //生成预约出库信息
+    function createReservation() {
+        var row = dg.datagrid('getSelected');
+        if (rowIsNull(row)) return;
+        $.ajax({
+            type: 'post',
+            url: "${ctx}/platform/reservationData/outbound/" + row.orderNum,
+            success: function (data) {
+                if(data=="success"){
+                    successTip(data, dg);
+                }else{
+                    parent.$.messager.show({ title : "提示",msg: "生成预约出库信息失败！", position: "bottomRight" });
+                    return;
+                }
+            }
         });
     }
     

@@ -61,6 +61,11 @@
                onclick="unendd()">取消完结</a>
             <span class="toolbar-item dialog-tool-separator"></span>
         </shiro:hasPermission>
+        <shiro:hasPermission name="bis:asn:update">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-old-versions" plain="true"
+               onclick="createReservation()">生成预约入库信息</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+        </shiro:hasPermission>
     </div>
 
     <div>
@@ -390,6 +395,28 @@
     	var row = dg.datagrid('getSelected');
         if (rowIsNull(row)) return;
     	window.parent.mainpage.mainTabs.addModule('打印垛卡','${ctx}/bis/asn/printCard/'+row.asn);
+    }
+
+    //生成预约入库信息
+    function createReservation() {
+        var row = dg.datagrid('getSelected');
+        if (rowIsNull(row)) return;
+        if (3 == row.asnState || 4 == row.asnState) {
+            $.ajax({
+                type: 'post',
+                url: "${ctx}/platform/reservationData/inbound/" + row.asn,
+                success: function (data) {
+                    if(data=="success"){
+                        successTip(data, dg);
+                    }else{
+                        parent.$.messager.show({ title : "提示",msg: "生成预约入库信息失败！", position: "bottomRight" });
+                        return;
+                    }
+                }
+            });
+        } else {
+            parent.$.easyui.messager.alert("ASN号：" + row.asn + " 未上架或未完成，不允许生成！");
+        }
     }
 </script>
 </body>

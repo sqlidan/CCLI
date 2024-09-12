@@ -195,6 +195,7 @@ public class PassPortInfoController extends BaseController {
     public Map<String, Object> create(@Valid BisPassPort bisPassPort, Model model, HttpServletRequest request) {
         bisPassPort.setId(getNewPassPortId());
         bisPassPort.setState("0");//状态
+        bisPassPort.setLockage("0");//过卡状态
         User user = UserUtil.getCurrentUser();
         bisPassPort.setCreateBy(user.getName());//创建人
         bisPassPort.setCreateTime(new Date());//创建时间
@@ -258,7 +259,11 @@ public class PassPortInfoController extends BaseController {
         queryBisPassPort.setTotalGrossWt(updateBisPassPort.getTotalGrossWt());
         queryBisPassPort.setTotalNetWt(updateBisPassPort.getTotalNetWt());
         queryBisPassPort.setTotalWt(updateBisPassPort.getTotalWt());
-        queryBisPassPort.setLockage(updateBisPassPort.getLockage());
+        if (updateBisPassPort.getLockage()==null || updateBisPassPort.getLockage().trim().length() == 0){
+            queryBisPassPort.setLockage("0");
+        }else{
+            queryBisPassPort.setLockage(updateBisPassPort.getLockage());
+        }
         queryBisPassPort.setLockageTime1(updateBisPassPort.getLockageTime1());
         queryBisPassPort.setLockageTime2(updateBisPassPort.getLockageTime2());
         queryBisPassPort.setInputCode(updateBisPassPort.getInputCode());

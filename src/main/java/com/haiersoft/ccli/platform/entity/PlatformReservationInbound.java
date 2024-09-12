@@ -129,6 +129,16 @@ public class PlatformReservationInbound implements Serializable {
         private Integer delFlag;
      @Column(name = "STATUS")
      private  String status;
+    @Column(name = "TYPE")
+     private  String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getStatus() {
         return status;

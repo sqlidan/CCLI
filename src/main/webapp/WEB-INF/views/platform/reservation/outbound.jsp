@@ -44,9 +44,15 @@
             <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
             <span class="toolbar-item dialog-tool-separator"></span>
+
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="synchronousInformation()">同步信息</a>
             <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="cancel()">取消预约</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="update()">编辑</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="deleteMothed()">删除</a>
+            <span class="toolbar-item dialog-tool-separator"></span>
         </form>
         <form id="searchFrom3" action="">
         </form>
@@ -148,23 +154,29 @@
                 {field: 'queuingTime', title: '排队时间', width: 120},
                 {field: 'driverName', title: '司机姓名', width: 100},
                 {field: 'driverMobile', title: '电话', width:100},
+                // {
+                //     field: 'dirverIdNumber', title: '身份证号',width: 100,
+                //
+                // },
+                // {
+                //     field: 'desCompany', title: '货物流向目的地公司名称',width: 100
+                // },
+                // {
+                //     field: 'province', title: '省',width: 70
+                // },
+                // {field: 'city', title: '市', width: 70},
+                // {
+                //     field: 'area', title: '区', width: 60,
+                // },
+                // {field: 'address', title: '详细地址',width: 200},
+                // {field: 'desContactName', title: '目的地联系人',  width: 80},
+                // {field: 'desContactPhone', title: '目的地联系电话',  width: 100},
                 {
-                    field: 'dirverIdNumber', title: '身份证号',width: 100,
-
-                },
-                {
-                    field: 'desCompany', title: '货物流向目的地公司名称',width: 100
-                },
-                {
-                    field: 'province', title: '省',width: 70
-                },
-                {field: 'city', title: '市', width: 70},
-                {
-                    field: 'area', title: '区', width: 60,
-                },
-                {field: 'address', title: '详细地址',width: 200},
-                {field: 'desContactName', title: '目的地联系人',  width: 80},
-                {field: 'desContactPhone', title: '目的地联系电话',  width: 100}
+                    field: 'type', title: '类型', width: 60,
+                    formatter: function (val, row, index) {
+                        return val == "1" ? '系统生成' : '同步生成';
+                    }
+                }
 
 
             ]],
@@ -186,8 +198,12 @@
     //取消预约
     function cancel(){
         var row = dg.datagrid('getSelected');
-
         if(rowIsNull(row)) return;
+
+        if(row.type=='1'){
+            parent.$.messager.alert("提示","该信息不能取消预约");
+            return;
+        }
 
         if(row.status!='0'){
             parent.$.messager.alert("提示","该状态不能取消预约");
@@ -210,8 +226,12 @@
     //同步信息
     function synchronousInformation(){
         var row = dg.datagrid('getSelected');
-
         if(rowIsNull(row)) return;
+
+        if(row.type=='1'){
+            parent.$.messager.alert("提示","该信息不能同步");
+            return;
+        }
 
         if(row.status!='0'){
             parent.$.messager.alert("提示","该状态不能同步信息");
@@ -227,6 +247,68 @@
                 $.ajax({
                     type:'get',
                     url:"${ctx}/platform/reservation/outbound/synchronousInformation/"+id,
+                    success: function(data){
+                        successTip(data,dg);
+                    }
+                });
+            }
+        });
+    }
+
+    //编辑
+    function update() {
+        var row = dg.datagrid('getSelected');
+        if (rowIsNull(row)) return;
+
+        if(row.type!='1'){
+            parent.$.messager.alert("提示","该信息不能编辑");
+            return;
+        }
+
+        d = $("#dlg").dialog({
+            title: '编辑',
+            width: 380,
+            height: 380,
+            href: '${ctx}/platform/reservationData/updateOutbound/' + row.id,
+            maximizable: true,
+            modal: true,
+            buttons: [{
+                text: '确认',
+                handler: function () {
+                    if ($("#mainform").form('validate')) {
+                        $("#mainform").submit();
+                        d.panel('close');
+                    }
+                }
+            }, {
+                text: '取消',
+                handler: function () {
+                    d.panel('close');
+                }
+            }],
+            onClose: function () {
+                window.setTimeout(function () {
+                    cx()
+                }, 100);
+            }
+        });
+    }
+
+    //删除
+    function deleteMothed(){
+        var row = dg.datagrid('getSelected');
+        if(rowIsNull(row)) return;
+
+        if(row.type!='1'){
+            parent.$.messager.alert("提示","该信息不能删除");
+            return;
+        }
+        var id = row.id;
+        parent.$.messager.confirm('提示', '您确定要取消预约信息吗？', function(data){
+            if (data){
+                $.ajax({
+                    type:'get',
+                    url:"${ctx}/platform/reservationData/deleteOutbound/"+id,
                     success: function(data){
                         successTip(data,dg);
                     }

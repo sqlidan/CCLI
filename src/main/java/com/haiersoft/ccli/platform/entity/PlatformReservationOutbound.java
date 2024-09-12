@@ -137,6 +137,17 @@ public class PlatformReservationOutbound implements Serializable {
         @Column(name = "IS_BULK_CARGO")
         public String isBulkCargo;
 
+    @Column(name = "TYPE")
+    private  String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getManifestId() {
         return ManifestId;
     }
