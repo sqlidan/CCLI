@@ -827,12 +827,12 @@ public class PassPortController extends BaseController {
                             org.json.JSONObject jsonObject = XML.toJSONObject(xml);
                             if (jsonObject.get("CommonResponeMessage") != null) {
                                 JSONObject commonResponeMessage = JSONObject.parseObject(jsonObject.get("CommonResponeMessage").toString());
-                                logger.info("EtpsPreentNo1:"+commonResponeMessage.get("EtpsPreentNo"));
+//                                logger.info("EtpsPreentNo1:"+commonResponeMessage.get("EtpsPreentNo"));
                                 if (commonResponeMessage.get("EtpsPreentNo") != null && commonResponeMessage.get("EtpsPreentNo").toString().trim().length() > 0) {
                                     EtpsPreentNo = commonResponeMessage.get("EtpsPreentNo").toString();
-                                    logger.info("EtpsPreentNo2:"+EtpsPreentNo);
+//                                    logger.info("EtpsPreentNo2:"+EtpsPreentNo);
                                 }
-                                logger.info("EtpsPreentNo3:"+EtpsPreentNo);
+//                                logger.info("EtpsPreentNo3:"+EtpsPreentNo);
                                 if(commonResponeMessage.get("SeqNo")!=null && commonResponeMessage.get("SeqNo").toString().trim().length() > 0) {
                                     SeqNo = commonResponeMessage.get("SeqNo").toString();
 
@@ -845,14 +845,14 @@ public class PassPortController extends BaseController {
                                         filters.add(filter);
                                         bisPassPortList = passPortService.search(filters);
                                         listMapSuccessed.put(EtpsPreentNo,bisPassPortList);
-                                        logger.info("bisPassPortList,结果：" + JSON.toJSONString(bisPassPortList));
+//                                        logger.info("bisPassPortList,结果：" + JSON.toJSONString(bisPassPortList));
                                     }
                                     if (bisPassPortList != null && bisPassPortList.size() == 1) {
                                         for (BisPassPort forBisPassPort : bisPassPortList) {
                                             forBisPassPort.setEtpsPreentNo2(SeqNo);
                                             forBisPassPort.setUpdateBy("SYSTEM");
                                             forBisPassPort.setUpdateTime(new Date());
-                                            logger.info("执行merge方法");
+//                                            logger.info("执行merge方法");
                                             updateBisPassPortList.add(forBisPassPort);
 //                                            passPortService.merge(forBisPassPort);
                                         }
@@ -905,7 +905,7 @@ public class PassPortController extends BaseController {
                             }
                             read.close();
                             if (StringUtils.isNotBlank(xml)) {
-                                logger.info("执行execute方法");
+//                                logger.info("执行execute方法");
                                 execute(xml, fileName, null, ftpFile,listMap);
                             }
                         } else {
@@ -936,7 +936,7 @@ public class PassPortController extends BaseController {
             String manageResult = null;
             //区分校验回执
             if (BussinessData.get("SAS221") != null) {//核放单回执报文
-                logger.info("解析SAS221回执");
+//                logger.info("解析SAS221回执");
                 JSONObject SAS221 = JSONObject.parseObject(BussinessData.get("SAS221").toString());
                 //清单审批回执
                 if (SAS221.get("HdeApprResult") != null) {
@@ -951,7 +951,7 @@ public class PassPortController extends BaseController {
                         manageResult = hdeApprResultMap.get("manageResult").toString();
                     }
 
-                    logger.info("SAS221解析后执行查询,参数:" + etpsPreentNo);
+//                    logger.info("SAS221解析后执行查询,参数:" + etpsPreentNo);
                     List<BisPassPort> bisPassPortList = new ArrayList<>();
                     if (listMap.get(etpsPreentNo) != null) {
                         bisPassPortList = listMap.get(etpsPreentNo);
@@ -961,18 +961,18 @@ public class PassPortController extends BaseController {
                         filters.add(filter);
                         bisPassPortList = passPortService.search(filters);
                         listMap.put(etpsPreentNo,bisPassPortList);
-                        logger.info("SAS221解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
+//                        logger.info("SAS221解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
                     }
 
                     SAS221Mothed(fileName, file, ftpFile, bisPassPortList, manageResult,SAS221,hdeApprResultMap);
                 }
             }
             if (BussinessData.get("SAS222") != null) {//核放单修改回执报文
-                logger.info("解析SAS222回执");
+//                logger.info("解析SAS222回执");
                 SAS222Mothed();
             }
             if (BussinessData.get("SAS223") != null) {//核放单过卡回执报文
-                logger.info("解析SAS223回执");
+//                logger.info("解析SAS223回执");
                 JSONObject SAS223 = JSONObject.parseObject(BussinessData.get("SAS223").toString());
                 //清单审批回执
                 if (SAS223.get("HdeApprResult") != null) {
@@ -987,7 +987,7 @@ public class PassPortController extends BaseController {
                         manageResult = hdeApprResultMap.get("manageResult").toString();
                     }
 
-                    logger.info("SAS223解析后执行查询,参数:" + etpsPreentNo);
+//                    logger.info("SAS223解析后执行查询,参数:" + etpsPreentNo);
                     List<BisPassPort> bisPassPortList = new ArrayList<>();
                     if (listMap.get(etpsPreentNo)!=null){
                         bisPassPortList = listMap.get(etpsPreentNo);
@@ -997,13 +997,13 @@ public class PassPortController extends BaseController {
                         filters.add(filter);
                         bisPassPortList = passPortService.search(filters);
                         listMap.put(etpsPreentNo,bisPassPortList);
-                        logger.info("SAS223解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
+//                        logger.info("SAS223解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
                     }
                     SAS223Mothed(fileName, file, ftpFile,bisPassPortList,manageResult);
                 }
             }
             if (BussinessData.get("SAS224") != null) {//核放单查验处置回执报文
-                logger.info("解析SAS224回执");
+//                logger.info("解析SAS224回执");
                 JSONObject SAS224 = JSONObject.parseObject(BussinessData.get("SAS224").toString());
                 //清单审批回执
                 if (SAS224.get("HdeApprResult") != null) {
@@ -1018,7 +1018,7 @@ public class PassPortController extends BaseController {
                         manageResult = hdeApprResultMap.get("manageResult").toString();
                     }
 
-                    logger.info("SAS224解析后执行查询,参数:" + etpsPreentNo);
+//                    logger.info("SAS224解析后执行查询,参数:" + etpsPreentNo);
                     List<BisPassPort> bisPassPortList = new ArrayList<>();
                     if (listMap.get(etpsPreentNo)!=null){
                         bisPassPortList = listMap.get(etpsPreentNo);
@@ -1028,14 +1028,14 @@ public class PassPortController extends BaseController {
                         filters.add(filter);
                         bisPassPortList = passPortService.search(filters);
                         listMap.put(etpsPreentNo,bisPassPortList);
-                        logger.info("SAS224解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
+//                        logger.info("SAS224解析后执行查询,结果：" + JSON.toJSONString(bisPassPortList));
                     }
 
                     SAS224Mothed(fileName, file, ftpFile,bisPassPortList,manageResult);
                 }
             }
             if (BussinessData.get("SAS231") != null) {//车辆信息审核回执报文
-                logger.info("解析SAS231回执");
+//                logger.info("解析SAS231回执");
                 SAS231Mothed();
             }
 
@@ -1066,7 +1066,7 @@ public class PassPortController extends BaseController {
     public void SAS221Mothed(String fileName, File file, FTPFile ftpFile, List<BisPassPort> bisPassPortList, String manageResult, JSONObject SAS221,Map<String, Object> hdeApprResultMap) {
         try{
             if (bisPassPortList != null && bisPassPortList.size() == 1) {
-                logger.info("SAS221解析后执行查询有数据");
+//                logger.info("SAS221解析后执行查询有数据");
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1-通过2-转人工3-退单Y-入库成功Z-入库失败
                     //状态-1-删除;0-新增;1-申报成功;4-成功发送海关;5-海关接收成功;6-海关接收失败;B-海关终审通过;C-退单;E-删除;T-转人工;Y-入库成功;Z-入库失败;
@@ -1099,7 +1099,7 @@ public class PassPortController extends BaseController {
                     }
                     forBisPassPort.setUpdateBy("SYSTEM");
                     forBisPassPort.setUpdateTime(new Date());
-                    logger.info("SAS221解析后执行修改");
+//                    logger.info("SAS221解析后执行修改");
                     passPortService.merge(forBisPassPort);
                 }
 //                //将文件挪放至日期下的预录入编号文件夹中
@@ -1138,7 +1138,7 @@ public class PassPortController extends BaseController {
     public void SAS223Mothed(String fileName, File file, FTPFile ftpFile, List<BisPassPort> bisPassPortList, String manageResult) {
         try{
             if (bisPassPortList != null && bisPassPortList.size() == 1) {
-                logger.info("SAS223解析后执行查询有数据");
+//                logger.info("SAS223解析后执行查询有数据");
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //1.已过卡2.未过卡
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
@@ -1149,7 +1149,7 @@ public class PassPortController extends BaseController {
                         forBisPassPort.setLockage("2");//已过卡
                         forBisPassPort.setUpdateBy("SYSTEM");
                         forBisPassPort.setUpdateTime(new Date());
-                        logger.info("SAS223解析后执行已过卡修改");
+//                        logger.info("SAS223解析后执行已过卡修改");
                         passPortService.merge(forBisPassPort);
 
 //                        //非空车出区则进行底账变更
@@ -1181,7 +1181,7 @@ public class PassPortController extends BaseController {
                         forBisPassPort.setLockage("0");//已申请
                         forBisPassPort.setUpdateBy("SYSTEM");
                         forBisPassPort.setUpdateTime(new Date());
-                        logger.info("SAS221解析后执行已申请修改");
+//                        logger.info("SAS221解析后执行已申请修改");
                         passPortService.merge(forBisPassPort);
                     }
                 }
@@ -1216,7 +1216,7 @@ public class PassPortController extends BaseController {
     public void SAS224Mothed(String fileName, File file, FTPFile ftpFile, List<BisPassPort> bisPassPortList, String manageResult) {
         try{
             if (bisPassPortList != null && bisPassPortList.size() == 1) {
-                logger.info("SAS224解析后执行查询有数据");
+//                logger.info("SAS224解析后执行查询有数据");
                 for (BisPassPort forBisPassPort : bisPassPortList) {
                     //2.拒绝过卡 3.卡口放行
                     //0.已申请1.已审批2.已过卡3.已过一卡4.已过二卡5.已删除6.已作废
@@ -1231,7 +1231,7 @@ public class PassPortController extends BaseController {
                     }
                     forBisPassPort.setUpdateBy("SYSTEM");
                     forBisPassPort.setUpdateTime(new Date());
-                    logger.info("SAS224解析后执行修改");
+//                    logger.info("SAS224解析后执行修改");
                     passPortService.merge(forBisPassPort);
                 }
 //                //将文件挪放至日期下的预录入编号文件夹中

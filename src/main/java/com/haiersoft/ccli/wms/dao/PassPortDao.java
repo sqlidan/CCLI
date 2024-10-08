@@ -41,7 +41,7 @@ public class PassPortDao extends HibernateDao<BisPassPort, String> {
         sql.append(" SELECT * FROM ( ");
         sql.append(" SELECT SEQ_NO,PASSPORT_NO,IO_TYPECD,VEHICLE_WT,VEHICLE_FRAME_WT,CONTAINER_WT,TOTAL_GROSS_WT,TOTAL_NET_WT,TOTAL_WT ");
         sql.append(" FROM BIS_PASSPORT ");
-        sql.append(" where VEHICLE_NO=:vehicleNo and IO_TYPECD=:ioTypecd and state = 'B' and (nvl(LOCKAGE,0) = '0' or nvl(LOCKAGE,0) = '1' or nvl(LOCKAGE,0) = '2') ");
+        sql.append(" where VEHICLE_NO=:vehicleNo and IO_TYPECD=:ioTypecd and (state = 'B' or state = 'Y') and (nvl(LOCKAGE,0) = '0' or nvl(LOCKAGE,0) = '1') ");
         sql.append(" and CREATE_TIME BETWEEN SYSDATE - 3 AND SYSDATE ");
         sql.append(" order by CREATE_TIME desc ");
         sql.append(" ) x ");
