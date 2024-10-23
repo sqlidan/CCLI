@@ -204,7 +204,6 @@
             clientName: {
                 validator: function (value, param) {
                     var flag = false;
-                    var rules = $.fn.validatebox.defaults.rules;
                     //更新时，值和原值一致返回true，否则进行校验
                     if ("update" == action && value == $("#yname").val()) {
                         flag = true;
@@ -225,11 +224,6 @@
                             }
                         });
                     }//end if
-
-                    if (!rules.length.validator(value, param)) {
-                        rules.rangelength.message = "请输入一个长度介于 {0} 和 {1} 之间的字符串";
-                        return false;
-                    }
                     return flag;
                 },
                 message: '输入的客户名已存在！'

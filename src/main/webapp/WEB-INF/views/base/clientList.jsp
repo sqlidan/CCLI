@@ -160,10 +160,8 @@
                 text: '确认',
                 handler: function () {
                     setTimeout(function(){
-                        debugger
                     // .form('validate')
                         if($("#mainform").form('validate')) {
-                            debugger
                             $("#mainform").submit();
                             d.panel('close');
                           /*  successTip(data, dg);*/
