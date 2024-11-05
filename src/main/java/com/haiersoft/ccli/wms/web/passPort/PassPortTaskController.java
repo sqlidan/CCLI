@@ -28,6 +28,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Calendar;
 
 /**
  * 执行核放单回执
@@ -52,7 +53,6 @@ public class PassPortTaskController implements Job {
         ScheduleJob scheduleJob = (ScheduleJob) context.getMergedJobDataMap().get("scheduleJob");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
         getPassPortHZ();
-        System.out.println("任务名称 = [" + scheduleJob.getName() + "]" + " 在 " + dateFormat.format(new Date()) + " 时运行");
         logger.info("任务名称 = [" + scheduleJob.getName() + "]" + " 在 " + dateFormat.format(new Date()) + " 时运行");
     }
 
@@ -75,7 +75,15 @@ public class PassPortTaskController implements Job {
 
     //FTP执行回执
     public void ftpFileList() throws IOException, ParseException {
-        String date = "2024-08-20 00:00:00";
+//        String date = "2024-08-20 00:00:00";
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -3); // 将日期往前推三天
+        // 将Calendar对象转换为Date对象
+        Date dateD = calendar.getTime();
+        SimpleDateFormat sdfTemp = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        String date = sdfTemp.format(dateD);
+
         PassPortFTPUtils passPortFTPUtils = PassPortFTPUtils.getInstance();
         // 获取路径下所有的回执文件
         FTPFile[] fileList = passPortFTPUtils.getFilesList(FTP_RECEIVE_PATH);
@@ -86,16 +94,16 @@ public class PassPortTaskController implements Job {
             Map<String,List<BisPassPort>> listMapSuccessed = new HashMap<String,List<BisPassPort>>();
             for (FTPFile ftpFile : fileList) {
                 String fileName = ftpFile.getName();
+//                logger.info("fileName1==> "+fileName);
+                Date fileLastModifyTime = ftpFile.getTimestamp().getTime();
+//                logger.info("modifyTime1==>>"+fileLastModifyTime);
                 try{
                     String substring = fileName.substring(fileName.lastIndexOf(".") + 1);
                     if (!"COPSASX".equals(substring)) {
-                        System.out.println("fileName1 ==> "+fileName);
                         continue;
                     } else {
                         if (fileName.contains("Successed_") || fileName.contains("Failed_")) {
                             //只获取并解析2024-07-24之后的回执
-                            Date fileLastModifyTime = ftpFile.getTimestamp().getTime();
-                            System.out.println("modifyTime==>>"+fileLastModifyTime);
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                             if (fileLastModifyTime.getTime() < sdf.parse(date).getTime()){
                                 continue;
@@ -166,17 +174,16 @@ public class PassPortTaskController implements Job {
             Map<String,List<BisPassPort>> listMap = new HashMap<String,List<BisPassPort>>();
             for (FTPFile ftpFile : fileList) {
                 String fileName = ftpFile.getName();
+//                logger.info("fileName2==> "+fileName);
+                Date fileLastModifyTime = ftpFile.getTimestamp().getTime();
+//                logger.info("modifyTime2==>>"+fileLastModifyTime);
                 try{
                     String substring = fileName.substring(fileName.lastIndexOf(".") + 1);
                     if (!"COPSASX".equals(substring)) {
-                        System.out.println("fileName1 ==> "+fileName);
                         continue;
                     } else {
-                        System.out.println("fileName2 ==> "+fileName);
                         if (fileName.contains("Receipt")) {//单一窗口返回回执
                             //只获取并解析2024-07-24之后的回执
-                            Date fileLastModifyTime = ftpFile.getTimestamp().getTime();
-                            System.out.println("modifyTime==>>"+fileLastModifyTime);
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                             if (fileLastModifyTime.getTime() < sdf.parse(date).getTime()){
                                 continue;
@@ -564,10 +571,10 @@ public class PassPortTaskController implements Job {
             PassPortFTPUtils passPortFTPUtils = PassPortFTPUtils.getInstance();
             //下载至本地
             Boolean downResult = passPortFTPUtils.downFile(FTP_RECEIVE_PATH, fileName, localPath);
-            System.out.println("downResult  "+downResult);
+            logger.info("downResult  "+downResult);
             //上传至FTP服务器备份
             Boolean upResult = passPortFTPUtils.upFile(localPath, fileName, targetPath);
-            System.out.println("upResult  "+upResult);
+            logger.info("upResult  "+upResult);
         }
     }
 }

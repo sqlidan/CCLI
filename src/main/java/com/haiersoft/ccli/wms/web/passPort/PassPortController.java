@@ -94,6 +94,15 @@ public class PassPortController extends BaseController {
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         PropertyFilter filter = new PropertyFilter("NEQS_state", "-1");//已删除
         filters.add(filter);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -3); // 将日期往前推三天
+        // 将Calendar对象转换为Date对象
+        Date date = calendar.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        String formattedDate = sdf.format(date);
+        PropertyFilter filterCreateTime = new PropertyFilter("GED_createTime", formattedDate);//三天内数据
+        filters.add(filterCreateTime);
         page = passPortService.search(page, filters);
         return getEasyUIData(page);
     }
