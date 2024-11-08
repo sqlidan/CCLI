@@ -52,8 +52,9 @@ public class PassPortTaskController implements Job {
     public void execute(JobExecutionContext context) {
         ScheduleJob scheduleJob = (ScheduleJob) context.getMergedJobDataMap().get("scheduleJob");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+        logger.info("任务名称 = [" + scheduleJob.getName() + "]" + " 在 " + dateFormat.format(new Date()) + " 时开始运行");
         getPassPortHZ();
-        logger.info("任务名称 = [" + scheduleJob.getName() + "]" + " 在 " + dateFormat.format(new Date()) + " 时运行");
+        logger.info("任务名称 = [" + scheduleJob.getName() + "]" + " 在 " + dateFormat.format(new Date()) + " 时结束运行");
     }
 
     public static final String FTP_RECEIVE_PATH = "/Receive/";//FTP回执文件存放路径

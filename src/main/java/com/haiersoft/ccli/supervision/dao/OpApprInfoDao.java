@@ -36,7 +36,7 @@ public class OpApprInfoDao extends HibernateDao<OpApprInfo, String> {
 	public String sumWeightByHeadId(String headId) {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("headId", headId);
-		String sql = "SELECT NVL(SUM(t.GROSS_WT),0） FROM FLJG_OP_APPR_INFO t WHERE t.HEAD_ID = :headId ";
+		String sql = "SELECT NVL(SUM(t.GROSS_WT),0) FROM FLJG_OP_APPR_INFO t WHERE t.HEAD_ID = :headId ";
 		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		BigDecimal value = (BigDecimal)sqlQuery.uniqueResult();
 		return value.toString();
