@@ -199,7 +199,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append("	AND t.NOW_PIECE >= 0 	and t.IS_BONDED is not  null  )a ");
 			stringBuffer2.append(" GROUP BY A.SKU_ID, a.ASN)t2 ");
 			stringBuffer2.append(" on   t2.SKU_ID=t1.WmsMtsNo and t2.asn=t1.GoodsMtsNo");
-	        stringBuffer2.append(" where t1.wmsdclqty>0  and t1.goodsname is not null  and ((t1.goodstype='1' and t1.emsseqno is not null)or t1.goodstype = '0')");
+	        stringBuffer2.append(" where t1.wmsdclqty>0 and t1.LocationIds IS NOT NULL and t1.goodsname is not null  and ((t1.goodstype='1' and t1.emsseqno is not null)or t1.goodstype = '0')");
 			Map<String, Object> params = new HashMap<String, Object>();
 			SQLQuery sqlQuery = createSQLQuery(stringBuffer2.toString(), params);
 			SQLQuery sqlQuery2=this.getSession().createSQLQuery(stringBuffer2.toString());
