@@ -1509,16 +1509,19 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 
 	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> getTotal(String codeNum) {
-		String sql = "select sum(nvl(SHOULD_RMB,0)) as RMB from bis_standing_book t where t.reconcile_num =?0 group by reconcile_num";
-		SQLQuery sqlQuery=createSQLQuery(sql, codeNum);
+		Map<String,Object> params = new HashMap<String,Object>();
+		String sql = "select sum(nvl(SHOULD_RMB,0)) as RMB from bis_standing_book t where t.reconcile_num =:codeNum group by reconcile_num";
+		params.put("codeNum", codeNum);
+		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
 	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> connectBillNum(String linkId) {
 		//String sql = "select t.out_link_id, listagg(t.bill_num,',') WITHIN GROUP (order by t.bill_num ) as billNum from bis_out_stock_info t where t.out_link_id=?0 group by t.out_link_id";
-
-		String sql = "select t.out_link_id, to_char(wmsys.wm_concat(distinct t.bill_num)) as billNum from bis_out_stock_info t where t.out_link_id=? group by t.out_link_id";
-		SQLQuery sqlQuery=createSQLQuery(sql, linkId);
+		Map<String,Object> params = new HashMap<String,Object>();
+		String sql = "select t.out_link_id, to_char(wmsys.wm_concat(distinct t.bill_num)) as billNum from bis_out_stock_info t where t.out_link_id=:linkId group by t.out_link_id";
+		params.put("linkId", linkId);
+		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
 

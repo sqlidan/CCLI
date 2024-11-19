@@ -244,7 +244,7 @@ function cx(){
 	dg.datagrid('clearSelections');
 	var obj=$("#searchFrom").serializeObject();
 
-	dg.datagrid('load',obj); 
+	dg.datagrid('load',obj);
 }
 
 //导出excel
