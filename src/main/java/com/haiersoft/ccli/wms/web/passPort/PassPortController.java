@@ -796,7 +796,15 @@ public class PassPortController extends BaseController {
 
     //FTP执行回执
     public void ftpFileList() throws IOException, ParseException {
-        String date = "2024-08-20 00:00:00";
+//        String date = "2024-08-20 00:00:00";
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_MONTH, -1); // 将日期往前推三天
+        // 将Calendar对象转换为Date对象
+        Date dateD = calendar.getTime();
+        SimpleDateFormat sdfTemp = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        String date = sdfTemp.format(dateD);
+
         PassPortFTPUtils passPortFTPUtils = PassPortFTPUtils.getInstance();
         // 获取路径下所有的回执文件
         FTPFile[] fileList = passPortFTPUtils.getFilesList(FTP_RECEIVE_PATH);

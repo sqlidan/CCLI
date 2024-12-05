@@ -3,11 +3,7 @@ package com.haiersoft.ccli.supervision.entity;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -167,7 +163,38 @@ public class ManiHead implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
     @Column(name = "CREATE_TIME")
     private Date createTime;
-	
+
+	@Transient
+    private Integer piece;//件数
+	@Transient
+    private String itemNum;//提单号
+	@Transient
+    private String linkId;//联系单号
+
+	public String getItemNum() {
+		return itemNum;
+	}
+
+	public void setItemNum(String itemNum) {
+		this.itemNum = itemNum;
+	}
+
+	public Integer getPiece() {
+		return piece;
+	}
+
+	public void setPiece(Integer piece) {
+		this.piece = piece;
+	}
+
+	public String getLinkId() {
+		return linkId;
+	}
+
+	public void setLinkId(String linkId) {
+		this.linkId = linkId;
+	}
+
 	public String getId() {
 		return id;
 	}

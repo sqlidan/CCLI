@@ -13,15 +13,25 @@
 			method="post">
 			<table class="formTable">
 				<tr data-options="">
-					<td>集装箱号：</td>
-					<td><input id="ContaId" name="ContaId"
-						class="easyui-validatebox" value="${bisEnterStockInfos[0].ctnNum }"
-						style="background: #eee" data-options="width:150 " readonly />
+					<td>联系单号：</td>
+					<td><input id="linkId" name="linkId"
+							   class="easyui-validatebox" value="${bisEnterStockInfos[0].linkId }"
+							   style="background: #eee" data-options="width:150 " readonly />
+					</td>
+					<td>提单号：</td>
+					<td><input id="itemNum" name="itemNum"
+							   class="easyui-validatebox" value="${bisEnterStockInfos[0].itemNum }"
+							   style="background: #eee" data-options="width:150 " readonly />
+					</td>
+				</tr>
+				<tr data-options="">
+					<td>件数：</td>
+					<td><input id="piece" name="piece"
+							   class="easyui-validatebox" value="${pieceTotal}" data-options="width:150 " />
 					</td>
 					<td>毛重：</td>
 					<td><input id="GrossWt" name="GrossWt"
-						class="easyui-validatebox" value="${grossWeightTotal}"
-						style="background: #eee" data-options="width:150 " readonly />
+						class="easyui-validatebox" value="${grossWeightTotal}" data-options="width:150 " />
 					</td>
 				</tr>
 				<tr>

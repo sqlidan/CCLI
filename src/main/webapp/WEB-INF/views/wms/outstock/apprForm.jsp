@@ -116,7 +116,7 @@
 			});
 			console.log("33333");
 			$("#CustomsCode").val('4258');
-			$("#EmsNo").val("NH4230210001");
+			$("#EmsNo").val("NH4230240017");
 			$("#BondInvtNo").val("");
 			$("#GNo").val("");
 			$("#DNote").val("");
@@ -133,10 +133,9 @@
 
 		    	if(data=="success"){
 			    	successTip(data,dg,d);
-		    	}
-		    	else{
-				$.messager.confirm('已存在此条记录的申请单');
-		    	}
+		    	} else{
+					$.messager.confirm('申请单保存失败:'+data);
+				}
 	    	
 		    }    
 		}); 

@@ -92,7 +92,8 @@ public class OutManiController extends BaseController{
 
 		}
 
-		outDoing(maniHead);
+//		outDoing(maniHead);;//2024-11-20 徐峥注释
+		outDoing2(maniHead);//2024-11-20 徐峥编写
 
 		return "success";
 	}
@@ -101,7 +102,7 @@ public class OutManiController extends BaseController{
 	OutStockInfoService outStockInfoService;
 	
 	@Transactional
-	void outDoing(ManiHead maniHead) {
+	void outDoing2(ManiHead maniHead) {
 		Date currDate = new Date();
 		// 核放单头
 		maniHead.setIeFlag("E");
@@ -116,52 +117,51 @@ public class OutManiController extends BaseController{
 		maniHeadService.save(maniHead);
 		
 		List<String> list = Arrays.asList(maniHead.getInfoIds().split(","));
-		int index = 1;
 		for(String orderNum:list) {
-			BisLoadingOrder order = loadingOrderService.get(orderNum);
-
-			//根据联系单号查询对应的申请单
-//			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();			
-//			filters.add(new PropertyFilter("EQS_linkId", order.getOutLinkId()));
-//			List<ApprInfo> apprInfoList = apprInfoService.search(filters);		
-
-			//填充核放单表体
 			//根据选中的货物信息生成核放单行
+			List<String> billNumList = new ArrayList<>();
 			List<BisLoadingOrderInfo> infos = loadingOrderInfoService.getInfoList(orderNum);
-			
 			for(BisLoadingOrderInfo orderInfo : infos) {
-				
-				//根据箱号和联系单号查找出库联系单info
-				List<PropertyFilter> filters = new ArrayList<PropertyFilter>();		
-				filters.add(new PropertyFilter("EQS_outLinkId", orderInfo.getOutLinkId()));
-				filters.add(new PropertyFilter("EQS_ctnNum", orderInfo.getCtnNum()));
-				List<BisOutStockInfo> BisOutStockInfo = outStockInfoService.search(filters);
-				//根据联系单info的ID查找申请单info
-				ApprInfo apprInfo = apprInfoService.findApprInfosByOutBisInfoId(String.valueOf(BisOutStockInfo.get(0).getId()));
-				
-				ManiInfo maInfo = new ManiInfo();	
-				
-				maInfo.setApprId(apprInfo.getApprId());
-				maInfo.setApprGNo(apprInfo.getApprGNo());
-
-				//gno底账项号为 原入库货物申请单的底账项号
-				ApprInfo apprInfoIn = this.findGnoFromInAppr(orderInfo.getBillNum(),orderInfo.getCtnNum(),orderInfo.getCatgoName());
-				if (apprInfoIn != null) {
-					maInfo.setgNo(apprInfoIn.getgNo());
-					maInfo.setCodeTs(apprInfoIn.getCodeTs());
+				if (!billNumList.contains(orderInfo.getBillNum())){
+					billNumList.add(orderInfo.getBillNum());
 				}
+			}
+			for (int i = 0; i < billNumList.size(); i++) {
+				Integer piece = 0;
+				Double grossWeight = 0.00;
+				for(BisLoadingOrderInfo orderInfo : infos) {
+					piece += (orderInfo.getPiece()==null?0:orderInfo.getPiece());
+					grossWeight += (orderInfo.getGrossWeight()==null?0.00:orderInfo.getGrossWeight());
+				}
+				//根据提单号和出库联系单号查找出库联系单明细
+				List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+				filters.add(new PropertyFilter("EQS_outLinkId", infos.get(0).getOutLinkId()));
+				filters.add(new PropertyFilter("EQS_billNum", billNumList.get(i)));
+				List<BisOutStockInfo> bisOutStockInfoList = outStockInfoService.search(filters);
+				//根据提单号和出库联系单号查找出库联系单明细
+				List<PropertyFilter> filters2 = new ArrayList<PropertyFilter>();
+				filters2.add(new PropertyFilter("EQS_linkId", infos.get(0).getOutLinkId()));
+				filters2.add(new PropertyFilter("LIKES_bisInfoId", bisOutStockInfoList.get(0).getId()));
+				List<ApprInfo> apprInfoList = apprInfoService.search(filters2);
 
-				maInfo.setGName(orderInfo.getCatgoName());
-				maInfo.setGModel(orderInfo.getTypeSize());
+				ManiInfo maInfo = new ManiInfo();
+				maInfo.setApprId(apprInfoList.get(0).getApprId());
+				maInfo.setApprGNo(apprInfoList.get(0).getApprGNo());
+				maInfo.setgNo(i+1);
+				maInfo.setCodeTs(apprInfoList.get(0).getCodeTs());
+				maInfo.setGName(apprInfoList.get(0).getgName());
+				maInfo.setGModel(apprInfoList.get(0).getgName());
 				maInfo.setGUnit("035");
-				maInfo.setGQty(String.valueOf(orderInfo.getPiece()));
-				maInfo.setGrossWt(String.valueOf(orderInfo.getGrossWeight()));	
+				maInfo.setGQty(String.valueOf(piece));
+				maInfo.setGrossWt(String.valueOf(grossWeight));
+				maInfo.setGQty1(maInfo.getGQty());
+				maInfo.setGUnit1(maInfo.getGUnit());
+				maInfo.setEmsGNo(String.valueOf(apprInfoList.get(0).getgNo()));
 				maInfo.setHeadId(maniHead.getId());
-				maInfo.setContaId(orderInfo.getCtnNum());
+				maInfo.setContaId(apprInfoList.get(0).getCtnNum());
 				maInfo.setCreateTime(currDate);
 				maniInfoService.save(maInfo);
 			}
-			
 		}
 
 		// 空车核放单头
@@ -184,6 +184,102 @@ public class OutManiController extends BaseController{
 		//maniInfo.setContaId(maniHead.getContaId());
 		//前端传来的箱型
 		maniInfo.setContaType(maniHead.getCtnTypeSize());		
+		//根据前端传来的箱型匹配箱重
+		if(maniHead.getCtnTypeSize().equals("20")) {
+			maniInfo.setContaWeight("2800");
+		}else if(maniHead.getCtnTypeSize().equals("40")){
+			maniInfo.setContaWeight("47000");
+		}else {
+			maniInfo.setContaWeight("");
+		}
+		maniInfoService.save(maniInfo);
+
+	}
+
+	@Transactional
+	void outDoing(ManiHead maniHead) {
+		Date currDate = new Date();
+		// 核放单头
+		maniHead.setIeFlag("E");
+		maniHead.setEmptyFlag("N");
+		maniHead.setIeFlagNote("出库核放");
+		maniHead.setLocalStatus("1");
+		maniHead.setCreateTime(currDate);
+
+		//截取最前边的箱号作为核放单头部的箱号
+		String contaIdStr = maniHead.getContaId();
+		maniHead.setContaId(contaIdStr.substring(0, contaIdStr.indexOf(",")));
+		maniHeadService.save(maniHead);
+
+		List<String> list = Arrays.asList(maniHead.getInfoIds().split(","));
+		int index = 1;
+		for(String orderNum:list) {
+			BisLoadingOrder order = loadingOrderService.get(orderNum);
+
+			//根据联系单号查询对应的申请单
+//			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+//			filters.add(new PropertyFilter("EQS_linkId", order.getOutLinkId()));
+//			List<ApprInfo> apprInfoList = apprInfoService.search(filters);
+
+			//填充核放单表体
+			//根据选中的货物信息生成核放单行
+			List<BisLoadingOrderInfo> infos = loadingOrderInfoService.getInfoList(orderNum);
+
+			for(BisLoadingOrderInfo orderInfo : infos) {
+
+				//根据箱号和联系单号查找出库联系单info
+				List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+				filters.add(new PropertyFilter("EQS_outLinkId", orderInfo.getOutLinkId()));
+				filters.add(new PropertyFilter("EQS_ctnNum", orderInfo.getCtnNum()));
+				List<BisOutStockInfo> BisOutStockInfo = outStockInfoService.search(filters);
+				//根据联系单info的ID查找申请单info
+				ApprInfo apprInfo = apprInfoService.findApprInfosByOutBisInfoId(String.valueOf(BisOutStockInfo.get(0).getId()));
+
+				ManiInfo maInfo = new ManiInfo();
+
+				maInfo.setApprId(apprInfo.getApprId());
+				maInfo.setApprGNo(apprInfo.getApprGNo());
+
+				//gno底账项号为 原入库货物申请单的底账项号
+				ApprInfo apprInfoIn = this.findGnoFromInAppr(orderInfo.getBillNum(),orderInfo.getCtnNum(),orderInfo.getCatgoName());
+				if (apprInfoIn != null) {
+					maInfo.setgNo(apprInfoIn.getgNo());
+					maInfo.setCodeTs(apprInfoIn.getCodeTs());
+				}
+
+				maInfo.setGName(orderInfo.getCatgoName());
+				maInfo.setGModel(orderInfo.getTypeSize());
+				maInfo.setGUnit("035");
+				maInfo.setGQty(String.valueOf(orderInfo.getPiece()));
+				maInfo.setGrossWt(String.valueOf(orderInfo.getGrossWeight()));
+				maInfo.setHeadId(maniHead.getId());
+				maInfo.setContaId(orderInfo.getCtnNum());
+				maInfo.setCreateTime(currDate);
+				maniInfoService.save(maInfo);
+			}
+
+		}
+
+		// 空车核放单头
+		ManiHead mh = new ManiHead();
+		mh.setIeFlag("I");
+		mh.setEmptyFlag("Y");
+		mh.setIeFlagNote("出库空车核放");
+		mh.setVehicleId(maniHead.getVehicleId());
+		mh.setVehicleWeight(maniHead.getVehicleWeight());
+		mh.setLocalStatus("1");
+		mh.setDNote(maniHead.getDNote());
+		mh.setCreateTime(currDate);
+		maniHeadService.save(mh);
+
+		// 空车核放单表体
+		ManiInfo maniInfo = new ManiInfo();
+		maniInfo.setHeadId(mh.getId());
+
+		//前端传来的箱号
+		//maniInfo.setContaId(maniHead.getContaId());
+		//前端传来的箱型
+		maniInfo.setContaType(maniHead.getCtnTypeSize());
 		//根据前端传来的箱型匹配箱重
 		if(maniHead.getCtnTypeSize().equals("20")) {
 			maniInfo.setContaWeight("2800");

@@ -23,6 +23,7 @@ import javax.validation.Valid;
 
 import com.haiersoft.ccli.cost.entity.BisStandingBook;
 import com.haiersoft.ccli.cost.service.StandingBookService;
+import com.haiersoft.ccli.wms.entity.BisInOut;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
@@ -142,6 +143,23 @@ public class EnterStockInfoController extends BaseController {
             String skuId = this.makeNewSku(bisEnterStockInfo);
             bisEnterStockInfo.setSku(skuId);
         }
+
+        //2024-11-19 徐峥
+        //添加的入库联系单明细时，校验HS编码是否不一样
+        if (bisEnterStockInfo.getHsCode()!=null && bisEnterStockInfo.getHsCode().trim().length() > 0){
+            List<PropertyFilter> filters =new ArrayList<PropertyFilter>();
+            PropertyFilter filter = new PropertyFilter("EQS_linkId", bisEnterStockInfo.getLinkId());
+            filters.add(filter);
+            List<BisEnterStockInfo> bisEnterStockInfoList = enterStockInfoService.search(filters);
+            if (bisEnterStockInfoList!=null && bisEnterStockInfoList.size() > 0){
+                for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
+                    if (!bisEnterStockInfo.getHsCode().equals(forBisEnterStockInfo.getHsCode())){
+                        return "入库联系单"+bisEnterStockInfo.getLinkId()+" 明细中的HS编码不一致";
+                    }
+                }
+            }
+        }
+
 /*    	if(null != bisEnterStockInfo.getHsItemname() || !"".equals(bisEnterStockInfo.getHsItemname())){
         	//BaseItemname baseItemname=ItemnameService.find("cargoName", bisEnterStockInfo.getHsItemname());
         	if (ItemnameService.find("cargoName", bisEnterStockInfo.getHsItemname())==null) {
@@ -906,14 +924,17 @@ public class EnterStockInfoController extends BaseController {
 
         List<BisEnterStockInfo> bisEnterStockInfos = new ArrayList<BisEnterStockInfo>();
         Double grossWeightTotal = 0.0; 
-        
+        int pieceTotal = 0;
+
         for(Integer id :ids) {
         	BisEnterStockInfo info = enterStockInfoService.get(id);
         	bisEnterStockInfos.add(info);
         	
         	BigDecimal bTotal = new BigDecimal(Double.toString(grossWeightTotal));
-        	BigDecimal bThis = new BigDecimal(Double.toString(info.getGrossWeight()));
+        	BigDecimal bThis = new BigDecimal(Double.toString(info.getGrossWeight()==null?0.00:info.getGrossWeight()));
         	grossWeightTotal = bTotal.add(bThis).doubleValue();
+
+            pieceTotal += Integer.valueOf(info.getPiece()==null?0:info.getPiece());
         }
         
         BisEnterStock bes = enterStockService.get(bisEnterStockInfos.get(0).getLinkId());
@@ -921,6 +942,7 @@ public class EnterStockInfoController extends BaseController {
         model.addAttribute("ctnTypeSize", bes.getCtnTypeSize());
         
         model.addAttribute("bisEnterStockInfos", bisEnterStockInfos);
+        model.addAttribute("pieceTotal", pieceTotal);
         model.addAttribute("grossWeightTotal", grossWeightTotal);
         model.addAttribute("infoIds", ids);
         return "wms/enterStock/maniForm";

@@ -61,25 +61,38 @@ public class EnterManiController extends BaseController{
 	@ResponseBody
 	@Transactional
 	public String saveManiHead(ManiHead maniHead) {
-		
-		//检查货物明细行是否生成有对应的申请单
-		//没有申请单的记录不能生成核放单
-		String infoIds = maniHead.getInfoIds().replaceAll("[\\[\\]]", "");
-		List<String> list = Arrays.asList(infoIds.split(","));
-		for(String id :list) {
-			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();			
-			filters.add(new PropertyFilter("EQS_bisInfoId", id.trim()));
-			List<ApprInfo> infoList = apprInfoService.search(filters);
-			if (infoList.size() == 0 || infoList == null) {
-				return "没有对应的申请单";
-			}
-			else if (StringUtils.isBlank(infoList.get(0).getApprId()) || infoList.get(0).getApprId() == null) {
-				return "没有生成ApprId";
-			}
-			maniHead.setApprId(infoList.get(0).getApprId());
-		}				
 
-		inDoing(maniHead);
+		//2024-11-20 徐峥注释
+//		//检查货物明细行是否生成有对应的申请单
+//		//没有申请单的记录不能生成核放单
+//		String infoIds = maniHead.getInfoIds().replaceAll("[\\[\\]]", "");
+//		List<String> list = Arrays.asList(infoIds.split(","));
+//		for(String id :list) {
+//			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+//			filters.add(new PropertyFilter("EQS_bisInfoId", id.trim()));
+//			List<ApprInfo> infoList = apprInfoService.search(filters);
+//			if (infoList.size() == 0 || infoList == null) {
+//				return "没有对应的申请单";
+//			}
+//			else if (StringUtils.isBlank(infoList.get(0).getApprId()) || infoList.get(0).getApprId() == null) {
+//				return "没有生成ApprId";
+//			}
+//			maniHead.setApprId(infoList.get(0).getApprId());
+//		}
+
+		//2024-11-20 徐峥编写
+		List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+		filters.add(new PropertyFilter("EQS_linkId", maniHead.getLinkId()));
+		List<ApprInfo> infoList = apprInfoService.search(filters);
+		if (infoList.size() == 0 || infoList == null) {
+			return "没有对应的申请单";
+		} else if (StringUtils.isBlank(infoList.get(0).getApprId()) || infoList.get(0).getApprId() == null) {
+			return "没有生成ApprId";
+		}
+		maniHead.setApprId(infoList.get(0).getApprId());
+
+//		inDoing(maniHead);//2024-11-20 徐峥注释
+		inDoing2(maniHead);//2024-11-20 徐峥编写
 
 		return "success";
 	}
@@ -105,28 +118,30 @@ public class EnterManiController extends BaseController{
 		String infoIds = maniHead.getInfoIds().replaceAll("[\\[\\]]", "");
 		List<String> list = Arrays.asList(infoIds.split(","));
 		
-		
-		
+
+
 		for(String str :list) {
 			ManiInfo maniInfo = new ManiInfo();
 			
 			//根据bisInfoId查询对应的入库申请单
 			ApprInfo info = apprInfoService.findApprInfosByEntBisInfoIdNew(str.trim());
+			//根据bisInfoId查询对应的入库联系单明细
+			BisEnterStockInfo bisInfo = enterStockInfoService.get(Integer.valueOf(str.trim()));
 			
 			//填充数据
 			maniInfo.setApprId(info.getApprId());
 			maniInfo.setApprGNo(info.getApprGNo());
-			maniInfo.setgNo(info.getApprGNo());
+			maniInfo.setgNo(info.getgNo());
 			maniInfo.setGName(info.getgName());
 			maniInfo.setGModel(info.getgModel());
 			maniInfo.setGUnit(info.getgUnit());
 			maniInfo.setGQty(info.getgQty());
-			maniInfo.setGrossWt(info.getGrossWt());	
+			maniInfo.setGrossWt(info.getGrossWt());
 			maniInfo.setHeadId(maniHead.getId());
 			maniInfo.setCreateTime(currDate);
 			maniInfo.setBisInfoId(str.trim());
 			
-			BisEnterStockInfo bisInfo = enterStockInfoService.get(Integer.valueOf(str.trim()));
+
 			maniInfo.setBisInfoLinkId(bisInfo.getLinkId());
 			maniInfo.setBisItemNum(bisInfo.getItemNum());
 			maniInfo.setBisSku(bisInfo.getSku());
@@ -166,6 +181,53 @@ public class EnterManiController extends BaseController{
 //		maniInfoService.save(maniInfo);
 
 	}
-	
+
+	@Transactional
+	private void inDoing2(ManiHead maniHead) {
+		Date currDate = new Date();
+
+		DecimalFormat format = new DecimalFormat("0.00");
+
+		String grossWt = format.format(new BigDecimal(maniHead.getGrossWt()));
+		maniHead.setGrossWt(grossWt);
+		// 核放单头
+		maniHead.setIeFlag("I");
+		maniHead.setEmptyFlag("N");
+		maniHead.setIeFlagNote("入库核放");
+		maniHead.setLocalStatus("1");
+		maniHead.setManiConfirmStatus("N");
+		maniHead.setCreateTime(currDate);
+		maniHeadService.save(maniHead);
+
+		//根据bisInfoId查询对应的入库申请单
+		List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+		filters.add(new PropertyFilter("EQS_linkId", maniHead.getLinkId()));
+		List<ApprInfo> infoList = apprInfoService.search(filters);
+
+
+		//填充数据
+		ManiInfo maniInfo = new ManiInfo();
+		maniInfo.setApprId(infoList.get(0).getApprId());
+		maniInfo.setApprGNo(infoList.get(0).getApprGNo());
+		maniInfo.setgNo(1);
+		maniInfo.setCodeTs(infoList.get(0).getCodeTs());
+		maniInfo.setGName(infoList.get(0).getgName());
+		maniInfo.setGModel(infoList.get(0).getgModel());
+		maniInfo.setGUnit(infoList.get(0).getgUnit());
+		maniInfo.setGQty(String.valueOf(maniHead.getPiece()));
+		maniInfo.setGrossWt(grossWt);
+		maniInfo.setGQty1(maniInfo.getGQty());
+		maniInfo.setGUnit1(maniInfo.getGUnit());
+		maniInfo.setEmsGNo(String.valueOf(infoList.get(0).getgNo()));
+		maniInfo.setHeadId(maniHead.getId());
+		maniInfo.setCreateTime(currDate);
+		maniInfo.setBisInfoId(maniHead.getInfoIds());
+
+
+		maniInfo.setBisInfoLinkId(maniHead.getLinkId());
+		maniInfo.setBisItemNum(maniHead.getItemNum());
+		maniInfoService.save(maniInfo);
+	}
+
 	
 }

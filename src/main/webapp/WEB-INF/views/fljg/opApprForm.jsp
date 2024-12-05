@@ -110,7 +110,7 @@
 				editable:false
 			});
 			$("#CustomsCode").val('4258');
-			$("#EmsNo").val("NH4230210001");
+			$("#EmsNo").val("NH4230240017");
 			$("#BondInvtNo").val("");
 			$("#GNo").val("");
 			$("#DNote").val("");

@@ -222,16 +222,16 @@ function info(id){
  	        {field:'gModel',title:'商品规格型号',sortable:true},
  	        {field:'GUnit',title:'申报计量单位',sortable:true},
  	        {field:'GQty',title:'申报数量',sortable:true},
- 	        {field:'unit1',title:'法定计量单位',sortable:true},
- 	        {field:'qty1',title:'法定数量',sortable:true},
+ 	        {field:'GUnit1',title:'法定计量单位',sortable:true},
+ 	        {field:'GQty1',title:'法定数量',sortable:true},
  	        {field:'GrossWt',title:'毛重',sortable:true},
  	        {field:'ConfirmQty',title:'到货确认数',sortable:true},
  	        {field:'EmsGNo',title:'底账项号',sortable:true},
  	        {field:'GdsMtno',title:'商品料号',sortable:true},
- 	        {field:'CREATETIME',title:'创建时间',sortable:true},
-            {field:'ContaId',title:'箱号',sortable:true},
-            {field:'ContaType',title:'箱型',sortable:true},
-            {field:'ContaWeight',title:'箱重',sortable:true}
+ 	        {field:'CREATETIME',title:'创建时间',sortable:true}
+            // {field:'ContaId',title:'箱号',sortable:true},
+            // {field:'ContaType',title:'箱型',sortable:true},
+            // {field:'ContaWeight',title:'箱重',sortable:true}
 	    ]],
 	    enableHeaderClickMenu: true,
 	    enableHeaderContextMenu: true,

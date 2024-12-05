@@ -156,6 +156,9 @@ public class OpApprHead implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
     @Column(name = "CREATE_TIME")
     private Date createTime;
+
+	@Column(name = "APPR_ADD_TYPE")
+	private String apprAddType;//手工申请单添加方式
 	
 	public String getId() {
 		return id;
@@ -403,5 +406,13 @@ public class OpApprHead implements Serializable {
 
 	public void setOrderNum(String orderNum) {
 		this.orderNum = orderNum;
+	}
+
+	public String getApprAddType() {
+		return apprAddType;
+	}
+
+	public void setApprAddType(String apprAddType) {
+		this.apprAddType = apprAddType;
 	}
 }

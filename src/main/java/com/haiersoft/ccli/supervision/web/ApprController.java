@@ -120,50 +120,63 @@ public class ApprController extends BaseController {
 			map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
 			map.put("DeclType", "1");
 
-			//入区不用调整，出区需要调整
-			if("2".equals(apprheadList.get(0).getIoType())){
-				String tdNo = apprheadList.get(0).getItemNum();
-				System.out.println("tdNo:"+tdNo);
-				String[] tdNoAry = null;
-				if(tdNo.contains(",")){
-					tdNoAry = tdNo.split(",");
-				}else{
-					tdNoAry = new String[1];
-					tdNoAry[0] = tdNo;
-				}
-				for (int i = 0; i < tdNoAry.length; i++) {
-					List<BisEnterStockInfo> bisEnterStockInfoList = new ArrayList<BisEnterStockInfo>();
-					List<PropertyFilter> enterStockFilters = PropertyFilter.buildFromHttpRequest(request);
-					enterStockFilters.add(new PropertyFilter("EQS_itemNum", tdNoAry[i]));
-					bisEnterStockInfoList = enterStockInfoService.search(enterStockFilters);
-					for (ApprInfo forApprInfo : apprInfoList) {
-						for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
-							//20240219 徐峥优化注释
-//							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
-							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())
-									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getCargoName())
-									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getHsItemname())) {
-								forApprInfo.setCodeTs(forBisEnterStockInfo.getHsCode());//HS编码/商品编码
-							}
-							apprInfoService.merge(forApprInfo);
-						}
-					}
-				}
+			//2024-11-20 徐峥注释
+//			//入区不用调整，出区需要调整
+//			if("2".equals(apprheadList.get(0).getIoType())){
+//				String tdNo = apprheadList.get(0).getItemNum();
+//				System.out.println("tdNo:"+tdNo);
+//				String[] tdNoAry = null;
+//				if(tdNo.contains(",")){
+//					tdNoAry = tdNo.split(",");
+//				}else{
+//					tdNoAry = new String[1];
+//					tdNoAry[0] = tdNo;
+//				}
+//				for (int i = 0; i < tdNoAry.length; i++) {
+//					List<BisEnterStockInfo> bisEnterStockInfoList = new ArrayList<BisEnterStockInfo>();
+//					List<PropertyFilter> enterStockFilters = PropertyFilter.buildFromHttpRequest(request);
+//					enterStockFilters.add(new PropertyFilter("EQS_itemNum", tdNoAry[i]));
+//					bisEnterStockInfoList = enterStockInfoService.search(enterStockFilters);
+//					for (ApprInfo forApprInfo : apprInfoList) {
+//						for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
+//							//20240219 徐峥优化注释
+////							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())) {
+//							if (forApprInfo.getgName().equals(forBisEnterStockInfo.getCargoName())
+//									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getCargoName())
+//									|| forApprInfo.getgName().contains(forBisEnterStockInfo.getHsItemname())) {
+//								forApprInfo.setCodeTs(forBisEnterStockInfo.getHsCode());//HS编码/商品编码
+//							}
+//							apprInfoService.merge(forApprInfo);
+//						}
+//					}
+//				}
+//
+//				for (ApprInfo forApprInfo:apprInfoList) {
+//					forApprInfo.setgUnit("035");//申报计量单位
+//					forApprInfo.setUnit1("035");//申报计量单位
+//				}
+//				logger.error("apprInfoList2： "+JSON.toJSONString(apprInfoList));
+//				map.put("ApprLists", apprInfoList);
+//				map.put("ApprHead", apprheadList.get(0));
+//			}else{
+//				for (ApprInfo forApprInfo:apprInfoList) {
+//					forApprInfo.setgUnit("035");//申报计量单位
+//					forApprInfo.setUnit1("035");//申报计量单位
+//				}
+//				logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
+//				map.put("ApprLists", apprInfoList);
+//				map.put("ApprHead", apprheadList.get(0));
+//			}
 
-				for (ApprInfo forApprInfo:apprInfoList) {
-					forApprInfo.setgUnit("035");//申报计量单位
-				}
-				logger.error("apprInfoList2： "+JSON.toJSONString(apprInfoList));
-				map.put("ApprLists", apprInfoList);
-				map.put("ApprHead", apprheadList.get(0));
-			}else{
-				for (ApprInfo forApprInfo:apprInfoList) {
-					forApprInfo.setgUnit("035");//申报计量单位
-				}
-				logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
-				map.put("ApprLists", apprInfoList);
-				map.put("ApprHead", apprheadList.get(0));
+			//2024-11-20 徐峥编写
+			for (ApprInfo forApprInfo:apprInfoList) {
+				forApprInfo.setgUnit("035");//申报计量单位
+				forApprInfo.setUnit1("035");//申报计量单位
 			}
+			logger.error("apprInfoList1： "+JSON.toJSONString(apprInfoList));
+			map.put("ApprLists", apprInfoList);
+			map.put("ApprHead", apprheadList.get(0));
+
 
 			ObjectMapper objectMapper = new ObjectMapper();
 			//String json = objectMapper.writeValueAsString(apprheadList.get(0));

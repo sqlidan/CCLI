@@ -129,10 +129,15 @@ public class PreEntryInvtQueryController extends BaseController {
 			if(invtHeadType.getInvtDclTime()!=null && invtHeadType.getInvtDclTime().trim().length() > 0){
 				try {
 					invtHeadTypeVo.setCreateTime(sdf1.format(sdf2.parse(invtHeadType.getInvtDclTime())));
+					if (forBisPreEntryInvtQuery.getOrderTime()==null){
+						forBisPreEntryInvtQuery.setOrderTime(sdf2.parse(invtHeadType.getInvtDclTime()));
+						preEntryInvtQueryService.merge(forBisPreEntryInvtQuery);
+					}
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}
+
 
 			invtHeadTypeVo.setJlAudit(forBisPreEntryInvtQuery.getJlAudit());
 			if(forBisPreEntryInvtQuery.getJlAuditTime()!=null){

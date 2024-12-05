@@ -27,7 +27,7 @@ public class OpManiHeadDao extends HibernateDao<OpManiHead, String> {
 		params.put("maniFestId", maniFestId);
 		params.put("id", id);
 		params.put("localStatus", localStatus);
-		String sql = "update FLJG_MANI_HEAD set MANIFEST_ID = :maniFestId, LOCAL_STATUS = :localStatus where ID = :id ";
+		String sql = "update FLJG_OP_MANI_HEAD set MANIFEST_ID = :maniFestId, LOCAL_STATUS = :localStatus where ID = :id ";
 		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		sqlQuery.executeUpdate();
 		

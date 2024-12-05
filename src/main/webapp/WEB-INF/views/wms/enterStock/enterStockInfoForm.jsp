@@ -635,7 +635,11 @@
             return isValid; // 返回false终止表单提交
         },
         success: function (data) {
-            parent.$.messager.show({title: "提示", msg: "保存成功！", position: "bottomRight"});
+            if(data=="success"){
+                parent.$.messager.show({title: "提示", msg: "保存成功！", position: "bottomRight"});
+            } else {
+                parent.$.easyui.messager.alert(data);
+            }
         }
     });
     $(function() {
