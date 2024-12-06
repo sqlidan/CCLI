@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
 
+import com.haiersoft.ccli.supervision.entity.*;
+import com.haiersoft.ccli.supervision.service.*;
 import com.haiersoft.ccli.wms.entity.BisEnterStockInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,12 +18,6 @@ import com.haiersoft.ccli.base.service.ClientService;
 import com.haiersoft.ccli.base.service.HscodeService;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
-import com.haiersoft.ccli.supervision.entity.ApprHead;
-import com.haiersoft.ccli.supervision.entity.ApprInfo;
-import com.haiersoft.ccli.supervision.entity.OutApprHead;
-import com.haiersoft.ccli.supervision.service.ApprHeadService;
-import com.haiersoft.ccli.supervision.service.ApprInfoService;
-import com.haiersoft.ccli.supervision.service.OutApprHeadService;
 import com.haiersoft.ccli.wms.entity.BisOutStock;
 import com.haiersoft.ccli.wms.entity.BisOutStockInfo;
 import com.haiersoft.ccli.wms.service.OutStockInfoService;
@@ -48,7 +44,10 @@ public class OutApprController extends BaseController {
 	@Autowired
 	private OutStockService outStockService;
 
-
+	@Autowired
+	private OpApprHeadService opApprHeadService;
+	@Autowired
+	private OpApprInfoService opApprInfoService;
 	@Autowired
 	private OutStockInfoService outStockInfoService;
 	@Autowired
@@ -122,6 +121,9 @@ public class OutApprController extends BaseController {
 				apprInfoList = copyStockInfo2ApprInfo2(list);
 				if (apprInfoList == null){
 					return "未找到对应的入库申请单信息";
+				}else{
+					apprHead.setItemNum(list.get(0).getBillNum());
+					apprHead.setgNo(apprInfoList.get(0).getgNo());
 				}
 			}
 			outApprHeadService.save(apprHead);
@@ -218,17 +220,38 @@ public class OutApprController extends BaseController {
 
 	//根据提单号查找对应的申请单底项账号
 	private List<ApprInfo> getGnoMethod(String itemNum) {
-		List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
-		filters.add(new PropertyFilter("EQS_itemNum", itemNum));
-		filters.add(new PropertyFilter("EQS_ioType", "1"));
-		List<ApprHead> result = apprHeadService.search(filters);
-        if (result.size() > 0){
+		//先查询手工申请单中是否存在这个提单号的入区申请单信息，有则使用，无则查询正常的申请单
+		List<PropertyFilter> filters1 = new ArrayList<PropertyFilter>();
+		filters1.add(new PropertyFilter("EQS_itemNum", itemNum));
+		filters1.add(new PropertyFilter("EQS_ioType", "1"));
+		filters1.add(new PropertyFilter("GED_createTime", "2024-12-05 18:00:00"));
+		List<OpApprHead> result1 = opApprHeadService.search(filters1);
+		if (result1.size() > 0){
 			List<PropertyFilter> filters2 = new ArrayList<PropertyFilter>();
-			filters2.add(new PropertyFilter("EQS_headId", result.get(0).getId()));
-			List<ApprInfo> apprinfoList = apprInfoService.search(filters2);
-            return apprinfoList;
-        }
-        return null;
-		
+			filters2.add(new PropertyFilter("EQS_headId", result1.get(0).getId()));
+			List<OpApprInfo> opApprInfoList = opApprInfoService.search(filters2);
+			List<ApprInfo> apprinfoList = new ArrayList<>();
+			for (OpApprInfo forOpApprInfo:opApprInfoList) {
+				ApprInfo apprInfo = new ApprInfo();
+				apprInfo.setCodeTs(forOpApprInfo.getCodeTs());
+				apprInfo.setgName(forOpApprInfo.getgName());
+				apprInfo.setgModel(forOpApprInfo.getgModel());
+				apprInfo.setgNo(forOpApprInfo.getgNo());
+				apprinfoList.add(apprInfo);
+			}
+			return apprinfoList;
+		}else{//查询正常的申请单
+			List<PropertyFilter> filters2 = new ArrayList<PropertyFilter>();
+			filters2.add(new PropertyFilter("EQS_itemNum", itemNum));
+			filters2.add(new PropertyFilter("EQS_ioType", "1"));
+			List<ApprHead> result2 = apprHeadService.search(filters2);
+			if (result2.size() > 0){
+				List<PropertyFilter> filters4 = new ArrayList<PropertyFilter>();
+				filters4.add(new PropertyFilter("EQS_headId", result2.get(0).getId()));
+				List<ApprInfo> apprinfoList = apprInfoService.search(filters4);
+				return apprinfoList;
+			}
+			return null;
+		}
 	}
 }

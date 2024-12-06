@@ -5,6 +5,7 @@ import java.util.*;
 import javax.transaction.Transactional;
 import javax.xml.rpc.ServiceException;
 
+import com.haiersoft.ccli.supervision.dao.ApprGno2SequenceDao;
 import com.haiersoft.ccli.supervision.dao.ApprGnoSequenceDao;
 import org.apache.cxf.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,9 @@ public class EnterApprController extends BaseController {
 	@Autowired
 	ApprGnoSequenceDao apprGnoSequenceDao;
 
+	@Autowired
+	ApprGno2SequenceDao apprGno2SequenceDao;
+
 
 	@RequestMapping(value = "save", method = RequestMethod.POST)
 	@ResponseBody
@@ -118,7 +122,11 @@ public class EnterApprController extends BaseController {
 			apprHead.setCreateTime(new Date());
 //			apprInfoList = copyStockInfo2ApprInfo(bisEnterStockInfoList);//2024-11-19 徐峥注释
 			apprInfoList = copyStockInfo2ApprInfo2(bisEnterStockInfoList);//2024-11-19 徐峥编写
-
+			if (apprInfoList != null && apprInfoList.size() > 0) {
+				if (apprInfoList.get(0)!=null && apprInfoList.get(0).getgNo()!=null){
+					apprHead.setgNo(apprInfoList.get(0).getgNo());
+				}
+			}
 		}
 		//底账项号修改为从数据库中的sequence获取
 		//底账商品编号为空时填充		
@@ -256,7 +264,7 @@ public class EnterApprController extends BaseController {
 		for (BisEnterStockInfo info :list){
 			String key = info.getItemNum();
 			if(null ==map.get(key)){
-				map.put(key,apprGnoSequenceDao.getNextval());
+				map.put(key,apprGno2SequenceDao.getNextval());
 			}
 		}
 		return map;

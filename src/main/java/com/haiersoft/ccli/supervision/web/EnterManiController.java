@@ -92,13 +92,11 @@ public class EnterManiController extends BaseController{
 		maniHead.setApprId(infoList.get(0).getApprId());
 
 //		inDoing(maniHead);//2024-11-20 徐峥注释
-		inDoing2(maniHead);//2024-11-20 徐峥编写
-
-		return "success";
+		return inDoing2(maniHead);//2024-11-20 徐峥编写
 	}
 	
 	@Transactional
-	private void inDoing(ManiHead maniHead) {
+	void inDoing(ManiHead maniHead) {
 		Date currDate = new Date();
 
 		DecimalFormat format = new DecimalFormat("0.00");
@@ -183,7 +181,7 @@ public class EnterManiController extends BaseController{
 	}
 
 	@Transactional
-	private void inDoing2(ManiHead maniHead) {
+	String inDoing2(ManiHead maniHead) {
 		Date currDate = new Date();
 
 		DecimalFormat format = new DecimalFormat("0.00");
@@ -197,6 +195,27 @@ public class EnterManiController extends BaseController{
 		maniHead.setLocalStatus("1");
 		maniHead.setManiConfirmStatus("N");
 		maniHead.setCreateTime(currDate);
+		//截取最前边的箱号作为核放单头部的箱号
+		String contaIdStr = maniHead.getContaId();
+		String contaId = "";
+		if (contaIdStr!= null && contaIdStr.trim().length() > 0){
+			if (contaIdStr.contains(",")){
+				String[] strings = contaIdStr.split(",");
+				for (int i = 0; i < strings.length; i++) {
+					if (strings[i]!= null && strings[i].trim().length() == 11){
+						contaId = strings[i];
+						break;
+					}
+				}
+			}else{
+				contaId = contaIdStr;
+			}
+		}
+		if (contaId!=null && contaId.trim().length() == 11){
+			maniHead.setContaId(contaId);
+		}else{
+			return "箱号格式不正确";
+		}
 		maniHeadService.save(maniHead);
 
 		//根据bisInfoId查询对应的入库申请单
@@ -227,6 +246,8 @@ public class EnterManiController extends BaseController{
 		maniInfo.setBisInfoLinkId(maniHead.getLinkId());
 		maniInfo.setBisItemNum(maniHead.getItemNum());
 		maniInfoService.save(maniInfo);
+
+		return "success";
 	}
 
 	

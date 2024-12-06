@@ -93,16 +93,14 @@ public class OutManiController extends BaseController{
 		}
 
 //		outDoing(maniHead);;//2024-11-20 徐峥注释
-		outDoing2(maniHead);//2024-11-20 徐峥编写
-
-		return "success";
+		return outDoing2(maniHead);//2024-11-20 徐峥编写
 	}
 	
 	@Autowired
 	OutStockInfoService outStockInfoService;
 	
 	@Transactional
-	void outDoing2(ManiHead maniHead) {
+	String outDoing2(ManiHead maniHead) {
 		Date currDate = new Date();
 		// 核放单头
 		maniHead.setIeFlag("E");
@@ -110,10 +108,27 @@ public class OutManiController extends BaseController{
 		maniHead.setIeFlagNote("出库核放");
 		maniHead.setLocalStatus("1");
 		maniHead.setCreateTime(currDate);
-
 		//截取最前边的箱号作为核放单头部的箱号
 		String contaIdStr = maniHead.getContaId();
-		maniHead.setContaId(contaIdStr.substring(0, contaIdStr.indexOf(",")));
+		String contaId = "";
+		if (contaIdStr!= null && contaIdStr.trim().length() > 0){
+			if (contaIdStr.contains(",")){
+				String[] strings = contaIdStr.split(",");
+				for (int i = 0; i < strings.length; i++) {
+					if (strings[i]!= null && strings[i].trim().length() == 11){
+						contaId = strings[i];
+						break;
+					}
+				}
+			}else{
+				contaId = contaIdStr;
+			}
+		}
+		if (contaId!=null && contaId.trim().length() == 11){
+			maniHead.setContaId(contaId);
+		}else{
+			return "箱号格式不正确";
+		}
 		maniHeadService.save(maniHead);
 		
 		List<String> list = Arrays.asList(maniHead.getInfoIds().split(","));
@@ -164,36 +179,37 @@ public class OutManiController extends BaseController{
 			}
 		}
 
-		// 空车核放单头
-		ManiHead mh = new ManiHead();
-		mh.setIeFlag("I");
-		mh.setEmptyFlag("Y");
-		mh.setIeFlagNote("出库空车核放");
-		mh.setVehicleId(maniHead.getVehicleId());
-		mh.setVehicleWeight(maniHead.getVehicleWeight());
-		mh.setLocalStatus("1");
-		mh.setDNote(maniHead.getDNote());
-		mh.setCreateTime(currDate);
-		maniHeadService.save(mh);
-
-		// 空车核放单表体
-		ManiInfo maniInfo = new ManiInfo();
-		maniInfo.setHeadId(mh.getId());
-
-		//前端传来的箱号
-		//maniInfo.setContaId(maniHead.getContaId());
-		//前端传来的箱型
-		maniInfo.setContaType(maniHead.getCtnTypeSize());		
-		//根据前端传来的箱型匹配箱重
-		if(maniHead.getCtnTypeSize().equals("20")) {
-			maniInfo.setContaWeight("2800");
-		}else if(maniHead.getCtnTypeSize().equals("40")){
-			maniInfo.setContaWeight("47000");
-		}else {
-			maniInfo.setContaWeight("");
-		}
-		maniInfoService.save(maniInfo);
-
+		//2024-12-06 经沟通后注释此处(出库空车核放，进区信息)信息及明细的创建
+//		// 空车核放单头
+//		ManiHead mh = new ManiHead();
+//		mh.setIeFlag("I");
+//		mh.setEmptyFlag("Y");
+//		mh.setIeFlagNote("出库空车核放");
+//		mh.setVehicleId(maniHead.getVehicleId());
+//		mh.setVehicleWeight(maniHead.getVehicleWeight());
+//		mh.setLocalStatus("1");
+//		mh.setDNote(maniHead.getDNote());
+//		mh.setCreateTime(currDate);
+//		maniHeadService.save(mh);
+//
+//		// 空车核放单表体
+//		ManiInfo maniInfo = new ManiInfo();
+//		maniInfo.setHeadId(mh.getId());
+//
+//		//前端传来的箱号
+//		//maniInfo.setContaId(maniHead.getContaId());
+//		//前端传来的箱型
+//		maniInfo.setContaType(maniHead.getCtnTypeSize());
+//		//根据前端传来的箱型匹配箱重
+//		if(maniHead.getCtnTypeSize().equals("20")) {
+//			maniInfo.setContaWeight("2800");
+//		}else if(maniHead.getCtnTypeSize().equals("40")){
+//			maniInfo.setContaWeight("47000");
+//		}else {
+//			maniInfo.setContaWeight("");
+//		}
+//		maniInfoService.save(maniInfo);
+		return "success";
 	}
 
 	@Transactional
@@ -260,35 +276,36 @@ public class OutManiController extends BaseController{
 
 		}
 
-		// 空车核放单头
-		ManiHead mh = new ManiHead();
-		mh.setIeFlag("I");
-		mh.setEmptyFlag("Y");
-		mh.setIeFlagNote("出库空车核放");
-		mh.setVehicleId(maniHead.getVehicleId());
-		mh.setVehicleWeight(maniHead.getVehicleWeight());
-		mh.setLocalStatus("1");
-		mh.setDNote(maniHead.getDNote());
-		mh.setCreateTime(currDate);
-		maniHeadService.save(mh);
-
-		// 空车核放单表体
-		ManiInfo maniInfo = new ManiInfo();
-		maniInfo.setHeadId(mh.getId());
-
-		//前端传来的箱号
-		//maniInfo.setContaId(maniHead.getContaId());
-		//前端传来的箱型
-		maniInfo.setContaType(maniHead.getCtnTypeSize());
-		//根据前端传来的箱型匹配箱重
-		if(maniHead.getCtnTypeSize().equals("20")) {
-			maniInfo.setContaWeight("2800");
-		}else if(maniHead.getCtnTypeSize().equals("40")){
-			maniInfo.setContaWeight("47000");
-		}else {
-			maniInfo.setContaWeight("");
-		}
-		maniInfoService.save(maniInfo);
+		//2024-12-06 经沟通后注释此处(出库空车核放，进区信息)信息及明细的创建
+//		// 空车核放单头
+//		ManiHead mh = new ManiHead();
+//		mh.setIeFlag("I");
+//		mh.setEmptyFlag("Y");
+//		mh.setIeFlagNote("出库空车核放");
+//		mh.setVehicleId(maniHead.getVehicleId());
+//		mh.setVehicleWeight(maniHead.getVehicleWeight());
+//		mh.setLocalStatus("1");
+//		mh.setDNote(maniHead.getDNote());
+//		mh.setCreateTime(currDate);
+//		maniHeadService.save(mh);
+//
+//		// 空车核放单表体
+//		ManiInfo maniInfo = new ManiInfo();
+//		maniInfo.setHeadId(mh.getId());
+//
+//		//前端传来的箱号
+//		//maniInfo.setContaId(maniHead.getContaId());
+//		//前端传来的箱型
+//		maniInfo.setContaType(maniHead.getCtnTypeSize());
+//		//根据前端传来的箱型匹配箱重
+//		if(maniHead.getCtnTypeSize().equals("20")) {
+//			maniInfo.setContaWeight("2800");
+//		}else if(maniHead.getCtnTypeSize().equals("40")){
+//			maniInfo.setContaWeight("47000");
+//		}else {
+//			maniInfo.setContaWeight("");
+//		}
+//		maniInfoService.save(maniInfo);
 
 	}
 
