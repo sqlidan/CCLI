@@ -1,5 +1,6 @@
 package com.haiersoft.ccli.supervision.web;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -158,8 +159,8 @@ public class OutApprController extends BaseController {
 			ai.setgQty(String.valueOf(info.getPiece()));
 			ai.setUnit1(ai.getgUnit());
 			ai.setQty1(ai.getgQty());
-
-			ai.setGrossWt(String.valueOf(info.getGrossWeight()));
+			DecimalFormat df = new DecimalFormat("0.00000");//保留小数点后3位，四舍五入
+			ai.setGrossWt(df.format(info.getGrossWeight()));
 			ai.setCreateTime(new Date());
 			la.add(ai);
 		}
@@ -209,7 +210,8 @@ public class OutApprController extends BaseController {
 			ai.setgNo(apprInfoList.get(0).getgNo());
 			ai.setCtnNum(ctnNum);
 			ai.setgQty(String.valueOf(piece));
-			ai.setGrossWt(String.valueOf(grossWeight));
+			DecimalFormat df = new DecimalFormat("0.00000");//保留小数点后3位，四舍五入
+			ai.setGrossWt(df.format(grossWeight));
 			ai.setUnit1(ai.getgUnit());
 			ai.setQty1(ai.getgQty());
 			ai.setCreateTime(new Date());

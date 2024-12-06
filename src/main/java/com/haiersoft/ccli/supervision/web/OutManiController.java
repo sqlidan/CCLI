@@ -108,27 +108,27 @@ public class OutManiController extends BaseController{
 		maniHead.setIeFlagNote("出库核放");
 		maniHead.setLocalStatus("1");
 		maniHead.setCreateTime(currDate);
-		//截取最前边的箱号作为核放单头部的箱号
-		String contaIdStr = maniHead.getContaId();
-		String contaId = "";
-		if (contaIdStr!= null && contaIdStr.trim().length() > 0){
-			if (contaIdStr.contains(",")){
-				String[] strings = contaIdStr.split(",");
-				for (int i = 0; i < strings.length; i++) {
-					if (strings[i]!= null && strings[i].trim().length() == 11){
-						contaId = strings[i];
-						break;
-					}
-				}
-			}else{
-				contaId = contaIdStr;
-			}
-		}
-		if (contaId!=null && contaId.trim().length() == 11){
-			maniHead.setContaId(contaId);
-		}else{
-			return "箱号格式不正确";
-		}
+//		//截取最前边的箱号作为核放单头部的箱号
+//		String contaIdStr = maniHead.getContaId();
+//		String contaId = "";
+//		if (contaIdStr!= null && contaIdStr.trim().length() > 0){
+//			if (contaIdStr.contains(",")){
+//				String[] strings = contaIdStr.split(",");
+//				for (int i = 0; i < strings.length; i++) {
+//					if (strings[i]!= null && strings[i].trim().length() == 11){
+//						contaId = strings[i];
+//						break;
+//					}
+//				}
+//			}else{
+//				contaId = contaIdStr;
+//			}
+//		}
+//		if (contaId!=null && contaId.trim().length() == 11){
+//			maniHead.setContaId(contaId);
+//		}else{
+//			return "箱号格式不正确";
+//		}
 		maniHeadService.save(maniHead);
 		
 		List<String> list = Arrays.asList(maniHead.getInfoIds().split(","));

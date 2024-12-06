@@ -1,6 +1,7 @@
 package com.haiersoft.ccli.supervision.web;
 
 import java.rmi.RemoteException;
+import java.text.DecimalFormat;
 import java.util.*;
 import javax.transaction.Transactional;
 import javax.xml.rpc.ServiceException;
@@ -175,7 +176,8 @@ public class EnterApprController extends BaseController {
 			ai.setgQty(String.valueOf(info.getPiece()));
 			ai.setUnit1(ai.getgUnit());
 			ai.setQty1(ai.getgQty());
-			ai.setGrossWt(String.valueOf(info.getGrossWeight()));
+			DecimalFormat df = new DecimalFormat("0.00000");//保留小数点后3位，四舍五入
+			ai.setGrossWt(df.format(info.getGrossWeight()));
 			ai.setCreateTime(date);
 			//申请单行生成底账项号
 			ai.setgNo(gnoMap.get(info.getCtnNum()+info.getHsCode()+info.getHsItemname()));
@@ -224,7 +226,8 @@ public class EnterApprController extends BaseController {
 			grossWeight += (info.getGrossWeight()==null?0.00:info.getGrossWeight());
 		}
 		ai.setgQty(String.valueOf(piece));
-		ai.setGrossWt(String.valueOf(grossWeight));
+		DecimalFormat df = new DecimalFormat("0.00000");//保留小数点后3位，四舍五入
+		ai.setGrossWt(df.format(grossWeight));
 		ai.setQty1(ai.getgQty());
 		ai.setCreateTime(date);
 		//申请单行生成底账项号
