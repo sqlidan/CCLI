@@ -108,6 +108,7 @@ public class OutManiController extends BaseController{
 		maniHead.setIeFlagNote("出库核放");
 		maniHead.setLocalStatus("1");
 		maniHead.setCreateTime(currDate);
+		maniHead.setContaId("");
 //		//截取最前边的箱号作为核放单头部的箱号
 //		String contaIdStr = maniHead.getContaId();
 //		String contaId = "";
@@ -145,8 +146,10 @@ public class OutManiController extends BaseController{
 				Integer piece = 0;
 				Double grossWeight = 0.00;
 				for(BisLoadingOrderInfo orderInfo : infos) {
-					piece += (orderInfo.getPiece()==null?0:orderInfo.getPiece());
-					grossWeight += (orderInfo.getGrossWeight()==null?0.00:orderInfo.getGrossWeight());
+					if (orderInfo.getBillNum().equals(billNumList.get(i))){
+						piece += (orderInfo.getPiece()==null?0:orderInfo.getPiece());
+						grossWeight += (orderInfo.getGrossWeight()==null?0.00:orderInfo.getGrossWeight());
+					}
 				}
 				//根据提单号和出库联系单号查找出库联系单明细
 				List<PropertyFilter> filters = new ArrayList<PropertyFilter>();

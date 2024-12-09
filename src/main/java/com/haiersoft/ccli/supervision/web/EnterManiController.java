@@ -195,6 +195,7 @@ public class EnterManiController extends BaseController{
 		maniHead.setLocalStatus("1");
 		maniHead.setManiConfirmStatus("N");
 		maniHead.setCreateTime(currDate);
+		maniHead.setContaId("");
 //		//截取最前边的箱号作为核放单头部的箱号
 //		String contaIdStr = maniHead.getContaId();
 //		String contaId = "";
