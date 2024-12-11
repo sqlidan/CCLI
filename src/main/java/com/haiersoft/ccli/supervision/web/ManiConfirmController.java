@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.xml.rpc.ServiceException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +41,7 @@ import com.haiersoft.ccli.wms.service.TrayInfoService;
 @Controller
 @RequestMapping("supervision/maniconfirm")
 public class ManiConfirmController extends BaseController {
+	private static Logger logger = LoggerFactory.getLogger(ManiConfirmController.class);
 
 	@Autowired
 	ManiHeadService maniHeadService;
@@ -66,7 +69,6 @@ public class ManiConfirmController extends BaseController {
 	@ResponseBody
 	@RequestMapping(value = "/request/{id}", method = RequestMethod.GET)
 	public String confirmRequest(@PathVariable("id") String headId) throws RemoteException, ServiceException {
-		//List<ManiHead> maniHeadList = maniHeadService.findMainsToConfirm();
 		ManiHead ihead = maniHeadService.get(headId);
 		List<ManiHead> maniHeadList = new ArrayList<ManiHead>();
 		maniHeadList.add(ihead);
@@ -78,100 +80,88 @@ public class ManiConfirmController extends BaseController {
 		if(maniHeadList.size()==0) {
 			return "没有需要提交到货确认的核放单";
 		}
-		// 填充ConfirmQty 字段
-		for (ManiHead mh : maniHeadList) {
-			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
-			filters.add(new PropertyFilter("EQS_headId", mh.getId()));
-			List<ManiInfo> mInfoList = maniInfoService.search(filters);
-			for (ManiInfo mInfo : mInfoList) {
-				if (null==mInfo.ConfirmQty || mInfo.ConfirmQty.equals("")) {
-					//这里要注意ManiInfo中的提单号与BisAsn中的billNum 有唯一对应的关系
-					//BisAsn asn = asnService.find("billNum", mInfo.BisItemNum);
-					
-					//根据 提单号/箱号/入库类型为”正常”/ASN状态为”已上架”来查询唯一的asn，如果存在即为到货，查询不到即为未到货
-	                Map<String, Object> params = new HashMap<String, Object>();
-	                params.put("billNum", mInfo.BisItemNum);
-	                params.put("ctnNum", mh.getContaId());
-	                params.put("ifSecondEnter", "1"); // 入库类型 1.在库
-	                params.put("asnState", "3"); //已上架
-	                List<BisAsn> asnList = asnService.getList(params);
-					// 排除 asn状态不等于"3 已上架的"
-					if (0==asnList.size()) {
-						//maniHeadList.remove(mh);
-						//无操作
-					} else {
-						//填充ConfirmQty 字段	
-						BisAsn asn = asnList.get(0);
-						BisAsnInfo asnInfo = asnInfoService.findBisAsnInfo(asn.getAsn(), mInfo.getBisSku());
-						if(null != asnInfo) {
-							
-							String hsCode = asnInfo.getHsCode();
-							if(null !=hsCode) {
-								//根据HScode 查询对应的单位代码		
-//								BaseHscode bhs = hscodeService.find("code", hsCode);
-//								if(bhs.getItemNum()=="035") {
-//									//单位为035时 实际入库件数*单净
-//									mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()*asnInfo.getNetSingle()));							
-//								}else {
-//									//单位不是 035时 发 实际入库件数
-//									mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()));
-//								}
+//		// 填充ConfirmQty 字段
+//		for (ManiHead mh : maniHeadList) {
+//			List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+//			filters.add(new PropertyFilter("EQS_headId", mh.getId()));
+//			List<ManiInfo> mInfoList = maniInfoService.search(filters);
+//			for (ManiInfo mInfo : mInfoList) {
+//				if (null==mInfo.ConfirmQty || mInfo.ConfirmQty.equals("")) {
+//					//这里要注意ManiInfo中的提单号与BisAsn中的billNum 有唯一对应的关系
+//					//BisAsn asn = asnService.find("billNum", mInfo.BisItemNum);
+//
+//					//根据 提单号/箱号/入库类型为”正常”/ASN状态为”已上架”来查询唯一的asn，如果存在即为到货，查询不到即为未到货
+//	                Map<String, Object> params = new HashMap<String, Object>();
+//	                params.put("billNum", mInfo.BisItemNum);
+//	                params.put("ctnNum", mh.getContaId());
+//	                params.put("ifSecondEnter", "1"); // 入库类型 1.在库
+//	                params.put("asnState", "3"); //已上架
+//	                List<BisAsn> asnList = asnService.getList(params);
+//					// 排除 asn状态不等于"3 已上架的"
+//					if (0==asnList.size()) {
+//						//maniHeadList.remove(mh);
+//						//无操作
+//					} else {
+//						//填充ConfirmQty 字段
+//						BisAsn asn = asnList.get(0);
+//						BisAsnInfo asnInfo = asnInfoService.findBisAsnInfo(asn.getAsn(), mInfo.getBisSku());
+//						if(null != asnInfo) {
+//
+//							String hsCode = asnInfo.getHsCode();
+//							if(null !=hsCode) {
+//								//根据HScode 查询对应的单位代码
+////								BaseHscode bhs = hscodeService.find("code", hsCode);
+////								if(bhs.getItemNum()=="035") {
+////									//单位为035时 实际入库件数*单净
+////									mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()*asnInfo.getNetSingle()));
+////								}else {
+////									//单位不是 035时 发 实际入库件数
+////									mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()));
+////								}
+//
+//							}
+//
+////							mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()));
+//							String counts = cuntTrayInfoPieces(asn.getAsn(), mInfo.getBisSku());
+//							if(!"0".equals(counts)) {
+//								mInfo.setConfirmQty(counts);
+//								//保存ManiInfo ，实际上是保存ConfirmQty字段
+//								maniInfoService.save(mInfo);
+//							}
+//
+//
+//						}
+//						//此处要增加找不到asn到货信息时的处理
+//
+//					}
+//
+//				}
+//
+//			}
+//
+//		}
 
-							}
-
-//							mInfo.setConfirmQty(String.valueOf(asnInfo.getPieceReal()));
-							String counts = cuntTrayInfoPieces(asn.getAsn(), mInfo.getBisSku());
-							if(!"0".equals(counts)) {
-								mInfo.setConfirmQty(counts);								
-								//保存ManiInfo ，实际上是保存ConfirmQty字段
-								maniInfoService.save(mInfo);
-							}
-
-
-						}
-						//此处要增加找不到asn到货信息时的处理
-
-					}
-					
-				}
-
-			}
-
-		}
-
-//        //调用接口
-//		// 1 获得key
+		// 1 获得key
 		String tickId = getKeyService.builder();
 		System.out.println(tickId);
-//		// 2 调用接口
-//		//设置接口名
+		//设置接口名
 		String serviceName = "ManiConfirm";
-		// 查询所有需要更新到货确认的ManiHead
-		//List<String> ids = maniHeadService.findMainIdsToConfirmGoods();
-		
-//		//拼接json
-//		for (ManiHead mh : maniHeadList) {
-		//for (String id : ids) {
-		//	ManiHead mh = maniHeadService.get(id);
-			String json = buildJson(ihead);			
-			String result = fljgWsClient.getResult(json, tickId, serviceName);
-			System.out.println("result: " + result);
-			
-			JSONObject jsonObject = JSON.parseObject(result);
-	        String state = jsonObject.getString("state");
-			//String state = "2";
-	        //如果接口state返回1为提交成功
-	        if(state.equals("1")) {
-	        	ihead.setPassStatus("2");
-	        	ihead.setManiConfirmStatus("Y");
-	        	maniHeadService.save(ihead);
-	        }else {
-	        	
-	        	return "接口错误";
-	        	//返回其他信息时不处理，继续循环
-	        }
-		//}
-		return "success";		
+		String json = buildJson(ihead);
+		logger.error(">>>>>>>>>>>>>>>>>调用核放单到货确认json： "+json);
+		String result = fljgWsClient.getResult(json, tickId, serviceName);
+		System.out.println("result: " + result);
+		logger.error(">>>>>>>>>>>>>>>>>调用核放单到货确认result： "+result);
+		JSONObject jsonObject = JSON.parseObject(result);
+		String state = jsonObject.getString("state");
+		//如果接口state返回1为提交成功
+		if(state.equals("1")) {
+			ihead.setPassStatus("2");
+			ihead.setManiConfirmStatus("Y");
+			maniHeadService.save(ihead);
+		}else {
+			return "接口错误";
+		}
+		return "success";
 
 	}
 	

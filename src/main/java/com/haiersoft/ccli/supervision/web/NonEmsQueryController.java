@@ -2,12 +2,18 @@ package com.haiersoft.ccli.supervision.web;
 
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.rpc.ServiceException;
 
+import com.alibaba.fastjson.JSONArray;
 import com.haiersoft.ccli.common.persistence.Page;
+import com.haiersoft.ccli.common.persistence.PropertyFilter;
+import com.haiersoft.ccli.report.entity.AAccountBook;
+import com.haiersoft.ccli.report.service.AAccountBookService;
 import com.haiersoft.ccli.system.entity.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +41,8 @@ public class NonEmsQueryController extends BaseController {
 
 	@Autowired
 	GetKeyService getKeyService;
+	@Autowired
+	AAccountBookService aAccountBookService;
 
 	@Autowired
 	FljgWsClient fljgWsClient;
@@ -52,18 +60,18 @@ public class NonEmsQueryController extends BaseController {
 	public Map<String, Object> getData(HttpServletRequest request, String EmsNo, String CodeTs, String GNo) throws RemoteException, ServiceException {
 		Page<Object> page = getPage(request);
 		  //查询条件为空时返回空的列表 Map;
-		  String returnstr="{\r\n" + 
-			  		"	\"state\": 1,\r\n" + 
-			  		"	\"message\": null,\r\n" + 
-			  		"	\"rows\": null,\r\n" + 
-			  		"	\"TotalCount\": 0,\r\n" + 
-			  		"	\"CheckInfos\": null\r\n" + 
+		  String returnstr="{\r\n" +
+			  		"	\"state\": 1,\r\n" +
+			  		"	\"message\": null,\r\n" +
+			  		"	\"rows\": null,\r\n" +
+			  		"	\"TotalCount\": 0,\r\n" +
+			  		"	\"CheckInfos\": null\r\n" +
 			  		"}";
-		  Map<String, Object> empMaps = (Map<String, Object>)JSON.parse(returnstr); 
+		  Map<String, Object> empMaps = (Map<String, Object>)JSON.parse(returnstr);
 		  if(StringUtils.isBlank(EmsNo) && StringUtils.isBlank(CodeTs) && StringUtils.isBlank(GNo)) {
-			 
+
 			  return empMaps;
-			  
+
 		  }
 
 		  Map<String,Integer> pagemap = new HashMap<>();
@@ -92,6 +100,23 @@ public class NonEmsQueryController extends BaseController {
 		System.out.println("result: " + result);
 
 		Map<String, Object> maps = (Map<String, Object>) JSON.parse(result);
+//		List<AAccountBook> aAccountBookList = JSONArray.parseArray(maps.get("PageList").toString(),AAccountBook.class);
+//		if (aAccountBookList!=null && aAccountBookList.size() > 0){
+//			for (AAccountBook forAAccountBook:aAccountBookList) {
+//				if (forAAccountBook.getCutQty()!=null && Integer.parseInt(forAAccountBook.getCutQty()) <= 0){
+//					forAAccountBook.setFinish("1");
+//				}
+//				List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+//				filters.add(new PropertyFilter("EQS_GNo", forAAccountBook.getGNo()));
+//				List<AAccountBook> aAccountBookS = aAccountBookService.search(filters);
+//				if (aAccountBookS!=null && aAccountBookS.size() > 0){
+//					aAccountBookService.merge(aAccountBookS.get(0));
+//				}else{
+//					aAccountBookService.save(forAAccountBook);
+//				}
+//			}
+//		}
+
 		maps.put("rows", maps.remove("PageList"));
 		maps.put("total", maps.remove("TotalCount"));
 		return maps;

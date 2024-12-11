@@ -25,6 +25,13 @@
 		<span class="toolbar-item dialog-tool-separator"></span>
 		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true" onclick="createDHQR()">批量到货确认</a>
 		<span class="toolbar-item dialog-tool-separator"></span>
+		<span class="toolbar-item dialog-tool-separator"></span>
+		<span class="toolbar-item dialog-tool-separator"></span>
+		<span class="toolbar-item dialog-tool-separator"></span>
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true" onclick="createOldAppr()">旧账册申请单</a>
+		<span class="toolbar-item dialog-tool-separator"></span>
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true" onclick="createOldMain()">旧账册核放单</a>
+		<span class="toolbar-item dialog-tool-separator"></span>
 	</div>
 </div>
 
@@ -181,6 +188,46 @@ function createDHQR(){
 				async:false,
 				type:'get',
 				url:"${ctx}/report/ATray/createDHQR",
+				success: function(data){
+					if(data == "success"){
+						parent.$.easyui.messager.alert("操作成功！");
+						cx();
+					}else{
+						parent.$.easyui.messager.alert("操作失败！");
+					}
+				}
+			});
+		}
+	});
+}
+//旧帐册申请单
+function createOldAppr(){
+	parent.$.messager.confirm('提示', '确定批量执行旧帐册申请单申报？', function(data){
+		if (data){
+			$.ajax({
+				async:false,
+				type:'get',
+				url:"${ctx}/report/ATray/clearInventoryS",
+				success: function(data){
+					if(data == "success"){
+						parent.$.easyui.messager.alert("操作成功！");
+						cx();
+					}else{
+						parent.$.easyui.messager.alert("操作失败！");
+					}
+				}
+			});
+		}
+	});
+}
+//旧帐册核放单
+function createOldMain(){
+	parent.$.messager.confirm('提示', '确定批量执行旧帐册核放单申报？', function(data){
+		if (data){
+			$.ajax({
+				async:false,
+				type:'get',
+				url:"${ctx}/report/ATray/clearInventoryH",
 				success: function(data){
 					if(data == "success"){
 						parent.$.easyui.messager.alert("操作成功！");

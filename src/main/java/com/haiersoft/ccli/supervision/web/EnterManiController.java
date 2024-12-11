@@ -239,6 +239,7 @@ public class EnterManiController extends BaseController{
 		maniInfo.setGQty1(maniInfo.getGQty());
 		maniInfo.setGUnit1(maniInfo.getGUnit());
 		maniInfo.setEmsGNo(String.valueOf(infoList.get(0).getgNo()));
+		maniInfo.setConfirmQty(maniInfo.getGQty());
 		maniInfo.setHeadId(maniHead.getId());
 		maniInfo.setCreateTime(currDate);
 		maniInfo.setBisInfoId(maniHead.getInfoIds());

@@ -9,8 +9,10 @@ import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.utils.*;
 import com.haiersoft.ccli.common.web.BaseController;
+import com.haiersoft.ccli.report.entity.AAccountBook;
 import com.haiersoft.ccli.report.entity.ATray;
 import com.haiersoft.ccli.report.entity.Stock;
+import com.haiersoft.ccli.report.service.AAccountBookService;
 import com.haiersoft.ccli.report.service.AtrayService;
 import com.haiersoft.ccli.report.service.StockReportService;
 import com.haiersoft.ccli.supervision.entity.*;
@@ -50,6 +52,8 @@ public class ATrayController extends BaseController {
 
     @Autowired
     private AtrayService atrayService;
+    @Autowired
+    private AAccountBookService aAccountBookService;
     @Autowired
     private OpApprHeadService opApprHeadService;
     @Autowired
@@ -479,6 +483,103 @@ public class ATrayController extends BaseController {
         }else{
             return "没有需要提交到货确认的核放单";
         }
+        return "success";
+    }
+
+
+
+    /**
+     * 旧账册数据清零申请单
+     */
+    @RequestMapping(value = "clearInventoryS", method = RequestMethod.GET)
+    @ResponseBody
+    public String clearInventoryS() throws RemoteException, ServiceException {
+        //查询剩余数量大于0的底账信息
+        List<AAccountBook> aAccountBookList = new ArrayList<>();
+        aAccountBookList = aAccountBookService.queryClearInventorySData();
+        System.out.println("aAccountBookList"+JSON.toJSONString(aAccountBookList));
+
+//        //申请单
+//        List<Map<String, Object>> ApprLists = this.buildApprLists(opApprHead,infolist);
+//        //拼装Json
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
+//        map.put("DeclType", "1");
+//        map.put("ApprLists", ApprLists);
+//        map.put("ApprHead", apprHeadMap);
+//
+//        String jsonString = JSON.toJSONString(map, SerializerFeature.WriteMapNullValue);
+//        System.out.println(jsonString);
+//        logger.error(jsonString);
+//        // 1 获得key
+//        String tickId = getKeyService.builder();
+//        System.out.println(tickId);
+//
+//        // 2 调用接口
+//        //设置接口名
+//        String serviceName = "ApprSave";
+//        // 调用 申请单保存
+//        String result = fljgWsClient.getResult(jsonString, tickId, serviceName);
+//        System.out.println("ApprSave result: " + result);
+//        logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
+//
+//        JSONObject jsonObject = JSON.parseObject(result);
+//        String state = jsonObject.getString("state");
+//        if(state.equals("1")) {
+//
+//        }else {
+//            String CheckInfos = jsonObject.getString("CheckInfos");
+//            logger.error("CheckInfos"+CheckInfos);
+//        }
+//
+
+        return "success";
+    }
+
+    /**
+     * 旧账册数据清零核放单
+     */
+    @RequestMapping(value = "clearInventoryH", method = RequestMethod.GET)
+    @ResponseBody
+    public String clearInventoryH() throws RemoteException, ServiceException {
+        //查询剩余数量大于0的底账信息
+        List<AAccountBook> aAccountBookList = new ArrayList<>();
+        aAccountBookList = aAccountBookService.queryClearInventoryHData();
+
+//        //申请单
+//        List<Map<String, Object>> ApprLists = this.buildApprLists(opApprHead,infolist);
+//        //拼装Json
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
+//        map.put("DeclType", "1");
+//        map.put("ApprLists", ApprLists);
+//        map.put("ApprHead", apprHeadMap);
+//
+//        String jsonString = JSON.toJSONString(map, SerializerFeature.WriteMapNullValue);
+//        System.out.println(jsonString);
+//        logger.error(jsonString);
+//        // 1 获得key
+//        String tickId = getKeyService.builder();
+//        System.out.println(tickId);
+//
+//        // 2 调用接口
+//        //设置接口名
+//        String serviceName = "ApprSave";
+//        // 调用 申请单保存
+//        String result = fljgWsClient.getResult(jsonString, tickId, serviceName);
+//        System.out.println("ApprSave result: " + result);
+//        logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
+//
+//        JSONObject jsonObject = JSON.parseObject(result);
+//        String state = jsonObject.getString("state");
+//        if(state.equals("1")) {
+//
+//        }else {
+//            String CheckInfos = jsonObject.getString("CheckInfos");
+//            logger.error("CheckInfos"+CheckInfos);
+//        }
+//
+
         return "success";
     }
     
