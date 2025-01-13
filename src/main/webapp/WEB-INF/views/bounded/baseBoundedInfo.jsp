@@ -151,8 +151,15 @@
                     <textarea rows="3" cols="55" readonly name="cargoLocation" style="font-size: 12px;  font-family: '微软雅黑'">${baseBounded.cargoArea }   </textarea>
                 </td>
             </tr>
-
-
+            <tr>
+                <td>账册号</td>
+                <td>
+                    <select class="easyui-combobox" id="emsNo" name="emsNo"  data-options="width:200,required:'required' ">
+                        <option value="T4230W000036">原账册(T4230W000036)</option>
+                        <option value="T4230W000042">新账册(T4230W000042)</option>
+                    </select>
+                </td>
+            </tr>
 
          <%--   <tr>
                 <td>入库时间</td>

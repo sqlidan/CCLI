@@ -1,6 +1,9 @@
 package com.haiersoft.ccli.supervision.service;
 
+import com.haiersoft.ccli.bounded.entity.BaseBounded;
+import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
+import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.supervision.dao.SupervisionDao;
 import com.haiersoft.ccli.supervision.entity.CopBaseInfo;
@@ -27,6 +30,8 @@ import java.util.*;
 public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 	@Autowired
 	private SupervisionDao supervisionDao;
+	@Autowired
+	private BaseBoundedService baseBoundedService;
 
 	@Override
 	public HibernateDao<CopBaseInfo, Integer> getEntityDao() {
@@ -194,6 +199,7 @@ public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 					String ZKTRADE = hashMap.get("ZKTRADE") == null ? "" : hashMap.get("ZKTRADE").toString();//在库保税
 					String ZKFOWARD = hashMap.get("ZKFORWARD") == null ? "" : hashMap.get("ZKFORWARD").toString();//在库一般贸易
 					String GoodsType = hashMap.get("GOODSTYPE") == null ? "" : hashMap.get("GOODSTYPE").toString();
+					String billNum = hashMap.get("BILLNUM") == null ? "" : hashMap.get("BILLNUM").toString();//提单号
 					//            if ((ZKTRADE==null&&ZKFOWARD==null)||(ZKTRADE.equals("")&&ZKFOWARD.equals(""))) {
 
 
@@ -206,7 +212,16 @@ public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 					handler.startElement("", "", "EmsNo", attr);
 					String EmsNo = "";
 					if (GoodsType.equals("1")) {
-						EmsNo = "T4230W000036";//如果是保税货物，账册号固定
+						//2025-01-09 徐峥注释，原因：应海关要求保税底账账册使用新账册，导致在一段时间内保税账册存在两个，需要进行判断获取
+//						EmsNo = "T4230W000036";//如果是保税货物，账册号固定
+						//2025-01-09 徐峥，开发依据提单号从保税底账表中查询对应的底账账册号
+						List<BaseBounded> baseBoundedList = new ArrayList<>();
+						List<PropertyFilter> filters = new ArrayList<>();
+						filters.add(new PropertyFilter("EQS_billNum",billNum.trim()));
+						baseBoundedList = baseBoundedService.search(filters);
+						if (baseBoundedList!=null && baseBoundedList.size() > 0){
+							EmsNo = baseBoundedList.get(0).getEmsNo()==null?"":baseBoundedList.get(0).getEmsNo();
+						}
 					} else {
 						EmsNo = "";
 					}

@@ -117,12 +117,25 @@ public class BaseBounded implements Serializable {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	@Column(name = "UPDATED_TIME")
 	private Date updatedTime;//修改时间
+
+	@Excel(name = "账册号")
+	@Column(name = "EMS_NO")
+	private String emsNo;
+
 	@Transient
 	private String gdsMtno;
 	@Transient
 	private Double grossWeight;
 	@Transient
 	private Double dclTotalAmt;
+
+	public String getEmsNo() {
+		return emsNo;
+	}
+
+	public void setEmsNo(String emsNo) {
+		this.emsNo = emsNo;
+	}
 
 	public String getGdsMtno() {
 		return gdsMtno;

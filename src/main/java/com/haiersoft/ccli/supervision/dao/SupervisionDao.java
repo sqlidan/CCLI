@@ -27,6 +27,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append(" SELECT       ");
 			stringBuffer2.append(" B.sku as WmsMtsNo,   ");
 			stringBuffer2.append(" B.asn as GoodsMtsNo,");
+			stringBuffer2.append(" B.billNum AS billNum,");
 			stringBuffer2.append("  SUM( B.jz )  as WmsDclQty,");
 			stringBuffer2.append(" B.cargoName   as GoodsName ,");
 		//	stringBuffer2.append(" ");
@@ -43,6 +44,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append(" A.sku AS sku,");
 			stringBuffer2.append(" SUM( A.netWeight ) AS JZ,");
 			stringBuffer2.append(" 	A.asn,");
+			stringBuffer2.append(" 	A.billNum,");
 			stringBuffer2.append(" A.cargoName,");
 			//stringBuffer2.append(" ");
 			stringBuffer2.append(" A.state,");
@@ -59,6 +61,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append(" SELECT");
 		//	stringBuffer2.append(" t.TRAY_ID AS trayCode,");
 			stringBuffer2.append(" t.SKU_ID AS sku ,");
+			stringBuffer2.append(" t.BILL_NUM AS billNum,");
 			stringBuffer2.append(" info.hs_code  AS asn,");
 			stringBuffer2.append(" t.CARGO_LOCATION AS locationCode,");
 			stringBuffer2.append("  t.AREA_NUM AS areanum,");
@@ -90,6 +93,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			//stringBuffer2.append(" t.TRAY_ID,");
 			stringBuffer2.append("	info.hs_code,");
 			stringBuffer2.append("	t.SKU_ID,");
+			stringBuffer2.append("	t.BILL_NUM,");
 			stringBuffer2.append("	t.WAREHOUSE,");
 			stringBuffer2.append("	INFO.HS_ITEMNAME,");
 		//	stringBuffer2.append("	");
@@ -100,6 +104,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append("	st.IF_BONDED,info.hs_code,bh.ITEM_NUM,info.ACCOUNT_BOOK,info.TYPE_SIZE ");
 			stringBuffer2.append(" UNION");
 			stringBuffer2.append(" SELECT   t.SKU_ID AS sku,");
+			stringBuffer2.append(" t.BILL_NUM AS billNum,");
 			stringBuffer2.append(" bai.HS_CODE as asn,");
 			stringBuffer2.append(" t.CARGO_LOCATION AS locationCode,");
 			stringBuffer2.append(" t.AREA_NUM AS areanum,");
@@ -123,7 +128,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append(" WHERE 1 = 1 AND t.NOW_PIECE > 0   AND st.IF_BONDED != '1'   and ba.IF_SECOND_ENTER!='1' ");
 			//stringBuffer2.append("  AND st.IF_SORTING = '1' AND st.IF_RECORD = '1'");//入库联系单已审核是分拣
 			//stringBuffer2.append("	 and   TO_CHAR(t.UPDATE_TIME,'yyyy-MM-dd')='"+yesterdayDate+"'");
-			stringBuffer2.append(" GROUP BY   	t.SKU_ID,");
+			stringBuffer2.append(" GROUP BY   	t.SKU_ID,t.BILL_NUM,");
 			stringBuffer2.append("	bai.HS_CODE , 	t.CARGO_LOCATION ,");
 			stringBuffer2.append("t.AREA_NUM ,t.WAREHOUSE ,bai.HS_ITEMNAME  , ");
 			stringBuffer2.append("t.UNITS ,t.CARGO_STATE ,st.IF_BONDED,");
@@ -131,6 +136,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			//stringBuffer2.append("  and t.CARGO_STATE='01'");状态为已上架
 			stringBuffer2.append("  UNION  SELECT " +
 					" id AS sku, " +
+					" BILL_NUM AS billNum, " +
 					" HS_CODE AS asn, " +
 					" CARGO_LOCATION AS locationCode, " +
 					" CARGO_AREA AS areanum, " +
@@ -148,6 +154,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 					" BASE_BOUNDED  " +
 					" GROUP BY " +
 					" id, " +
+					" BILL_NUM, " +
 					" HS_CODE, " +
 					" CARGO_LOCATION, " +
 					" CARGO_AREA, " +
@@ -157,6 +164,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append("  GROUP BY");
 			stringBuffer2.append("  A.sku,");
 			stringBuffer2.append("	 A.asn,");
+			stringBuffer2.append("	 A.billNum,");
 			stringBuffer2.append("	 A.cargoName,");
 			stringBuffer2.append("	");
 			stringBuffer2.append("	A.state,");
@@ -167,6 +175,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append("  GROUP BY");
 			stringBuffer2.append("  B.sku,");
 			stringBuffer2.append("  B.asn,");
+			stringBuffer2.append("  B.billNum,");
 			stringBuffer2.append("  B.cargoName,");
 			stringBuffer2.append("   ");
 			stringBuffer2.append("	B.IF_BONDED,B.hs_code,b.ITEM_NUM,b.ACCOUNT_BOOK ,b.TYPE_SIZE,B.dclUnit)t1");
