@@ -89,6 +89,7 @@ function gridDG(){
 			{field: 'id', title: 'id', hidden:true},
 			{field: 'clientId', title: '客户ID', hidden:true},
 	        {field:'clientName',title:'客户名称',sortable:true,width:70},
+			{field:'emsNo',title:'账册号',sortable:true,width:40},
 			{field:'billNum',title:'提单号',sortable:true,width:40},
 			{field:'cdNum',title:'报关单号',sortable:true,width:70},
 			//{field:'ctnNum',title:'MR/集装箱号',sortable:true,width:50},
