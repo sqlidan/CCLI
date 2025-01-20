@@ -57,6 +57,7 @@ import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 
@@ -93,6 +94,46 @@ public class PreEntryInvtQueryController extends BaseController {
 		return "wms/preEntryInvtQuery/preEntryInvtQuery";
 	}
 
+	//依据核注清单号查询单条核注清单信息
+	@RequestMapping(value="getOnePreEntryInvtInfo/{checkListNo}",method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String, Object> getOnePreEntryInvtInfo(@PathVariable("checkListNo") String checkListNo) {
+		Map<String, Object> result = new HashMap<>();
+		InvtHeadType invtHeadType = new InvtHeadType();
+
+		if (checkListNo == null ||checkListNo.trim().length() == 0){
+			result.put("msg","缺少报税你核注清单号参数");
+			result.put("data",invtHeadType);
+			result.put("row",new BisPreEntryInvtQuery());
+			return result;
+		}
+
+		List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+		List<PropertyFilter> filters = new ArrayList<>();
+		filters.add(new PropertyFilter("EQS_bondInvtNo", checkListNo));
+		filters.add(new PropertyFilter("EQS_synchronization", "1"));
+		bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+		if (bisPreEntryInvtQueryList!=null && bisPreEntryInvtQueryList.size() == 1){
+			BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
+			try {
+				invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+
+			result.put("msg","success");
+			result.put("data",invtHeadType);
+			result.put("row",forBisPreEntryInvtQuery);
+		}else{
+			result.put("msg","未找到对应的核注清单同步信息");
+			result.put("data",invtHeadType);
+			result.put("row",new BisPreEntryInvtQuery());
+		}
+		return result;
+	}
+
 	@RequestMapping(value = "json", method = RequestMethod.GET)
 	@ResponseBody
 	public Map<String, Object> getData(HttpServletRequest request) {
@@ -124,6 +165,18 @@ public class PreEntryInvtQueryController extends BaseController {
 			invtHeadTypeVo.setId(forBisPreEntryInvtQuery.getId());
 			invtHeadTypeVo.setEtpsInnerInvtNo(forBisPreEntryInvtQuery.getTdNo());
 			invtHeadTypeVo.setListStat(forBisPreEntryInvtQuery.getListStat().replaceAll("\"","").replaceAll("'",""));
+			if (forBisPreEntryInvtQuery.getInLinkId()==null || forBisPreEntryInvtQuery.getInLinkId().trim().length() == 0
+					|| forBisPreEntryInvtQuery.getOutLinkId()==null || forBisPreEntryInvtQuery.getOutLinkId().trim().length() == 0){
+				Integer days = 9999;
+				if (forBisPreEntryInvtQuery.getCreateTime()!=null){
+					Date date = forBisPreEntryInvtQuery.getCreateTime();
+					long daysDiff = ChronoUnit.DAYS.between(date.toInstant(), new Date().toInstant());
+					days = Integer.parseInt(daysDiff+"");
+				}
+				invtHeadTypeVo.setDays(days);
+			}else{
+				invtHeadTypeVo.setDays(0);
+			}
 
 			invtHeadTypeVo.setCreateBy(forBisPreEntryInvtQuery.getCreateBy());
 			if(invtHeadType.getInvtDclTime()!=null && invtHeadType.getInvtDclTime().trim().length() > 0){

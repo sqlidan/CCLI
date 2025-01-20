@@ -12,6 +12,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.jeecgframework.poi.excel.annotation.Excel;
 
 /**
  * 出库订单6
@@ -77,7 +78,16 @@ public class BisLoadingOrder implements java.io.Serializable {
 
     public BisLoadingOrder() {
     }
-  
+
+    private String ifBonded;   //是否保税
+    @Transient
+    public String getIfBonded() {
+        return ifBonded;
+    }
+    public void setIfBonded(String ifBonded) {
+        this.ifBonded = ifBonded;
+    }
+
     @Id
     @Column(name = "ORDER_NUM")
     public String getOrderNum() {

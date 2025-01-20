@@ -12,6 +12,12 @@
 			<form id="searchFrom" action="">
 				<input type="text" name="filter_LIKES_bondInvtNo" class="easyui-validatebox" data-options="width:150,prompt: '核注清单号'"/>
 				<span class="toolbar-item dialog-tool-separator"></span>
+				<input type="text" name="filter_LIKES_tdNo" class="easyui-validatebox" data-options="width:150,prompt: '提运单号'"/>
+				<span class="toolbar-item dialog-tool-separator"></span>
+				<input type="text" name="filter_LIKES_inLinkId" class="easyui-validatebox" data-options="width:150,prompt: '入库联系单'"/>
+				<span class="toolbar-item dialog-tool-separator"></span>
+				<input type="text" name="filter_LIKES_outLinkId" class="easyui-validatebox" data-options="width:150,prompt: '出库联系单'"/>
+				<span class="toolbar-item dialog-tool-separator"></span>
 				<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">搜索</a>
 			</form>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" data-options="disabled:false" onclick="queryHZQD()">同步核注清单(单条)</a>
@@ -28,30 +34,30 @@
 <%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="zgUpdateNo()">复审驳回</a>--%>
 <%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
 
-			<shiro:hasPermission name="wms:preEntryInvtQuery:synchronization">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="synchronization()">同步核注清单(批量)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
-			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOnePreEntry()">生成预报单(单条)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
-			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createPreEntry()">生成预报单(批量)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
-			<shiro:hasPermission name="wms:preEntryInvtQuery:createClearance">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据(批量)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
-			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOneBGD()">生成报关单(单条)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
-			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">
-				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createAllBGD()">生成报关单(批量)</a>
-				<span class="toolbar-item dialog-tool-separator"></span>
-			</shiro:hasPermission>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:synchronization">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="synchronization()">同步核注清单(批量)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOnePreEntry()">生成预报单(单条)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:createPreEntry">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createPreEntry()">生成预报单(批量)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:createClearance">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createClearance()">生成台账数据(批量)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createOneBGD()">生成报关单(单条)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
+<%--			<shiro:hasPermission name="wms:preEntryInvtQuery:createBGD">--%>
+<%--				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" data-options="disabled:false" onclick="createAllBGD()">生成报关单(批量)</a>--%>
+<%--				<span class="toolbar-item dialog-tool-separator"></span>--%>
+<%--			</shiro:hasPermission>--%>
         </div>
 	</div>
 </div>
@@ -306,7 +312,9 @@ function gridDG(){
 			// {field:'gdsMtno',title:'商品料号',sortable:true},
 			{field:'bizopEtpsno',title:'经营企业编号',sortable:true},
 			{field:'dclEtpsNm',title:'申报企业名称',sortable:true},
-			{field:'etpsInnerInvtNo',title:'企业内部编号',sortable:true},
+			{field:'etpsInnerInvtNo',title:'企业内部编号(提运单号)',sortable:true},
+			{field:'inLinkId',title:'入库联系单号入库联系单号',sortable:true},
+			{field:'outLinkId',title:'出库联系单号',sortable:true},
 			{field:'createBy',title:'创建人',sortable:true},
 			{field:'createTime',title:'创建日期',sortable:true},
 			{field:'jlAudit',title:'初审人',sortable:true},
@@ -318,6 +326,15 @@ function gridDG(){
 			// {field:'updateBy',title:'修改人',sortable:true},
 			// {field:'updateTime',title:'修改时间',sortable:true}
 	    ]],
+		rowStyler: function (rowIndex, rowData) {
+			var day = 5;
+			if(day !== undefined && day !== null && day > 0){
+				//变成红色
+				if (rowData.days >= day) {
+					return 'background-color:red;';
+				}
+			}
+		},
 	    enableHeaderClickMenu: true,
 	    enableHeaderContextMenu: true,
 	    enableRowContextMenu: false,

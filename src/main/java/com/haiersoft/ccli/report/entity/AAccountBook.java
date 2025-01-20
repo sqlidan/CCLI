@@ -44,6 +44,8 @@ public class AAccountBook implements Serializable {
     private String finish ; // 完结;
     @Column(name = "ISS")
     private String iss ; // 申报标识;
+    @Column(name = "APPRID")
+    private String appid ; // 申报标识;
     @Column(name = "ISH")
     private String ish ; // 核放标识;
 
@@ -177,6 +179,14 @@ public class AAccountBook implements Serializable {
 
     public void setIss(String iss) {
         this.iss = iss;
+    }
+
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
     }
 
     public String getIsh() {

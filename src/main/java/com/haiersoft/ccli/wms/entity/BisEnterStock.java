@@ -381,6 +381,17 @@ public class BisEnterStock implements Serializable {
 	private  String cargoName;//品名
 	@Transient
 	private  String piece;//箱数(合计)
+	@Column(name = "CHECK_LIST_NO")
+	private  String checkListNo;//核注清单号
+
+
+	public String getCheckListNo() {
+		return checkListNo;
+	}
+
+	public void setCheckListNo(String checkListNo) {
+		this.checkListNo = checkListNo;
+	}
 
 	public String getCargoName() {
 		return cargoName;

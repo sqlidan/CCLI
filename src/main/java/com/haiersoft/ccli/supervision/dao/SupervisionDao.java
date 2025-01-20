@@ -27,7 +27,6 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			stringBuffer2.append(" SELECT       ");
 			stringBuffer2.append(" B.sku as WmsMtsNo,   ");
 			stringBuffer2.append(" B.asn as GoodsMtsNo,");
-			stringBuffer2.append(" B.billNum AS billNum,");
 			stringBuffer2.append("  SUM( B.jz )  as WmsDclQty,");
 			stringBuffer2.append(" B.cargoName   as GoodsName ,");
 		//	stringBuffer2.append(" ");
@@ -37,7 +36,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 			//stringBuffer2.append(" CAST(regexp_replace(( xmlagg( xmlparse ( content B.areanum || '|' wellformed ) ORDER BY B.areanum ).getclobval ()), '([^|]+)(,)+', '' )AS VARCHAR2 ( 255 ) )  as PlaceIds ,");
 			//stringBuffer2.append(	" CAST(regexp_replace(( xmlagg( xmlparse ( content B.locationCode || '|' wellformed ) ORDER BY B.locationCode ).getclobval ()), '([^|]+)(,)+', '' ) AS VARCHAR2 ( 255 ))as LocationIds, ");
 			stringBuffer2.append("  B.hs_code,b.ITEM_NUM as itemnum,b.ACCOUNT_BOOK as EMSSEQNO ,b.TYPE_SIZE as TYPESIZE,SUM( B.dclQTY ) AS dclQTY," +
-					" B.dclUnit");
+					" B.dclUnit,B.billNum AS billNum");
 			stringBuffer2.append(" FROM");
 			stringBuffer2.append("	(");
 			stringBuffer2.append(" SELECT");
@@ -230,6 +229,7 @@ public class SupervisionDao extends HibernateDao<CopBaseInfo, String> {
 				data.put("TYPESIZE", ob[10]==null?"":ob[10].toString());
 				data.put("DCLQTY", ob[11]==null?"":ob[11].toString());
 				data.put("DCLUNIT", ob[12]==null?"035":ob[12].toString());
+				data.put("BILLNUM", ob[13]==null?"035":ob[13].toString());
 //				data.put("ZKPLACEIDS", ob[13]==null?"":ob[13].toString());
 //				data.put("ZKLOCATIONIDS", ob[14]==null?"":ob[14].toString());
 //				data.put("DCLQTY", ob[11]==null?"":ob[11].toString());

@@ -84,6 +84,27 @@ public class BisPreEntryInvtQuery implements java.io.Serializable {
 	@Column(name = "ZG_AUDIT_TIME")
 	private Date zgAuditTime;  //复审时间
 
+	@Column(name = "IN_LINK_ID")
+	private String inLinkId; //入库联系单号
+
+	@Column(name = "OUT_LINK_ID")
+	private String outLinkId; //出库联系单号
+
+	public String getInLinkId() {
+		return inLinkId;
+	}
+
+	public void setInLinkId(String inLinkId) {
+		this.inLinkId = inLinkId;
+	}
+
+	public String getOutLinkId() {
+		return outLinkId;
+	}
+
+	public void setOutLinkId(String outLinkId) {
+		this.outLinkId = outLinkId;
+	}
 
 	public String getId() {
 		return id;

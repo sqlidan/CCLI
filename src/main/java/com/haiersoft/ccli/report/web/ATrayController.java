@@ -497,42 +497,68 @@ public class ATrayController extends BaseController {
         //查询剩余数量大于0的底账信息
         List<AAccountBook> aAccountBookList = new ArrayList<>();
         aAccountBookList = aAccountBookService.queryClearInventorySData();
-        System.out.println("aAccountBookList"+JSON.toJSONString(aAccountBookList));
+        for (AAccountBook forAAccountBook:aAccountBookList) {
+            //生成申请单表头
+            OpApprHead opApprHead = new OpApprHead();
+            opApprHead.setApprType("3");//申请类型
+            opApprHead.setIoType("2");//出入区类型
+            opApprHead.setCustomsCode("4258");//主管海关
+            opApprHead.setEmsNo("NH4230210001");//账册编号
+            opApprHead.setOwnerCode("3702631016");//货主单位代码
+            opApprHead.setOwnerName("青岛港怡之航冷链物流有限公司");//货主单位名称
+            Map<String, Object> apprHeadMap = this.buildApprHead(opApprHead);
 
-//        //申请单
-//        List<Map<String, Object>> ApprLists = this.buildApprLists(opApprHead,infolist);
-//        //拼装Json
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
-//        map.put("DeclType", "1");
-//        map.put("ApprLists", ApprLists);
-//        map.put("ApprHead", apprHeadMap);
-//
-//        String jsonString = JSON.toJSONString(map, SerializerFeature.WriteMapNullValue);
-//        System.out.println(jsonString);
-//        logger.error(jsonString);
-//        // 1 获得key
-//        String tickId = getKeyService.builder();
-//        System.out.println(tickId);
-//
-//        // 2 调用接口
-//        //设置接口名
-//        String serviceName = "ApprSave";
-//        // 调用 申请单保存
-//        String result = fljgWsClient.getResult(jsonString, tickId, serviceName);
-//        System.out.println("ApprSave result: " + result);
-//        logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
-//
-//        JSONObject jsonObject = JSON.parseObject(result);
-//        String state = jsonObject.getString("state");
-//        if(state.equals("1")) {
-//
-//        }else {
-//            String CheckInfos = jsonObject.getString("CheckInfos");
-//            logger.error("CheckInfos"+CheckInfos);
-//        }
-//
+            //生成申请单表体
+            List<OpApprInfo> infolist = new ArrayList<>();
+            OpApprInfo opApprInfo = new OpApprInfo();
+            opApprInfo.setCodeTs(forAAccountBook.getCodeTs());//商品编码
+            opApprInfo.setgName(forAAccountBook.getGName());//商品名称
+            opApprInfo.setgNo(Integer.parseInt(forAAccountBook.getGNo()));//底账商品项号
+            opApprInfo.setgQty(forAAccountBook.getCutQty());//数量
+            opApprInfo.setgUnit("035");//单位
+            opApprInfo.setApprGNo(1);
+            infolist.add(opApprInfo);
 
+            //申请单
+            List<Map<String, Object>> ApprLists = this.buildApprLists(opApprHead,infolist);
+            //拼装Json
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
+            map.put("DeclType", "1");
+            map.put("ApprLists", ApprLists);
+            map.put("ApprHead", apprHeadMap);
+
+            String jsonString = JSON.toJSONString(map, SerializerFeature.WriteMapNullValue);
+            System.out.println(jsonString);
+            logger.error(jsonString);
+            // 1 获得key
+            String tickId = getKeyService.builder();
+            System.out.println(tickId);
+            //设置接口名
+            String serviceName = "ApprSave";
+            // 调用 申请单保存
+            String result = fljgWsClient.getResult(jsonString, tickId, serviceName);
+            System.out.println("ApprSave result: " + result);
+            logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
+
+            JSONObject jsonObject = JSON.parseObject(result);
+            String state = jsonObject.getString("state");
+            if(state.equals("1")) {
+                String data = jsonObject.getString("data");
+                List<AAccountBook> aAccountBooks = new ArrayList<>();
+                List<PropertyFilter> filtersATray =new ArrayList<PropertyFilter>();
+                filtersATray.add(new PropertyFilter("EQS_GNo", forAAccountBook.getGNo()));
+                aAccountBooks = aAccountBookService.search(filtersATray);
+                for (AAccountBook forAAccountBookTemp:aAccountBooks) {
+                    forAAccountBookTemp.setIss("1");
+                    forAAccountBookTemp.setAppid(data);
+                    aAccountBookService.merge(forAAccountBookTemp);
+                }
+            }else {
+                String CheckInfos = jsonObject.getString("CheckInfos");
+                logger.error("CheckInfos"+CheckInfos);
+            }
+        }
         return "success";
     }
 
@@ -545,41 +571,63 @@ public class ATrayController extends BaseController {
         //查询剩余数量大于0的底账信息
         List<AAccountBook> aAccountBookList = new ArrayList<>();
         aAccountBookList = aAccountBookService.queryClearInventoryHData();
+        for (AAccountBook forAAccountBook:aAccountBookList) {
+            JSONObject jsonObject = new JSONObject();
+            //构建接口json.表头
+            JSONObject manibase = new JSONObject();
+            manibase.put("IeFlag", "E");
+            manibase.put("GrossWt", "20");
+            manibase.put("VehicleId", "V"+(int)((Math.random()*9+1)*100000));
+            manibase.put("VehicleWeight", "20");
+            //表头加入json中
+            jsonObject.put("Manibase", manibase);
 
-//        //申请单
-//        List<Map<String, Object>> ApprLists = this.buildApprLists(opApprHead,infolist);
-//        //拼装Json
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        map.put("SaveType", "1");//这里0为暂存，咱们不存在暂存申请，直接发送1
-//        map.put("DeclType", "1");
-//        map.put("ApprLists", ApprLists);
-//        map.put("ApprHead", apprHeadMap);
-//
-//        String jsonString = JSON.toJSONString(map, SerializerFeature.WriteMapNullValue);
-//        System.out.println(jsonString);
-//        logger.error(jsonString);
-//        // 1 获得key
-//        String tickId = getKeyService.builder();
-//        System.out.println(tickId);
-//
-//        // 2 调用接口
-//        //设置接口名
-//        String serviceName = "ApprSave";
-//        // 调用 申请单保存
-//        String result = fljgWsClient.getResult(jsonString, tickId, serviceName);
-//        System.out.println("ApprSave result: " + result);
-//        logger.error(">>>>>>>>>>>>>>>>>调用申请单申报result： "+result);
-//
-//        JSONObject jsonObject = JSON.parseObject(result);
-//        String state = jsonObject.getString("state");
-//        if(state.equals("1")) {
-//
-//        }else {
-//            String CheckInfos = jsonObject.getString("CheckInfos");
-//            logger.error("CheckInfos"+CheckInfos);
-//        }
-//
+            //构建货物信息
+            JSONArray jsonArray = new JSONArray();
+            JSONObject maniGoods = new JSONObject();
+            maniGoods.put("GNo", forAAccountBook.getGNo());
+            maniGoods.put("ApprId", forAAccountBook.getAppid());
+            maniGoods.put("ApprGNo","1");
+            maniGoods.put("CodeTs", forAAccountBook.getCodeTs());
+            maniGoods.put("GName", forAAccountBook.getGName());
+            maniGoods.put("GUnit", "035");
+            maniGoods.put("GQty", forAAccountBook.getCutQty());
+            maniGoods.put("ConfirmQty", forAAccountBook.getCutQty());
+            jsonArray.add(maniGoods);
 
+            //货物信息加入
+            jsonObject.put("ManiGoods", jsonArray);
+            jsonObject.put("DeclType", "1");//1首次申报2变更3作废
+            jsonObject.put("SaveType", "1");// 0-暂存，1-申报
+            logger.error(">>>>>>>>>>>>>>>>>调用核放单申报json： " + jsonObject.toJSONString());
+            // 1 获得key
+            String tickId = getKeyService.builder();
+            System.out.println(tickId);
+            //设置接口名
+            String serviceName = "ManiSave";
+            // 调用 申请单保存
+            String result = fljgWsClient.getResult(jsonObject.toJSONString(), tickId, serviceName);
+            System.out.println("result: " + result);
+            logger.error(">>>>>>>>>>>>>>>>>调用核放单申报result： " + result);
+
+            JSONObject jsonResult = JSON.parseObject(result);
+            String state = jsonResult.getString("state");
+            if (state.equals("1")) {
+                List<AAccountBook> aAccountBooks = new ArrayList<>();
+                List<PropertyFilter> filtersATray =new ArrayList<PropertyFilter>();
+                filtersATray.add(new PropertyFilter("EQS_GNo", forAAccountBook.getGNo()));
+                aAccountBooks = aAccountBookService.search(filtersATray);
+                for (AAccountBook forAAccountBookTemp:aAccountBooks) {
+                    forAAccountBookTemp.setFinish("1");
+                    forAAccountBookTemp.setIsh("1");
+                    aAccountBookService.merge(forAAccountBookTemp);
+                }
+            }else {
+                String message = jsonResult.getString("message");
+                String CheckInfos = jsonResult.getString("CheckInfos");
+                logger.error(message+CheckInfos);
+            }
+        }
         return "success";
     }
     
@@ -592,10 +640,12 @@ public class ATrayController extends BaseController {
         apprHeadMap.put("ApprType", opApprHead.getApprType()!= null ? opApprHead.getApprType() : null);
         apprHeadMap.put("IoType", opApprHead.getIoType()!= null ? opApprHead.getIoType() : null);
         apprHeadMap.put("BondInvtNo", opApprHead.getBondInvtNo()!= null ? opApprHead.getBondInvtNo() : null);
-        //件数
-        apprHeadMap.put("PackNo", opApprInfoService.sumQtyByHeadId(opApprHead.getId()));
-        //重量
-        apprHeadMap.put("GrossWt", opApprInfoService.sumWeightByHeadId(opApprHead.getId()));
+        if (opApprHead.getId()!=null && opApprHead.getId().trim().length() > 0){
+            //件数
+            apprHeadMap.put("PackNo", opApprInfoService.sumQtyByHeadId(opApprHead.getId()));
+            //重量
+            apprHeadMap.put("GrossWt", opApprInfoService.sumWeightByHeadId(opApprHead.getId()));
+        }
 
         apprHeadMap.put("CustomsCode", opApprHead.getCustomsCode()!= null ? opApprHead.getCustomsCode() : null);
         apprHeadMap.put("EmsNo", opApprHead.getEmsNo()!= null ? opApprHead.getEmsNo() : null);

@@ -73,7 +73,20 @@ public class LoadingOrderContorller extends BaseController {
         page.orderBy("createTime").order(Page.DESC);
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         page = loadingOrderService.search(page, filters);
-        return getEasyUIData(page);
+        List<BisLoadingOrder> bisLoadingOrderList = new ArrayList<>();
+        for (BisLoadingOrder forBisLoadingOrder:page.getResult()) {
+            BisOutStock bisOutStock = outStockService.find("outLinkId",forBisLoadingOrder.getOutLinkId());
+            if (bisOutStock!=null && bisOutStock.getIfBonded()!=null && "1".equals(bisOutStock.getIfBonded().trim().toString())){
+                forBisLoadingOrder.setIfBonded("1");//保税
+            }else{
+                forBisLoadingOrder.setIfBonded("0");//非保税
+            }
+            bisLoadingOrderList.add(forBisLoadingOrder);
+        }
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("rows", bisLoadingOrderList);
+        map.put("total", page.getTotalCount());
+        return map;
     }
 
     /**

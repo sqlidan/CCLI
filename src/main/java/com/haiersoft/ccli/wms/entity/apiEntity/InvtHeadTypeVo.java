@@ -3,6 +3,7 @@ package com.haiersoft.ccli.wms.entity.apiEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.Column;
+import javax.persistence.Transient;
 import java.util.Date;
 
 
@@ -18,6 +19,15 @@ public class InvtHeadTypeVo extends InvtHeadType implements java.io.Serializable
     private String zgAudit; //复审审核
     private String zgRejectReason; //复审驳回原因
     private String zgAuditTime;  //复审时间
+    private Integer days; //天数
+
+    public Integer getDays() {
+        return days;
+    }
+
+    public void setDays(Integer days) {
+        this.days = days;
+    }
 
     public String getId() {
         return id;

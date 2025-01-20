@@ -13,6 +13,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.xml.rpc.ServiceException;
 
+import com.haiersoft.ccli.supervision.service.*;
+import com.haiersoft.ccli.wms.entity.BisEnterStock;
+import com.haiersoft.ccli.wms.entity.BisOutStock;
+import com.haiersoft.ccli.wms.service.EnterStockService;
+import com.haiersoft.ccli.wms.service.OutStockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +38,6 @@ import com.haiersoft.ccli.supervision.entity.ApprHead;
 import com.haiersoft.ccli.supervision.entity.ApprInfo;
 import com.haiersoft.ccli.supervision.entity.ManiHead;
 import com.haiersoft.ccli.supervision.entity.ManiInfo;
-import com.haiersoft.ccli.supervision.service.FljgWsClient;
-import com.haiersoft.ccli.supervision.service.GetKeyService;
-import com.haiersoft.ccli.supervision.service.ManiHeadService;
-import com.haiersoft.ccli.supervision.service.ManiInfoService;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.wms.entity.BisEnterStockInfo;
 import com.haiersoft.ccli.wms.service.EnterStockInfoService;
@@ -56,6 +57,14 @@ public class ManiController extends BaseController{
 	
 	@Autowired
 	ManiInfoService maniInfoService;
+
+	@Autowired
+	ApprInfoService apprInfoService;
+
+	@Autowired
+	EnterStockService enterStockService;
+	@Autowired
+	OutStockService outStockService;
 	
     @Autowired
     EnterStockInfoService enterStockInfoService;
@@ -252,14 +261,62 @@ public class ManiController extends BaseController{
 			List<PropertyFilter> infofilters = new ArrayList<PropertyFilter>();
 			infofilters.add(new PropertyFilter("EQS_headId", maniheadList.get(0).getId()));
 			List<ManiInfo> maniInfoList = maniInfoService.search(infofilters);
-			
+
 			//拼装Json
 //			Map<String,Object> map = new HashMap<String, Object>();
 //			map.put("SaveType", "0");
 //			map.put("DeclType", "1");
 //			map.put("ManiGoods", maniInfoList);
-//			map.put("Manibase", maniheadList.get(0));	
+//			map.put("Manibase", maniheadList.get(0));
 			ManiHead manihead = maniheadList.get(0);
+
+			//2024-12-30 徐峥 增加分类监管核放单校验保税货物逻辑
+			if (maniInfoList !=null && maniInfoList.size() > 0){
+				for (ManiInfo forManiInfo:maniInfoList) {
+					if (forManiInfo.getApprId()==null || forManiInfo.getApprId().trim().length() == 0){
+						return "核放单明细未绑定申请单号，请联系管理员。";
+					}
+					List<PropertyFilter> apprInfofilters = new ArrayList<PropertyFilter>();
+					apprInfofilters.add(new PropertyFilter("EQS_apprId", forManiInfo.getApprId()));
+					List<ApprInfo> apprInfoList = apprInfoService.search(apprInfofilters);
+					if (apprInfoList !=null && apprInfoList.size() > 0){
+						List<String> stingList = new ArrayList<>();
+						for (ApprInfo forApprInfo:apprInfoList) {
+							if (!stingList.contains(forApprInfo.getLinkId())){
+								stingList.add(forApprInfo.getLinkId());
+							}
+						}
+						if ("I".equals(manihead.getIeFlag())){//入区
+							for (String linkId:stingList) {
+								List<PropertyFilter> enterStockfilters = new ArrayList<PropertyFilter>();
+								enterStockfilters.add(new PropertyFilter("EQS_linkId", linkId));
+								List<BisEnterStock> bisEnterStockList = enterStockService.search(enterStockfilters);
+								if (bisEnterStockList!=null && bisEnterStockList.size() > 0){
+									for (BisEnterStock forBisEnterStock:bisEnterStockList) {
+										if ("1".equals(forBisEnterStock.getIfBonded())){
+											return "入库联系单："+linkId+"为保税货物,不可在分类监管中进行操作。";
+										}
+									}
+								}
+							}
+						}else if ("E".equals(manihead.getIeFlag())){//出区
+							for (String linkId:stingList) {
+								List<PropertyFilter> outStockfilters = new ArrayList<PropertyFilter>();
+								outStockfilters.add(new PropertyFilter("EQS_outLinkId", linkId));
+								List<BisOutStock> bisOutStockList = outStockService.search(outStockfilters);
+								if (bisOutStockList!=null && bisOutStockList.size() > 0){
+									for (BisOutStock forBisOutStock:bisOutStockList) {
+										if ("1".equals(forBisOutStock.getIfBonded())){
+											return "出库联系单："+linkId+"为保税货物,不可在分类监管中进行操作。";
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 			
 			JSONObject jsonObject = new JSONObject();
 			//构建接口json.表头

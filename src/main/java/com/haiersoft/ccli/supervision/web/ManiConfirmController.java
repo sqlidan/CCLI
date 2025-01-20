@@ -221,7 +221,7 @@ public class ManiConfirmController extends BaseController {
             maniGoods.put("Unit1", maniInfo.getGUnit1()==null?null:maniInfo.getGUnit1());
             maniGoods.put("Qty1", maniInfo.getGQty1()==null?null:maniInfo.getGQty1());
             maniGoods.put("GrossWt",maniInfo.getGrossWt()==null?null:maniInfo.getGrossWt());
-            maniGoods.put("ConfirmQty",maniInfo.getConfirmQty()==null?null:maniInfo.getConfirmQty());
+            maniGoods.put("ConfirmQty",maniInfo.getGQty()==null?null:maniInfo.getGQty());
             maniGoods.put("EmsGNo",maniInfo.getEmsGNo()==null?null:maniInfo.getEmsGNo());
             maniGoods.put("GdsMtno",maniInfo.getGdsMtno()==null?null:maniInfo.getGdsMtno());
             jsonArray.add(maniGoods);

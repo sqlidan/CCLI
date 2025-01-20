@@ -270,6 +270,17 @@ public class BisOutStock implements java.io.Serializable {
 	@Transient
 	private String locationType;//是否存在库位  1有，2没有
 	////////////////////////////////////////////////////////////////////////////
+
+	@Column(name = "CHECK_LIST_NO")
+	private  String checkListNo;//核注清单号
+
+	public String getCheckListNo() {
+		return checkListNo;
+	}
+
+	public void setCheckListNo(String checkListNo) {
+		this.checkListNo = checkListNo;
+	}
 	
 	
 	public String getIfRecord() {

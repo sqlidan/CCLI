@@ -1,15 +1,5 @@
 package com.haiersoft.ccli.wms.web;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.SocketException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -31,7 +21,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.haiersoft.ccli.report.web.OCRUtils;
 import com.haiersoft.ccli.supervision.web.FTPUtils;
+import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
+import com.haiersoft.ccli.wms.entity.apiEntity.ApiType;
+import com.haiersoft.ccli.wms.entity.apiEntity.InvtHeadType;
+import com.haiersoft.ccli.wms.entity.apiEntity.InvtHeadTypeVo;
+import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
+import com.haiersoft.ccli.wms.web.preEntry.HttpUtils;
+import okhttp3.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
@@ -44,12 +44,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.druid.sql.ast.statement.SQLIfStatement.Else;
 import com.alibaba.fastjson.JSON;
@@ -93,6 +88,10 @@ import com.haiersoft.ccli.wms.service.EnterStockInfoService;
 import com.haiersoft.ccli.wms.service.EnterStockService;
 import com.haiersoft.ccli.wms.service.TrayInfoService;
 import com.itextpdf.text.PageSize;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * @author pyl
  * @ClassName: EnterStockController
@@ -175,7 +174,6 @@ public class EnterStockController extends BaseController {
     		BisEnterStock bisEnterStock = enterStockService.get(linkId);
     		model.addAttribute("bisEnterStock", bisEnterStock);
     	}
-    	
         return "wms/enterStock/enterStockManagerUpdate";
     }
     //入库联系单管理修改 默认页面 查询
@@ -424,6 +422,25 @@ public class EnterStockController extends BaseController {
         BisEnterStock enterStock = new BisEnterStock();
         parameterReflect.reflectParameter(enterStock, request);//转换对应实体类参数
         User user = UserUtil.getCurrentUser();
+
+        //2024-12-09 徐峥增加
+        if (enterStock.getIfBonded()!=null && "1".equals(enterStock.getIfBonded()) && enterStock.getCheckListNo()!=null && enterStock.getCheckListNo().trim().length() > 0){
+            //依据核注清单号查询核注清单信息是否存在
+            List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+            List<PropertyFilter> filters = new ArrayList<>();
+            filters.add(new PropertyFilter("EQS_bondInvtNo", enterStock.getCheckListNo().trim()));
+            filters.add(new PropertyFilter("EQS_synchronization", "1"));
+            bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+            if (bisPreEntryInvtQueryList==null || bisPreEntryInvtQueryList.size() == 0){
+                return "当前信息为保税入库联系单，需填写有效的的核注清单号。";
+            }else{
+                if (bisPreEntryInvtQueryList.get(0)!=null) {
+                    bisPreEntryInvtQueryList.get(0).setInLinkId(enterStock.getLinkId());
+                    preEntryInvtQueryService.merge(bisPreEntryInvtQueryList.get(0));
+                }
+            }
+        }
+
         enterStock.setDelFlag("0"); //删除标志，正常
         if ("0".equals(state)) {
             enterStock.setPlanFeeState("0");
@@ -1717,6 +1734,133 @@ public class EnterStockController extends BaseController {
         model.addAttribute("bisEnterStockInfo", JSON.toJSONString(oldList));
         return "wms/enterStock/apprForm";
     }
-  
-    
+//==========================识别报关单渲染录入联系单===========================================================================================
+    @Autowired
+    private PreEntryInvtQueryService preEntryInvtQueryService;
+
+    /**
+     * 上传报关单PDF
+     */
+    @RequestMapping(value = "BGDOCR", method = RequestMethod.GET)
+    public String BGDOCR(HttpServletRequest request,Model model) {
+        return "wms/enterStock/enterStockOCRInfoInto";
+    }
+    /**
+     * 报关单PDF识别
+     */
+    @RequestMapping(value = "OCRPDF", method = RequestMethod.POST)
+    @ResponseBody
+    public String OCRPdf(@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+        byte[] bytes = file.getBytes();
+        String API_KEY = "3HHaLDGWrn7aim103NDugde6";
+        String SECRET_KEY = "cfURiYfdOrA1oXf6Hh4ZJ8XGnerKIU2R";
+
+        List<Dict> dictList = new ArrayList<>();
+        List<PropertyFilter> filters = new ArrayList<>();
+        filters.add(new PropertyFilter("EQS_type", "ocr_key"));
+        filters.add(new PropertyFilter("EQS_delFlag", "0"));
+        dictList = dictService.search(filters);
+        if (dictList!=null && dictList.size() > 0){
+            API_KEY = dictList.get(0).getLabel();
+            SECRET_KEY = dictList.get(0).getValue();
+        }
+        try {
+            //方案一，开通外网识别域名权限，直接访问识别API
+//            return OCRUtils.OCRPdf(bytes,API_KEY,SECRET_KEY);
+            //方案二，访问10.135.200.5上的8994端口服务，访问跳转接口，获取识别结果数据
+            String url = "http://10.135.200.5:8994/ccli/ocr/OCRPdf";
+            OkHttpClient client = new OkHttpClient();
+            MediaType mediaType = MediaType.parse("application/octet-stream");
+            okhttp3.RequestBody requestBody = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("API_KEY", API_KEY)
+                    .addFormDataPart("SECRET_KEY", SECRET_KEY)
+                    .addFormDataPart("file","ocrPdfFile.pdf", okhttp3.RequestBody.create(mediaType,bytes))
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("Unexpected code " + response);
+                }
+                String result = response.body().string();
+                System.out.println(result);
+                return result;
+            }
+        }catch(Exception e){
+            return "识别异常";
+        }
+    }
+    @RequestMapping(value = "addData/{json}", method = RequestMethod.GET)
+    public String addData(Model model, @PathVariable("json") String json) {
+        String linkId = enterStockService.getLinkIdToString();//入库联系单号
+        User user = UserUtil.getCurrentUser();
+        BisEnterStock enterStock = new BisEnterStock();
+        enterStock.setLinkId(linkId);
+        enterStock.setOperator(user.getName());
+        enterStock.setOperateTime(new Date());
+
+        String bah = "";//备案号
+        String tydh = "";//提运单号
+        String hzqdh = "";//核注清单号
+        if (json!=null && json.trim().length() > 0){
+            String[] strings = json.split(",");
+            bah = strings[1];
+            tydh = strings[2];
+            hzqdh = strings[3];
+        }
+
+        //如果备案号等于T4230W000036，且存在核注清单号标识为此报关单为保税单据
+        if (hzqdh !=null && hzqdh.trim().length() > 0 && ("T4230W000036".equals(bah) || "T4230W000042".equals(bah))){
+            enterStock.setIfBonded("1");//默认渲染为勾选保税，且不可修改
+        }
+        if (hzqdh.trim().length() > 0){
+            //依据核注清单号查询核注清单信息是否存在
+            List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+            List<PropertyFilter> filters = new ArrayList<>();
+            filters.add(new PropertyFilter("EQS_bondInvtNo", hzqdh));
+            filters.add(new PropertyFilter("EQS_synchronization", "1"));
+            bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+            if (bisPreEntryInvtQueryList!=null && bisPreEntryInvtQueryList.size() == 1){
+                if (!"1".equals(enterStock.getIfBonded())){
+                    enterStock.setIfBonded("1");//默认渲染为勾选保税，且不可修改
+                }
+                //渲染数据
+                for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
+                    InvtHeadType invtHeadType = new InvtHeadType();
+                    try {
+                        invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+                    enterStock.setItemNum(forBisPreEntryInvtQuery.getTdNo());//入库提单号
+                }
+            }
+        }
+
+        model.addAttribute("action", "create");
+        model.addAttribute("bisEnterStock", enterStock);
+        model.addAttribute("checkListNo", hzqdh);
+        return "wms/enterStock/enterStockManager";
+    }
+
+//==========================================================================================================================
+    public static Object ByteAryToObject(byte[] bytes) throws IOException, ClassNotFoundException {
+        if(bytes == null){
+            return null;
+        }
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ObjectInputStream sIn = null;
+        Object obj = null;
+        sIn = new ObjectInputStream(in);
+        obj = sIn.readObject();
+        return obj;
+    }
 }

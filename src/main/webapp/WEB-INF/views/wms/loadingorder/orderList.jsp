@@ -130,11 +130,22 @@
             pageNumber: 1,
             pageSize: 20,
             pageList: [10, 20, 30, 40, 50],
-            singleSelect: true,
+            singleSelect: false,
             columns: [[
                 {field: 'orderNum', title: '订单号', sortable: true, width: 100},
                 {field: 'outLinkId', title: '出库联系单', sortable: true, width: 120},
                 {field: 'carNum', title: '车牌号', sortable: true, width: 80},
+                {field: 'ifBonded', title: '是否保税', sortable: true, width: 80,
+                    formatter: function (value, row, index) {
+                        var retStr = "否";
+                        switch (value) {
+                            case '1':
+                                retStr = "是";
+                                break;
+                        }
+                        return retStr;
+                    }
+                },
                 {field: 'islock', title: '控车状态', sortable: true, width: 80,
                 	  formatter: function (value, row, index) {
                           var retStr = "否";

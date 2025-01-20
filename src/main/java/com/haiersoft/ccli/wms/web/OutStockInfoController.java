@@ -1,11 +1,6 @@
 package com.haiersoft.ccli.wms.web;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -17,6 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.alibaba.fastjson.JSON;
+import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
+import com.haiersoft.ccli.wms.entity.apiEntity.InvtListType;
+import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
@@ -85,6 +84,8 @@ public class OutStockInfoController extends BaseController {
     private ClientService clientService;
     @Autowired
     private ClientRankService clientRankService;
+    @Autowired
+    private PreEntryInvtQueryService preEntryInvtQueryService;
 
     /**
      * @return
@@ -155,6 +156,37 @@ public class OutStockInfoController extends BaseController {
     @RequestMapping(value = "addoutinfo", method = RequestMethod.GET)
     @ResponseBody
     public String create(Integer outNum, String billNum, String ctnNum, String outLinkId,String asn, String sku, String saleNum, String enterState, String rkNum,Integer codeNum,HttpServletRequest request) {
+        //2024-12-09 徐峥，获取核注清单中的提单号
+        String billNmS = "";//提单号
+        BisOutStock bisOutStock = outStockService.find("outLinkId",outLinkId);
+        if (bisOutStock!=null && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
+            //核注清单号可能会有多个，用英文分号隔开
+            String[] string = null;
+            if (bisOutStock.getCheckListNo().trim().contains(";")){
+                string = bisOutStock.getCheckListNo().trim().split(";");
+            }else{
+                string = new String[1];
+                string[0] = bisOutStock.getCheckListNo().trim();
+            }
+            for (int i = 0; i < string.length; i++) {
+                List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+                List<PropertyFilter> filters = new ArrayList<>();
+                filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
+                filters.add(new PropertyFilter("EQS_synchronization", "1"));
+                bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+                if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
+                    BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
+                    //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
+                    if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
+                        billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+                    }
+                }
+            }
+            if (!billNmS.contains(billNum)) {
+                return "新增提单需与核注清单中的提单保持一致";
+            }
+        }
+
         BisOutStockInfo outStockInfo = new BisOutStockInfo();
         //获得对应的入库联系单明细
         Map<String, Object> params3 = new HashMap<String, Object>();
@@ -327,6 +359,34 @@ public class OutStockInfoController extends BaseController {
         String tray = "";
         String rk = "";
         Double weight=0d;  //明细总量
+
+        //2024-12-09 徐峥，获取核注清单中的提单号
+        String billNmS = "";//提单号
+        BisOutStock bisOutStock = outStockService.find("outLinkId",outLinkId);
+        if (bisOutStock!=null && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
+            //核注清单号可能会有多个，用英文分号隔开
+            String[] string = null;
+            if (bisOutStock.getCheckListNo().trim().contains(";")){
+                string = bisOutStock.getCheckListNo().trim().split(";");
+            }else{
+                string = new String[1];
+                string[0] = bisOutStock.getCheckListNo().trim();
+            }
+            for (int i = 0; i < string.length; i++) {
+                List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+                List<PropertyFilter> filters = new ArrayList<>();
+                filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
+                filters.add(new PropertyFilter("EQS_synchronization", "1"));
+                bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+                if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
+                    BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
+                    if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
+                        billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+                    }
+                }
+            }
+        }
+
         List<BisOutStockInfo> infos=outStockInfoService.getList(outLinkId);
         if(!infos.isEmpty()){
 	        for(BisOutStockInfo info:infos){
@@ -337,6 +397,21 @@ public class OutStockInfoController extends BaseController {
             ImportParams params = new ImportParams();
             params.setTitleRows(1);
             List<OutStockInfoToExcel> list = ExcelImportUtil.importExcel(file.getInputStream(), OutStockInfoToExcel.class, params);
+
+            //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
+            if (billNmS != null && billNmS.trim().length() > 0){
+                Boolean con = false;
+                for (OutStockInfoToExcel getObj : list) {
+                    if (!billNmS.contains(getObj.getBillNum())){
+                        con = true;
+                        break;
+                    }
+                }
+                if (con){
+                    return "over";
+                }
+            }
+
             BisOutStockInfo newObj = null;
             BaseSkuBaseInfo skuObj = null;
             User user = UserUtil.getCurrentUser();
@@ -761,6 +836,18 @@ public class OutStockInfoController extends BaseController {
     	}else{
     		return "success";
     	}
+    }
+
+    public static Object ByteAryToObject(byte[] bytes) throws IOException, ClassNotFoundException {
+        if(bytes == null){
+            return null;
+        }
+        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+        ObjectInputStream sIn = null;
+        Object obj = null;
+        sIn = new ObjectInputStream(in);
+        obj = sIn.readObject();
+        return obj;
     }
     
 }

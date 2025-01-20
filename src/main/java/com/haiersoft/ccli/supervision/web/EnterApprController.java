@@ -82,20 +82,21 @@ public class EnterApprController extends BaseController {
 			return "exist";
 		}
 
-		//2024-11-19 徐峥
-		//生成申请单时，校验HS编码是否不一样
+		//2025-01-08 徐峥注释，原因：因入库联系单号：Ezl1241231111547中的商品存在多个HS编码
+//		//2024-11-19 徐峥
+//		//生成申请单时，校验HS编码是否不一样
 		List<BisEnterStockInfo> bisEnterStockInfoList = enterStockInfoService.getList(apprHead.getLinkId());
-		if (bisEnterStockInfoList!=null && bisEnterStockInfoList.size() > 0){
-			List<String> stringList = new ArrayList<>();
-			for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
-				if (!stringList.contains(forBisEnterStockInfo.getHsCode())){
-					stringList.add(forBisEnterStockInfo.getHsCode());
-				}
-			}
-			if (stringList.size()!=1){
-				return "入库联系单"+apprHead.getLinkId()+" 明细中的HS编码不存在或不一致";
-			}
-		}
+//		if (bisEnterStockInfoList!=null && bisEnterStockInfoList.size() > 0){
+//			List<String> stringList = new ArrayList<>();
+//			for (BisEnterStockInfo forBisEnterStockInfo:bisEnterStockInfoList) {
+//				if (!stringList.contains(forBisEnterStockInfo.getHsCode())){
+//					stringList.add(forBisEnterStockInfo.getHsCode());
+//				}
+//			}
+//			if (stringList.size()!=1){
+//				return "入库联系单"+apprHead.getLinkId()+" 明细中的HS编码不存在或不一致";
+//			}
+//		}
 
 		// 根据联系单生成申请单head
 		BisEnterStock bisEnterStock = enterStockService.get(apprHead.getLinkId());
@@ -203,7 +204,7 @@ public class EnterApprController extends BaseController {
 		ai.setBisInfoId(bisInfoId);
 		ai.setLinkId(list.get(0).getLinkId());
 		ai.setApprGNo(1);
-		ai.setCodeTs(list.get(0).getHsCode());
+		ai.setCodeTs(list.get(0).getHsCode());//2025-01-08 徐峥，已确认HS编码随机获取
 		ai.setgName(list.get(0).getHsItemname());
 		//规格
 		ai.setgModel(list.get(0).getTypeSize());

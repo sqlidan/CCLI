@@ -154,6 +154,9 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true"
                onclick="appr()">申请单申请</a>
             <span class="toolbar-item dialog-tool-separator"></span>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true"
+           onclick="BGDOCR()">报关单识别</a>
+        <span class="toolbar-item dialog-tool-separator"></span>
 <%--        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true"--%>
 <%--           onclick="checkFee()">查验作业计费单</a>--%>
 <%--        <span class="toolbar-item dialog-tool-separator"></span>--%>
@@ -662,6 +665,29 @@
     			}
     		}]
     	});
+    }
+
+    //报关单OCR识别
+    function BGDOCR() {
+        d = $("#dlg").dialog({
+            title: "报关单PDF文件导入",
+            width: 450,
+            height: 300,
+            href: '${ctx}/wms/enterStock/BGDOCR',
+            maximizable: true,
+            modal: true,
+            buttons: [{
+                text: '确认',
+                handler: function () {
+                    $("#mainform3").submit();
+                }
+            }, {
+                text: '取消',
+                handler: function () {
+                    d.panel('close');
+                }
+            }]
+        });
     }
 </script>
 </body>
