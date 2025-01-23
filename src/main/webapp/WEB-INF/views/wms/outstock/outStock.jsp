@@ -257,6 +257,11 @@
                 sortable: true,
                 width: 100
             },
+            {field:'ifBonded',title:'是否保税',sortable:true,
+                formatter : function(value, row, index) {
+                    return value == '1' ? '是':'否';
+                }
+            },
             {field:'customsCompanyId',title:'是否报关',sortable:true,
   	        	formatter : function(value, row, index) {
   	       			return value == null ? '否':'是';

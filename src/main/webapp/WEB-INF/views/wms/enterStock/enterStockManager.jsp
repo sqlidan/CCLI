@@ -166,7 +166,7 @@
 				<td>核注清单号</td>
 				<td><input id="checkListNo" name="checkListNo"
 						   class="easyui-validatebox" data-options="width: 180,prompt:'请输入保税核注清单号'"
-						   value="${checkListNo}" onblur="getInfo()"/>
+						   value="${checkListNo}"/>
 				</td>
 			</tr>
 			<tr>
@@ -886,8 +886,7 @@
 										saveAndAdd();
 									}
 								}else{
-									parent.$.messager.alert({title: "提示", msg: msg, position: "bottomRight"});
-									return;
+									$.messager.confirm('保存失败:'+msg);
 								}
 							}
 						});
@@ -912,8 +911,7 @@
 								$("#auditingStateC").val("暂存");
 							}
 						}else{
-							parent.$.messager.alert({title: "提示", msg: msg, position: "bottomRight"});
-							return;
+							$.messager.confirm('保存失败:'+msg);
 						}
 					}
 				});

@@ -148,8 +148,7 @@
 				</td>
 				<td>核注清单号</td>
 				<td><input id="checkListNo" name="checkListNo"
-						   class="easyui-validatebox" data-options="width: 360,prompt:'请输入保税核注清单号(多个核注清单号用英文分号隔开)'"
-						   onblur="getInfo()"/>
+						   class="easyui-validatebox" data-options="width: 360,prompt:'请输入保税核注清单号(多个核注清单号用英文分号隔开)'"/>
 				</td>
 			</tr>
 			<tr>
@@ -764,6 +763,16 @@
 			parent.$.messager.show({ title : "提示",msg: "请选择收货方！", position: "bottomRight" });
 			return;
 		}
+		if($("#ifBonded").is(":checked")){
+			if($("#checkListNo").val()==0||$("#checkListNo").val()==""||$("#checkListNo").val()==null){
+				parent.$.easyui.messager.show({
+					title: "操作提示",
+					msg: "请输入核注清单号！",
+					position: "bottomRight"
+				});
+				return;
+			}
+		}
 
 		//检查要保存的明细是否都有asn
 		var getLinkId=$("#outLinkId").val();
@@ -1123,9 +1132,10 @@
 			url:"${ctx}/wms/outstockinfo/addoutinfo" ,
 			data : {"outNum":outNum,"billNum":billNum,"ctnNum":ctnNum,"asn":asn,"sku":sku,"outLinkId":outLinkIdA,"saleNum":saleNum,"enterState":enterState,"codeNum":codeNum},
 			success: function(data){
-				if(data != "success"){
-					parent.$.messager.show({ title : "提示",msg: data, position: "bottomRight" });
-					return;
+				if(data=="success"){
+					successTip(data, dg);
+				} else{
+					$.messager.confirm('保存失败:'+data);
 				}
 			}
 		});

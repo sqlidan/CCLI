@@ -570,34 +570,35 @@ public class OutStockController extends BaseController {
 		parameterReflect.reflectParameter(outStock, request);//转换对应实体类参数
 		User user = UserUtil.getCurrentUser();
 
-		//2024-12-09 徐峥增加
-		if (outStock.getIfBonded()!=null && "1".equals(outStock.getIfBonded()) && outStock.getCheckListNo()!=null && outStock.getCheckListNo().trim().length() > 0){
-			//核注清单号可能会有多个，用英文分号隔开
-			String[] string = null;
-			if (outStock.getCheckListNo().trim().contains(";")){
-				string = outStock.getCheckListNo().trim().split(";");
-			}else{
-				string = new String[1];
-				string[0] = outStock.getCheckListNo().trim();
-			}
-
-			for (int i = 0; i < string.length; i++) {
-				//依据核注清单号查询核注清单信息是否存在
-				List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
-				List<PropertyFilter> filters = new ArrayList<>();
-				filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
-				filters.add(new PropertyFilter("EQS_synchronization", "1"));
-				bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
-				if (bisPreEntryInvtQueryList==null || bisPreEntryInvtQueryList.size() == 0){
-					return "当前信息为保税出库联系单，需填写有效的的核注清单号。";
-				}else{
-					if (bisPreEntryInvtQueryList.get(0)!=null){
-						bisPreEntryInvtQueryList.get(0).setOutLinkId(outStock.getOutLinkId());
-						preEntryInvtQueryService.merge(bisPreEntryInvtQueryList.get(0));
-					}
-				}
-			}
-		}
+//		//2025-01-21 徐峥 保税校验逻辑部署后，修改校验逻辑注释
+//		//2024-12-09 徐峥增加
+//		if (outStock.getIfBonded()!=null && "1".equals(outStock.getIfBonded()) && outStock.getCheckListNo()!=null && outStock.getCheckListNo().trim().length() > 0){
+//			//核注清单号可能会有多个，用英文分号隔开
+//			String[] string = null;
+//			if (outStock.getCheckListNo().trim().contains(";")){
+//				string = outStock.getCheckListNo().trim().split(";");
+//			}else{
+//				string = new String[1];
+//				string[0] = outStock.getCheckListNo().trim();
+//			}
+//
+//			for (int i = 0; i < string.length; i++) {
+//				//依据核注清单号查询核注清单信息是否存在
+//				List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+//				List<PropertyFilter> filters = new ArrayList<>();
+//				filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
+//				filters.add(new PropertyFilter("EQS_synchronization", "1"));
+//				bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+//				if (bisPreEntryInvtQueryList==null || bisPreEntryInvtQueryList.size() == 0){
+//					return "当前信息为保税出库联系单，需填写有效的的核注清单号。";
+//				}else{
+//					if (bisPreEntryInvtQueryList.get(0)!=null){
+//						bisPreEntryInvtQueryList.get(0).setOutLinkId(outStock.getOutLinkId());
+//						preEntryInvtQueryService.merge(bisPreEntryInvtQueryList.get(0));
+//					}
+//				}
+//			}
+//		}
 
 		if("0".equals(state)){
 			outStock.setPlanFeeState("0");

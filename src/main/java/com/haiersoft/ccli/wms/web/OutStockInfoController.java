@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.alibaba.fastjson.JSON;
+import com.haiersoft.ccli.report.dao.StockReportDao;
+import com.haiersoft.ccli.report.entity.Stock;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
 import com.haiersoft.ccli.wms.entity.apiEntity.InvtListType;
 import com.haiersoft.ccli.wms.service.PreEntryInvtQuery.PreEntryInvtQueryService;
@@ -86,6 +88,8 @@ public class OutStockInfoController extends BaseController {
     private ClientRankService clientRankService;
     @Autowired
     private PreEntryInvtQueryService preEntryInvtQueryService;
+    @Autowired
+    private StockReportDao stockReportDao;
 
     /**
      * @return
@@ -156,35 +160,60 @@ public class OutStockInfoController extends BaseController {
     @RequestMapping(value = "addoutinfo", method = RequestMethod.GET)
     @ResponseBody
     public String create(Integer outNum, String billNum, String ctnNum, String outLinkId,String asn, String sku, String saleNum, String enterState, String rkNum,Integer codeNum,HttpServletRequest request) {
+        //2025-01-21 徐峥 依据提单号查询在库明细获取该提单号是否保税
+        String ifBonded = "0";
+        int pageNo = 1;    //当前页码
+        int pageSize = 20;    //每页行数
+        String orderBy = "id";    //排序字段
+        String order = "asc";    //排序顺序
+        Page<Stock> page = new Page<Stock>(pageNo, pageSize, orderBy, order);
+        page = stockReportDao.getStockStocks(page,null,billNum, null, null, null, null, null,"1");
+        if (page.getTotalCount() > 0){
+            List<Stock> stockList = page.getResult();
+            if (stockList!=null && stockList.size() > 0){
+                ifBonded = stockList.get(0).getIsBonded();
+            }
+        }
+
         //2024-12-09 徐峥，获取核注清单中的提单号
         String billNmS = "";//提单号
         BisOutStock bisOutStock = outStockService.find("outLinkId",outLinkId);
-        if (bisOutStock!=null && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
-            //核注清单号可能会有多个，用英文分号隔开
-            String[] string = null;
-            if (bisOutStock.getCheckListNo().trim().contains(";")){
-                string = bisOutStock.getCheckListNo().trim().split(";");
-            }else{
-                string = new String[1];
-                string[0] = bisOutStock.getCheckListNo().trim();
+        if (bisOutStock!=null){
+            //校验一，校验当前保存的提单明细是否保税与出库联系单中的是否保税状态一致
+            if (!ifBonded.equals(bisOutStock.getIfBonded()==null?"0":bisOutStock.getIfBonded().trim())){
+                return "出库联系单主表和明细中的保税状态不一致，请检查后保存";
             }
-            for (int i = 0; i < string.length; i++) {
-                List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
-                List<PropertyFilter> filters = new ArrayList<>();
-                filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
-                filters.add(new PropertyFilter("EQS_synchronization", "1"));
-                bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
-                if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
-                    BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
-                    //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
-                    if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
-                        billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+
+            //校验二，校验导入出库明细的提单号要和核注清单中的提单号一致
+            if ("1".equals(ifBonded) && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
+                //核注清单号可能会有多个，用英文分号隔开
+                String[] string = null;
+                if (bisOutStock.getCheckListNo().trim().contains(";")){
+                    string = bisOutStock.getCheckListNo().trim().split(";");
+                }else{
+                    string = new String[1];
+                    string[0] = bisOutStock.getCheckListNo().trim();
+                }
+                for (int i = 0; i < string.length; i++) {
+                    List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+                    List<PropertyFilter> filters = new ArrayList<>();
+                    filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
+                    filters.add(new PropertyFilter("EQS_synchronization", "1"));
+                    bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+                    if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
+                        BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
+                        //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
+                        if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
+                            billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+                        }
                     }
                 }
+                if (!billNmS.contains(billNum)) {
+                    return "新增提单需与核注清单中的提单保持一致";
+                }
             }
-            if (!billNmS.contains(billNum)) {
-                return "新增提单需与核注清单中的提单保持一致";
-            }
+        }else{
+            return "未找到对应的出库联系单信息";
         }
 
         BisOutStockInfo outStockInfo = new BisOutStockInfo();
@@ -362,30 +391,37 @@ public class OutStockInfoController extends BaseController {
 
         //2024-12-09 徐峥，获取核注清单中的提单号
         String billNmS = "";//提单号
+        String ifBonded = "0";
         BisOutStock bisOutStock = outStockService.find("outLinkId",outLinkId);
-        if (bisOutStock!=null && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
-            //核注清单号可能会有多个，用英文分号隔开
-            String[] string = null;
-            if (bisOutStock.getCheckListNo().trim().contains(";")){
-                string = bisOutStock.getCheckListNo().trim().split(";");
-            }else{
-                string = new String[1];
-                string[0] = bisOutStock.getCheckListNo().trim();
+        if (bisOutStock!=null){
+            if (bisOutStock.getIfBonded()!=null){
+                ifBonded = bisOutStock.getIfBonded();
             }
-            for (int i = 0; i < string.length; i++) {
-                List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
-                List<PropertyFilter> filters = new ArrayList<>();
-                filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
-                filters.add(new PropertyFilter("EQS_synchronization", "1"));
-                bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
-                if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
-                    BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
-                    if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
-                        billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+            if ("1".equals(ifBonded) && bisOutStock.getCheckListNo()!=null && bisOutStock.getCheckListNo().trim().length() > 0){
+                //核注清单号可能会有多个，用英文分号隔开
+                String[] string = null;
+                if (bisOutStock.getCheckListNo().trim().contains(";")){
+                    string = bisOutStock.getCheckListNo().trim().split(";");
+                }else{
+                    string = new String[1];
+                    string[0] = bisOutStock.getCheckListNo().trim();
+                }
+                for (int i = 0; i < string.length; i++) {
+                    List<BisPreEntryInvtQuery> bisPreEntryInvtQueryList = new ArrayList<>();
+                    List<PropertyFilter> filters = new ArrayList<>();
+                    filters.add(new PropertyFilter("EQS_bondInvtNo", string[i]));
+                    filters.add(new PropertyFilter("EQS_synchronization", "1"));
+                    bisPreEntryInvtQueryList = preEntryInvtQueryService.search(filters);
+                    if (bisPreEntryInvtQueryList != null && bisPreEntryInvtQueryList.size() == 1) {
+                        BisPreEntryInvtQuery forBisPreEntryInvtQuery = bisPreEntryInvtQueryList.get(0);
+                        if (forBisPreEntryInvtQuery.getTdNo() != null && forBisPreEntryInvtQuery.getTdNo().trim().length() > 0) {
+                            billNmS = billNmS + forBisPreEntryInvtQuery.getTdNo()+";";
+                        }
                     }
                 }
             }
         }
+
 
         List<BisOutStockInfo> infos=outStockInfoService.getList(outLinkId);
         if(!infos.isEmpty()){
@@ -397,18 +433,43 @@ public class OutStockInfoController extends BaseController {
             ImportParams params = new ImportParams();
             params.setTitleRows(1);
             List<OutStockInfoToExcel> list = ExcelImportUtil.importExcel(file.getInputStream(), OutStockInfoToExcel.class, params);
-
-            //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
             if (billNmS != null && billNmS.trim().length() > 0){
-                Boolean con = false;
+                //2025-01-21 徐峥 依据提单号查询在库明细获取该提单号是否保税
+                Boolean con1 = false;
                 for (OutStockInfoToExcel getObj : list) {
-                    if (!billNmS.contains(getObj.getBillNum())){
-                        con = true;
-                        break;
+                    String billNum = getObj.getBillNum();
+                    int pageNo = 1;    //当前页码
+                    int pageSize = 20;    //每页行数
+                    String orderBy = "id";    //排序字段
+                    String order = "asc";    //排序顺序
+                    Page<Stock> page = new Page<Stock>(pageNo, pageSize, orderBy, order);
+                    page = stockReportDao.getStockStocks(page, null, billNum, null, null, null, null, null, "1");
+                    if (page.getTotalCount() > 0) {
+                        List<Stock> stockList = page.getResult();
+                        if (stockList != null && stockList.size() > 0) {
+                            if (!ifBonded.equals(stockList.get(0).getIsBonded())){
+                                con1 = true;
+                                break;
+                            }
+                        }
                     }
                 }
-                if (con){
-                    return "over";
+                if (con1){
+                    return "出库联系单主表和明细中的保税状态不一致，请检查后保存";
+                }
+
+                //2024-12-09 徐峥，校验导入出库明细的提单号要和核注清单中的提单号一致
+                if ("1".equals(ifBonded)){
+                    Boolean con2 = false;
+                    for (OutStockInfoToExcel getObj : list) {
+                        if (!billNmS.contains(getObj.getBillNum())){
+                            con2 = true;
+                            break;
+                        }
+                    }
+                    if (con2){
+                        return "over";
+                    }
                 }
             }
 
