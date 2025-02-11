@@ -95,7 +95,8 @@ public class Stock implements Serializable {
     
     private String orgId;//结算单位id
     private String orgName;//结算单位名称
-    
+
+    private Integer day;//距离生产日期之间日差数
     private Integer days;//距离报关之间月差数
     private Integer spNum;//审批数量
     private String remark;//备注
@@ -113,9 +114,40 @@ public class Stock implements Serializable {
 	private Date uploadDate;//修改时间
 
     private String xz;//货位号
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    private Date makeTimes;//生产开始日期
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    private Date makeTimee;//生产截至日期
     
     ////////////////////////////////////////////////////////////
-    
+
+
+    public Integer getDay() {
+        return day;
+    }
+
+    public void setDay(Integer day) {
+        this.day = day;
+    }
+
+    public Date getMakeTimes() {
+        return makeTimes;
+    }
+
+    public void setMakeTimes(Date makeTimes) {
+        this.makeTimes = makeTimes;
+    }
+
+    public Date getMakeTimee() {
+        return makeTimee;
+    }
+
+    public void setMakeTimee(Date makeTimee) {
+        this.makeTimee = makeTimee;
+    }
+
     public String getHsCode() {
 		return hsCode;
 	}

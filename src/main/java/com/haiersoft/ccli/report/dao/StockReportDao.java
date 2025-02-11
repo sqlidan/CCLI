@@ -56,6 +56,9 @@ public class StockReportDao extends HibernateDao<Stock, String> {
                 + " sum(t.now_piece * t.gross_single)over(partition by null) as allgross, "
                 + " st.BGDHDATE as bgdhdate, "
                 + " st.OPERATOR as createUser, "
+                + " st.MAKE_TIMES as makeTimes, "
+                + " st.MAKE_TIMEE as makeTimee, "
+                + " TO_NUMBER(sysdate - st.MAKE_TIMES) as day, "
                 + " nvl(t.ACTUAL_STOREROOM_X, 0) || '_' || nvl(t.ACTUAL_STOREROOM_Z, 0) AS xz, "
                 + " months_between(sysdate,st.BGDHDATE) days,t.is_bonded as isBonded,t.UPLOADER as  uploader,t.UPLOAD_DATE  as uploadDate "
                + " FROM bis_tray_info t "
@@ -119,6 +122,8 @@ public class StockReportDao extends HibernateDao<Stock, String> {
         parm.put("ctnNum", String.class);
         parm.put("bgdhdate", String.class);
         parm.put("createUser", String.class);
+        parm.put("makeTimes", Date.class);
+        parm.put("makeTimee", Date.class);
         parm.put("asn", String.class);
         parm.put("sku", String.class);
         parm.put("contactCode", String.class);
@@ -140,6 +145,7 @@ public class StockReportDao extends HibernateDao<Stock, String> {
         parm.put("inTime", Date.class);
         parm.put("enterPerson", String.class);
         parm.put("enterOp", String.class);
+        parm.put("day", Integer.class);
         parm.put("days", Integer.class);
         parm.put("isBonded",  String.class);
         parm.put("uploader",  String.class);

@@ -155,6 +155,14 @@ public class BisEnterStock implements Serializable {
 	@Column(name = "IF_BONDED")
 	@Excel(name = "是否保税", replace = {"否_0", "是_1"})
 	private String ifBonded;//保税
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "MAKE_TIMES")
+	private Date makeTimes;//开始生产日期
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Column(name = "MAKE_TIMEE")
+	private Date makeTimee;//结束生产日期
 	
 	@Column(name = "IF_TO_CUSTOMS")
 	@Excel(name = "是否报关", replace = {"否_0", "是_1"})
@@ -384,6 +392,21 @@ public class BisEnterStock implements Serializable {
 	@Column(name = "CHECK_LIST_NO")
 	private  String checkListNo;//核注清单号
 
+	public Date getMakeTimes() {
+		return makeTimes;
+	}
+
+	public void setMakeTimes(Date makeTimes) {
+		this.makeTimes = makeTimes;
+	}
+
+	public Date getMakeTimee() {
+		return makeTimee;
+	}
+
+	public void setMakeTimee(Date makeTimee) {
+		this.makeTimee = makeTimee;
+	}
 
 	public String getCheckListNo() {
 		return checkListNo;

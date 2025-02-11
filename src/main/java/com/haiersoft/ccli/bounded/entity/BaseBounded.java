@@ -129,6 +129,39 @@ public class BaseBounded implements Serializable {
 	@Transient
 	private Double dclTotalAmt;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Transient
+	private Date makeTimes;//生产开始日期
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@Transient
+	private Date makeTimee;//生产截至日期
+	@Transient
+	private Integer day;//距离生产日期之间日差数
+
+	public Date getMakeTimes() {
+		return makeTimes;
+	}
+
+	public void setMakeTimes(Date makeTimes) {
+		this.makeTimes = makeTimes;
+	}
+
+	public Date getMakeTimee() {
+		return makeTimee;
+	}
+
+	public void setMakeTimee(Date makeTimee) {
+		this.makeTimee = makeTimee;
+	}
+
+	public Integer getDay() {
+		return day;
+	}
+
+	public void setDay(Integer day) {
+		this.day = day;
+	}
+
 	public String getEmsNo() {
 		return emsNo;
 	}

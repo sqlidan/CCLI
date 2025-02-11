@@ -404,6 +404,8 @@ public class EnterStockController extends BaseController {
     public String updateContractForm(Model model, @PathVariable("linkId") String linkId) {
         BisEnterStock bisEnterStock = enterStockService.get(linkId);
         model.addAttribute("bisEnterStock", bisEnterStock);
+        model.addAttribute("checkListNo", bisEnterStock.getCheckListNo());
+        model.addAttribute("emsNo", "");
         model.addAttribute("action", "update");
         return "wms/enterStock/enterStockManager";
     }
@@ -1807,13 +1809,15 @@ public class EnterStockController extends BaseController {
         String bah = "";//备案号
         String tydh = "";//提运单号
         String hzqdh = "";//核注清单号
+        String bgdh = "";//报关单号
         if (json!=null && json.trim().length() > 0){
             String[] strings = json.split(",");
             bah = strings[1];
             tydh = strings[2];
             hzqdh = strings[3];
+            bgdh = strings[5];
         }
-
+        enterStock.setItemNum(tydh);//入库提单号
         //如果备案号等于T4230W000036，且存在核注清单号标识为此报关单为保税单据
         if (hzqdh !=null && hzqdh.trim().length() > 0 && ("T4230W000036".equals(bah) || "T4230W000042".equals(bah))){
             enterStock.setIfBonded("1");//默认渲染为勾选保税，且不可修改
@@ -1831,23 +1835,15 @@ public class EnterStockController extends BaseController {
                 }
                 //渲染数据
                 for (BisPreEntryInvtQuery forBisPreEntryInvtQuery:bisPreEntryInvtQueryList) {
-                    InvtHeadType invtHeadType = new InvtHeadType();
-                    try {
-                        invtHeadType = JSONObject.parseObject(JSON.toJSONString(ByteAryToObject(forBisPreEntryInvtQuery.getInvtHeadType())),InvtHeadType.class);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
                     enterStock.setItemNum(forBisPreEntryInvtQuery.getTdNo());//入库提单号
                 }
             }
         }
-
+        enterStock.setBgdh(bgdh);
         model.addAttribute("action", "create");
         model.addAttribute("bisEnterStock", enterStock);
         model.addAttribute("checkListNo", hzqdh);
+        model.addAttribute("emsNo", bah);
         return "wms/enterStock/enterStockManager";
     }
 

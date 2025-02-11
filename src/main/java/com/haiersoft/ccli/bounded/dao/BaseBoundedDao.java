@@ -3,12 +3,16 @@ package com.haiersoft.ccli.bounded.dao;
 import com.haiersoft.ccli.bounded.web.BondedController;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.bounded.entity.BaseBounded;
+import com.haiersoft.ccli.common.persistence.Page;
+import com.haiersoft.ccli.common.utils.StringUtils;
+import com.haiersoft.ccli.report.entity.Stock;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,103 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
 	private static String like(String str) {
         return "%" + str + "%";
     }
+
+	/**
+	 * @param page
+	 * @Description: 分页查询
+	 */
+	public Page<BaseBounded> searchBaseBounded(Page<BaseBounded> page, BaseBounded baseBounded) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		StringBuffer sql = new StringBuffer(""
+				+ " SELECT "
+				+ " t.CLIENT_ID AS clientId, "
+				+ " t.CLIENT_NAME AS clientName, "
+				+ " t.BILL_NUM AS billNum, "
+				+ " t.CD_NUM AS cdNum, "
+				+ " t.CTN_NUM AS ctnNum, "
+				+ " t.ITEM_NAME AS itemName, "
+				+ " t.PIECE AS piece, "
+				+ " t.NET_WEIGHT AS netWeight, "
+				+ " t.CUSTOMER_SERVICE_NAME AS customerServiceName, "
+				+ " t.HS_CODE AS hsCode, "
+				+ " t.HS_ITEMNAME AS hsItemname, "
+				+ " t.ACCOUNT_BOOK AS accountBook, "
+				+ " t.DCL_QTY AS dclQty, "
+				+ " t.DCL_UNIT AS dclUnit, "
+				+ " t.HS_QTY AS hsQty, "
+				+ " t.TYPE_SIZE AS typeSize, "
+				+ " t.CARGO_LOCATION as cargoLocation, "
+				+ " t.CARGO_AREA as cargoArea, "
+				+ " t.STORAGE_DATE as storageDate, "
+				+ " t.CREATED_TIME as createdTime, "
+				+ " t.UPDATED_TIME as updatedTime, "
+				+ " st.MAKE_TIMES as makeTimes, "
+				+ " st.MAKE_TIMEE as makeTimee, "
+				+ " TO_NUMBER(sysdate - st.MAKE_TIMES) as day "
+				+ " FROM BASE_BOUNDED t "
+				+ " LEFT JOIN BIS_ENTER_STOCK st ON T.BILL_NUM=ST.ITEM_NUM "
+				+ " WHERE 1 = 1 ");//20170821 增加库存大于0的条件
+
+
+		if(!StringUtils.isNull(baseBounded.getClientName())){
+			sql.append(" and t.CLIENT_NAME like :clientName");
+			params.put("clientName", "%"+baseBounded.getClientName()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getBillNum())){
+			sql.append(" and t.BILL_NUM like :billNum");
+			params.put("billNum", "%"+baseBounded.getBillNum()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getCdNum())){
+			sql.append(" and t.CD_NUM like :cdNum");
+			params.put("cdNum", "%"+baseBounded.getCdNum()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getCustomerServiceName())){
+			sql.append(" and t.CUSTOMER_SERVICE_NAME like :customerServiceName");
+			params.put("customerServiceName", "%"+baseBounded.getCustomerServiceName()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getHsCode())){
+			sql.append(" and t.HS_CODE like :hsCode");
+			params.put("hsCode", "%"+baseBounded.getHsCode()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getHsItemname())){
+			sql.append(" and t.HS_ITEMNAME like :hsItemname");
+			params.put("hsItemname", "%"+baseBounded.getHsItemname()+"%");
+		}
+		if(!StringUtils.isNull(baseBounded.getAccountBook())){
+			sql.append(" and t.ACCOUNT_BOOK like :accountBook");
+			params.put("accountBook", "%"+baseBounded.getAccountBook()+"%");
+		}
+
+
+		//查询对象属性转换
+		Map<String, Object> parm = new HashMap<String, Object>();
+		parm.put("clientId", String.class);
+		parm.put("clientName", String.class);
+		parm.put("billNum", String.class);
+		parm.put("cdNum", String.class);
+		parm.put("ctnNum", String.class);
+		parm.put("itemName", String.class);
+		parm.put("piece", Integer.class);
+		parm.put("netWeight", Double.class);
+		parm.put("customerServiceName", String.class);
+		parm.put("hsCode", String.class);
+		parm.put("hsItemname", String.class);
+		parm.put("accountBook", String.class);
+		parm.put("dclQty", Double.class);
+		parm.put("dclUnit", String.class);
+		parm.put("hsQty", Double.class);
+		parm.put("typeSize", String.class);
+		parm.put("cargoLocation", String.class);
+		parm.put("cargoArea", String.class);
+		parm.put("storageDate", Date.class);
+		parm.put("createdTime", Date.class);
+		parm.put("updatedTime", Date.class);
+		parm.put("makeTimes", Date.class);
+		parm.put("makeTimee", Date.class);
+		parm.put("day", Integer.class);
+
+		return findPageSql(page, sql.toString(), parm, params);
+	}
 
 /*	public Page<PlatformUser> seachCustomsClearanceSql(Page<PlatformUser> page, PlatformUser customsClearance) {
 		StringBuffer buffer=new StringBuffer();

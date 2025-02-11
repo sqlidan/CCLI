@@ -58,6 +58,11 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="change()">是否保税转换</a>
             <span class="toolbar-item dialog-tool-separator"></span>
     </shiro:hasPermission>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true">剩余提醒天数(请输入数字)：</a>
+    <input id="day" name="day" class="easyui-validatebox"
+           data-options="width:200,prompt: '剩余提醒天数(请输入数字)'" value="730" onkeyup="this.value=this.value.replace(/\D/g,'')"
+           onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+    <span class="toolbar-item dialog-tool-separator"></span>
     </div>
     <div>
         现有数量合计：<input type="text" id="allpiece" readonly/>
@@ -139,6 +144,8 @@
                 {field: 'createUser', title: '客服员', sortable: true, width: 130},
                 {field: 'asn', title: 'ASN', sortable: true, width: 90},
                 {field: 'sku', title: 'SKU', sortable: true, width: 120},
+                {field: 'makeTimes', title: '生产日期开始时间', sortable: true, width: 130},
+                {field: 'makeTimee', title: '生产日期截至时间', sortable: true, width: 130},
                 {field: 'contactCode', title: '联系单号', sortable: true, width: 135},
                 {field: 'clientName', title: '客户名称', sortable: true, width: 150},
                 {field: 'warehouse', title: '仓库名', sortable: true, width: 80},
@@ -195,12 +202,16 @@
                 {field: 'uploadDate', title: '转一般贸易时间', sortable: true, width: 130},
                 {field: 'enterPerson', title: '入库理货员', sortable: true, width: 100},
                 {field: 'enterOp', title: '入库操作员', sortable: true, width: 100},
+                {field: 'day', title: '天数差', sortable: true, width: 100},
                 {field: 'days', title: '月数差', sortable: true, width: 100}
             ]],
             rowStyler: function (rowIndex, rowData) {
-                //变成红色
-                if (rowData.days>=10) {
-                	return 'background-color:red;';
+                var day = document.getElementById("day").value;
+                if(day !== undefined && day !== null && day > 0){
+                    //变成红色
+                    if (rowData.day >= day) {
+                        return 'background-color:red;';
+                    }
                 }
             },
             onLoadSuccess: function (data) {

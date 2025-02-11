@@ -148,7 +148,8 @@
 				</td>
 				<td>核注清单号</td>
 				<td><input id="checkListNo" name="checkListNo"
-						   class="easyui-validatebox" data-options="width: 360,prompt:'请输入保税核注清单号(多个核注清单号用英文分号隔开)'"/>
+						   class="easyui-validatebox" data-options="width: 360,prompt:'请输入保税核注清单号(多个核注清单号用英文分号隔开)'"
+						   value="${bisOutStock.checkListNo}"/>
 				</td>
 			</tr>
 			<tr>

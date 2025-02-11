@@ -83,11 +83,18 @@ public class BondedController extends BaseController {
 		return getEasyUIData(page);*/
 
 
+		//2024-11-10 徐峥注释
+//		Page<BaseBounded> page = getPage(request);
+//		page.setOrder("asc");
+//		page.setOrderBy("accountBook");
+//		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
+//		page = baseBoundedService.search(page, filters);
+//		return getEasyUIData(page);
+
 		Page<BaseBounded> page = getPage(request);
-		page.setOrder("asc");
-		page.setOrderBy("accountBook");
-		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
-		page = baseBoundedService.search(page, filters);
+		BaseBounded baseBounded = new BaseBounded();
+		parameterReflect.reflectParameter(baseBounded, request);//转换对应实体类参数
+		page = baseBoundedService.searchBaseBounded(page, baseBounded);
 		return getEasyUIData(page);
 	}
 

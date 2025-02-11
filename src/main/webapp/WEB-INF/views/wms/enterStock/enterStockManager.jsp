@@ -135,6 +135,20 @@
 				</td>
 			</tr>
 			<tr>
+				<td>生产日期开始时间</td>
+				<td><input id="makeTimes" name="makeTimes"
+						   class="easyui-my97" datefmt="yyyy-MM-dd"
+						   data-options="width: 180"
+						   value="<fmt:formatDate value="${bisEnterStock.makeTimes}" pattern="yyyy-MM-dd" />" />
+				</td>
+				<td>生产日期截至时间</td>
+				<td><input id="makeTimee" name="makeTimee"
+						   class="easyui-my97" datefmt="yyyy-MM-dd"
+						   data-options="width: 180"
+						   value="<fmt:formatDate value="${bisEnterStock.makeTimee}" pattern="yyyy-MM-dd" />" />
+				</td>
+			</tr>
+			<tr>
 <%--				<td>是否保税</td>--%>
 <%--				<td>--%>
 <%--					<c:choose>--%>
@@ -167,6 +181,11 @@
 				<td><input id="checkListNo" name="checkListNo"
 						   class="easyui-validatebox" data-options="width: 180,prompt:'请输入保税核注清单号'"
 						   value="${checkListNo}"/>
+				</td>
+				<td>账册号</td>
+				<td><input id="emsNo" name="emsNo"
+						   class="easyui-validatebox" data-options="width: 180"
+						   value="${emsNo}" readonly/>
 				</td>
 			</tr>
 			<tr>
@@ -558,6 +577,7 @@
 	var dsku;
 	var action = "${action}";
 	var checkListNo = "${checkListNo}";
+	var emsNo = "${emsNo}";
 	var cha = 0;
 	$(function () {
 		//获得新联系单号
@@ -774,6 +794,28 @@
 				return;
 			}
 		}
+		if($("#ifBonded").is(":checked")){
+			console.log("makeTimes",$("#makeTimes").datebox("getValue"))
+			console.log("makeTimee",$("#makeTimee").datebox("getValue"))
+
+			var makeTimes = $("#makeTimes").datebox("getValue");
+			if (makeTimes == "" || makeTimes == null) {
+				parent.$.easyui.messager.show({
+					title: "操作提示",
+					msg: "请选择生产日期开始时间！",
+					position: "bottomRight"
+				});
+				return;
+			}
+			var makeTimee = $("#makeTimee").datebox("getValue");
+			if (makeTimee == "" || makeTimee == null) {
+				parent.$.easyui.messager.show({
+					title: "操作提示",
+					msg: "请选择生产日期截至时间！",
+					position: "bottomRight"
+				});
+				return;
+			}
 		/*     	if($("#ifBonded").is(":checked")){
                     if($("#accountBook").val()==0||$("#accountBook").val()==""||$("#accountBook").val()==null){
                         parent.$.easyui.messager.show({
