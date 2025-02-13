@@ -794,9 +794,9 @@
 				return;
 			}
 		}
-		if($("#ifBonded").is(":checked")){
-			console.log("makeTimes",$("#makeTimes").datebox("getValue"))
-			console.log("makeTimee",$("#makeTimee").datebox("getValue"))
+		if($("#ifBonded").is(":checked")) {
+			console.log("makeTimes", $("#makeTimes").datebox("getValue"))
+			console.log("makeTimee", $("#makeTimee").datebox("getValue"))
 
 			var makeTimes = $("#makeTimes").datebox("getValue");
 			if (makeTimes == "" || makeTimes == null) {
@@ -816,6 +816,7 @@
 				});
 				return;
 			}
+		}
 		/*     	if($("#ifBonded").is(":checked")){
                     if($("#accountBook").val()==0||$("#accountBook").val()==""||$("#accountBook").val()==null){
                         parent.$.easyui.messager.show({

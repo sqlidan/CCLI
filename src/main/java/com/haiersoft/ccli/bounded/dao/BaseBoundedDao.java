@@ -38,6 +38,7 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
 		Map<String, Object> params = new HashMap<String, Object>();
 		StringBuffer sql = new StringBuffer(""
 				+ " SELECT "
+				+ " t.ID AS id, "
 				+ " t.CLIENT_ID AS clientId, "
 				+ " t.CLIENT_NAME AS clientName, "
 				+ " t.BILL_NUM AS billNum, "
@@ -99,6 +100,7 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
 
 		//查询对象属性转换
 		Map<String, Object> parm = new HashMap<String, Object>();
+		parm.put("id", String.class);
 		parm.put("clientId", String.class);
 		parm.put("clientName", String.class);
 		parm.put("billNum", String.class);

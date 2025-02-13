@@ -11,22 +11,22 @@
 
 
 			<form id="searchFrom" action="">
-			<input type="text" name="filter_LIKES_clientName" class="easyui-validatebox" data-options="width:150,prompt: '客户名称'"/>
+			<input type="text" name="clientName" class="easyui-validatebox" data-options="width:150,prompt: '客户名称'"/>
 	        <span class="toolbar-item dialog-tool-separator"></span>
-			<input type="text" name="filter_LIKES_billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
+			<input type="text" name="billNum" class="easyui-validatebox" data-options="width:150,prompt: '提单号'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
-			<input type="text" name="filter_LIKES_cdNum" class="easyui-validatebox" data-options="width:150,prompt: '报关单号'"/>
+			<input type="text" name="cdNum" class="easyui-validatebox" data-options="width:150,prompt: '报关单号'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
 		<%--	<input type="text" name="filter_LIKES_ctnNum" class="easyui-validatebox" data-options="width:150,prompt: 'MR/集装箱号'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>--%>
-			<input type="text" name="filter_EQS_customerServiceName" class="easyui-validatebox" data-options="width:150,prompt: '所属客服'"/>
+			<input type="text" name="customerServiceName" class="easyui-validatebox" data-options="width:150,prompt: '所属客服'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
-			<input type="text" name="filter_LIKES_hsCode" class="easyui-validatebox" data-options="width:150,prompt: 'hs编码'"/>
+			<input type="text" name="hsCode" class="easyui-validatebox" data-options="width:150,prompt: 'hs编码'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
-			<input type="text" name="filter_LIKES_hsItemname" class="easyui-validatebox" data-options="width:150,prompt: '海关品名'"/>
+			<input type="text" name="hsItemname" class="easyui-validatebox" data-options="width:150,prompt: '海关品名'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
 
-			<input type="text" name="filter_LIKES_accountBook" class="easyui-validatebox" data-options="width:150,prompt: '账册商品序号'"/>
+			<input type="text" name="accountBook" class="easyui-validatebox" data-options="width:150,prompt: '账册商品序号'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
 
 		<%--	<input type="text" name="filter_GED_storageDate" class="easyui-my97" datefmt="yyyy-MM-dd"
