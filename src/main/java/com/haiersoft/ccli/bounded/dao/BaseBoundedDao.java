@@ -62,7 +62,8 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
 				+ " t.UPDATED_TIME as updatedTime, "
 				+ " st.MAKE_TIMES as makeTimes, "
 				+ " st.MAKE_TIMEE as makeTimee, "
-				+ " TO_NUMBER(sysdate - st.MAKE_TIMES) as day "
+				+ " TO_NUMBER(sysdate - st.MAKE_TIMES) as day, "
+				+ " t.EMS_NO AS emsNo "
 				+ " FROM BASE_BOUNDED t "
 				+ " LEFT JOIN BIS_ENTER_STOCK st ON T.BILL_NUM=ST.ITEM_NUM "
 				+ " WHERE 1 = 1 ");//20170821 增加库存大于0的条件
@@ -125,6 +126,7 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
 		parm.put("makeTimes", Date.class);
 		parm.put("makeTimee", Date.class);
 		parm.put("day", Integer.class);
+		parm.put("emsNo", String.class);
 
 		return findPageSql(page, sql.toString(), parm, params);
 	}
