@@ -488,31 +488,64 @@
         for(var i=0; i<rows.length; i++){
             orderNums.push(rows[i].orderNum);
         }
+        // //选择行记录中 存在多个保税或非保税时的判断
+        // var ifBondedAry= [];
+        // for(var i=0; i<rows.length; i++){
+        //     ifBondedAry.push(rows[i].ifBonded);
+        // }
+        // if(ifBondedAry.method2().length>1){
+        //     parent.$.messager.show({title: "提示", msg: "申请核放单时只能选择相同的保税或非保税信息", position: "bottomRight" });
+        //     return;
+        // }
+        // //校验选中数据是保税还是非保税
+        // var ifBonded = false;
+        // if (ifBondedAry[0] =="1" || ifBondedAry[0] =="是"){
+        //     ifBonded = true;
+        // }
+        //
+        // if (!ifBonded){
+            d=$("#dlg").dialog({
+                title: '核放单申请',
+                width: 560,
+                height: 380,
+                href:'${ctx}/bis/loading/mani/'+orderNums,
+                modal:true,
+                buttons:[{
+                    text:'确认',
+                    handler:function(){
+                        $("#mainform").submit();
 
-        d=$("#dlg").dialog({   
-            title: '核放单申请',    
-            width: 560,    
-            height: 380,    
-            href:'${ctx}/bis/loading/mani/'+orderNums,
-            modal:true,
-            buttons:[{
-                text:'确认',
-                handler:function(){             
-                    $("#mainform").submit(); 
-                
-                }
-            },{
-                text:'重置',
-                handler:function(){                 
-                    resetForm();
-                }
-            },{
-                text:'取消',
-                handler:function(){
-                    d.panel('close');
-                }
-            }]
-        });
+                    }
+                },{
+                    text:'重置',
+                    handler:function(){
+                        resetForm();
+                    }
+                },{
+                    text:'取消',
+                    handler:function(){
+                        d.panel('close');
+                    }
+                }]
+            });
+        <%--}else{--%>
+        <%--    parent.$.messager.confirm('提示', '您确定要生成保税核放单信息并跳转画面？', function (data) {--%>
+        <%--        if (data) {--%>
+        <%--            $.ajax({--%>
+        <%--                type: 'post',--%>
+        <%--                url: "${ctx}/bis/loading/createPassport",--%>
+        <%--                success: function (data) {--%>
+        <%--                    if ("success" == data) {--%>
+        <%--                        var href = 'wms/passPort/list';--%>
+        <%--                        window.parent.mainpage.mainTabs.addModule('核放单', href);--%>
+        <%--                    } else {--%>
+        <%--                        parent.$.easyui.messager.alert("生成保税核放单失败！");--%>
+        <%--                    }--%>
+        <%--                }--%>
+        <%--            });--%>
+        <%--        }--%>
+        <%--    });--%>
+        <%--}--%>
     }
 
     //生成预约出库信息

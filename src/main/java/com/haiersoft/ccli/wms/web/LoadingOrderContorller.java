@@ -9,6 +9,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.haiersoft.ccli.common.utils.StringUtils;
+import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
+import com.haiersoft.ccli.wms.service.passPort.PassPortService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -436,4 +439,53 @@ public class LoadingOrderContorller extends BaseController {
 		model.addAttribute("OrderNum", orderNumsStr);
 		return "wms/loadingorder/maniForm";
 	}
+
+    @Autowired
+    private PassPortService passPortService;
+	//生成保税核放单
+    @RequestMapping("createPassport")
+    @ResponseBody
+    public String createPassport(@Valid @ModelAttribute @RequestBody BisLoadingOrder order, Model model, HttpServletRequest request) {
+        User user = UserUtil.getCurrentUser();
+        BisPassPort bisPassPort = new BisPassPort();
+        //添加数据
+        bisPassPort.setId(getNewPassPortId());
+        bisPassPort.setMasterCuscd("4230");//主管关区
+        bisPassPort.setAreainEtpsno("3702631016");//区内企业编码
+        bisPassPort.setAreainEtpsSccd("91370220395949850B");//区内企业社会信用代码
+        bisPassPort.setAreainEtpsNm("青岛港怡之航冷链物流有限公司");//区内企业名称
+        bisPassPort.setDclEtpsno("3702631016");//申报单位编码
+        bisPassPort.setDclEtpsSccd("91370220395949850B");//申报单位社会信用代码
+        bisPassPort.setDclEtpsNm("青岛港怡之航冷链物流有限公司");//申报单位名称
+        bisPassPort.setInputCode("3702631016");//录入单位编码
+        bisPassPort.setInputSccd("91370220395949850B");//录入单位社会信用代码
+        bisPassPort.setInputName("青岛港怡之航冷链物流有限公司");//录入单位名称
+        bisPassPort.setEtpsPreentNo("3702631016");//企业内部编号
+        bisPassPort.setDclTypecd("1");//申报类型
+        bisPassPort.setDclBy(user.getName());
+        //TODO 添加表头信息
+
+        bisPassPort.setState("0");//状态
+        bisPassPort.setLockage("0");//过卡状态
+        bisPassPort.setCreateBy(user.getName());//创建人
+        bisPassPort.setCreateTime(new Date());//创建时间
+        passPortService.save(bisPassPort);
+        return "success";
+    }
+    public String getNewPassPortId() {
+        User user = UserUtil.getCurrentUser();
+        String userCode = user.getUserCode();
+        //判断用户码是否为空
+        if (StringUtils.isNull(user.getUserCode())) {
+            userCode = "YZH";
+        } else {//判断用户码 的长度
+            if (userCode.length() > 3) {
+                userCode = userCode.substring(0, 3);
+            } else if (userCode.length() < 3) {
+                userCode = StringUtils.lpadStringLeft(3, userCode);
+            }
+        }
+        String linkId = "P" + userCode + StringUtils.timeToString();
+        return linkId;
+    }
 }

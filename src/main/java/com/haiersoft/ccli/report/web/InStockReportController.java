@@ -348,6 +348,14 @@ public class InStockReportController extends BaseController {
         excelUtil.setCellStrValue(myNum + listMap.size()+addRow+2,
                 8,DateUtils.getDateTime());
 
+        //2025-02-21 徐峥增加
+        excelUtil.setCellStrValue(myNum + listMap.size()+addRow+2+5,
+                0,"1. 本凭证仅针对出具之日货物的数量、重量及有权提货人作出陈述，对于出具后货物情况发生的变化及提货人的变化不承担任何责任。\n" +
+                        "2. 该单据仅作为提供给客户的入库/出库/在库明细不得作为他用（如金融质押、抵押等）。");
+        excelUtil.setCellStrValue(myNum + listMap.size()+addRow+2+6,
+                0,"1. This document only makes representations regarding the quantity, weight, and the authorized consignee of the goods as of the date of issuance. It does not assume any responsibility for changes in the condition of the goods or changes in the consignee after the issuance.\n" +
+                        "2. This document is solely intended to provide customers with details of incoming/outgoing/current stock and must not be used for other purposes (such as financial collateral, mortgage, etc.).");
+
         excelUtil.exportToNewFile();
 
         FileInputStream in = new FileInputStream(new File(desPath));
@@ -621,7 +629,21 @@ public class InStockReportController extends BaseController {
             User user = UserUtil.getCurrentUser();
             sbHtml.append("<td style=\"text-align:right;margin-top:5px;\">").append(" PrintTime : &nbsp;").append(DateUtils.getDateTime()).append("</td>");
             sbHtml.append("</tr></table>");
-            
+
+            //2025-02-21 徐峥增加
+            sbHtml.append("<table><tr><td>&nbsp;</td></tr></table>");
+            sbHtml.append("<table><tr><td>&nbsp;</td></tr></table>");
+            sbHtml.append("<table><tr><td>&nbsp;</td></tr></table>");
+            sbHtml.append("<table><tr><td>&nbsp;</td></tr></table>");
+            sbHtml.append("<table><tr><td>&nbsp;</td></tr></table>");
+            sbHtml.append("<table><tr>");
+            sbHtml.append("<td style=\"width:50%;font-size:16px; font-family:宋体;\">1. 本凭证仅针对出具之日货物的数量、重量及有权提货人作出陈述，对于出具后货物情况发生的变化及提货人的变化不承担任何责任。\n 2. 该单据仅作为提供给客户的入库/出库/在库明细不得作为他用（如金融质押、抵押等）。</td>");
+            sbHtml.append("</tr></table>");
+            sbHtml.append("<table><tr>");
+            sbHtml.append("<td>").append("1. This document only makes representations regarding the quantity, weight, and the authorized consignee of the goods as of the date of issuance. It does not assume any responsibility for changes in the condition of the goods or changes in the consignee after the issuance.\n" +
+                    "2. This document is solely intended to provide customers with details of incoming/outgoing/current stock and must not be used for other purposes (such as financial collateral, mortgage, etc.).").append("</td>");
+            sbHtml.append("</tr></table>");
+
             MyFileUtils html = new MyFileUtils();
             System.out.println("pathHtml"+pathHtml);
             html.setFilePath(pathHtml);
