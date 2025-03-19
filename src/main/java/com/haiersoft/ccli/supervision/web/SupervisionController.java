@@ -874,6 +874,10 @@ public class SupervisionController {
 				String ZKTRADE = hashMap.get("ZKTRADE") == null ? "" : hashMap.get("ZKTRADE").toString();//在库保税
                 String ZKFOWARD= hashMap.get("ZKFORWARD") == null ? "" : hashMap.get("ZKFORWARD").toString();//在库一般贸易
                 String GoodsType = hashMap.get("GOODSTYPE") == null ? "" : hashMap.get("GOODSTYPE").toString();
+                //2025-03-10 徐峥修改，取消保税T4230W000031账册报文的发送
+				if (GoodsType.equals("1")) {
+					continue;
+				}
                 if (ZKTRADE==null&&ZKFOWARD==null||ZKTRADE.equals("")&&ZKFOWARD.equals("")) {
 					
 				
