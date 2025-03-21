@@ -807,13 +807,17 @@ public class TransferContorller extends BaseController {
 	       				getMap=getlist.get(i);
 	        			if(getMap!=null && getMap.size()>0){
 	        				if(customUser==null || consigneeUser==null){
-	        						if(!obj.getSearchTransferNum().contains(",")){
-			        					customUser=getMap.get("STOCK_IN")!=null?getMap.get("STOCK_IN").toString():"";
-			        					consigneeUser=getMap.get("RECEIVER_NAME")!=null?getMap.get("RECEIVER_NAME").toString():"";
-	        						}else{
-	        							customUser="";
-	        							consigneeUser="";
-	        						}
+//	        					//2025-03-21 徐峥 多个货转单号一起查询导出时不显示客户名称
+//								if(!obj.getSearchTransferNum().contains(",")){
+//									customUser=getMap.get("STOCK_IN")!=null?getMap.get("STOCK_IN").toString():"";
+//									consigneeUser=getMap.get("RECEIVER_NAME")!=null?getMap.get("RECEIVER_NAME").toString():"";
+//								}else{
+//									customUser="";
+//									consigneeUser="";
+//								}
+								//2025-03-21 徐峥新逻辑，不存在不同客户一起导出的情况
+								customUser=getMap.get("STOCK_IN")!=null?getMap.get("STOCK_IN").toString():"";
+								consigneeUser=getMap.get("RECEIVER_NAME")!=null?getMap.get("RECEIVER_NAME").toString():"";
 	        				}
 		       				sbHtml.append("<tr>");
 		       				if(2==obj.getNtype()){

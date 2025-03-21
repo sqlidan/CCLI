@@ -203,6 +203,8 @@ public class SupervisionController {
 				String EmsNo="";
 				if (GoodsType.equals("1")) {
 					EmsNo="T4230W000031";//如果是保税货物，账册号固定
+					//2025-03-10 徐峥修改，取消保税T4230W000031账册报文的发送
+					continue;
 				}else{
 					EmsNo="";
 				}
@@ -874,10 +876,7 @@ public class SupervisionController {
 				String ZKTRADE = hashMap.get("ZKTRADE") == null ? "" : hashMap.get("ZKTRADE").toString();//在库保税
                 String ZKFOWARD= hashMap.get("ZKFORWARD") == null ? "" : hashMap.get("ZKFORWARD").toString();//在库一般贸易
                 String GoodsType = hashMap.get("GOODSTYPE") == null ? "" : hashMap.get("GOODSTYPE").toString();
-                //2025-03-10 徐峥修改，取消保税T4230W000031账册报文的发送
-				if (GoodsType.equals("1")) {
-					continue;
-				}
+
                 if (ZKTRADE==null&&ZKFOWARD==null||ZKTRADE.equals("")&&ZKFOWARD.equals("")) {
 					
 				
@@ -891,6 +890,8 @@ public class SupervisionController {
 				String EmsNo="";
 				if (GoodsType.equals("1")) {
 					EmsNo="T4230W000031";//如果是保税货物，账册号固定
+					//2025-03-10 徐峥修改，取消保税T4230W000031账册报文的发送
+					continue;
 				}else{
 					EmsNo="";
 				}
@@ -1035,253 +1036,254 @@ public class SupervisionController {
 				
 				
 				
-                }else if (GoodsType.equals("1")){
-                	
-					//2.保税转一般贸易
-					// 1.保税转一般贸易后库中保税
-    				attr.clear();
-    				handler.startElement("", "", "StockInfo", attr);
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-
-    				// 账册号
-    				attr.clear();
-    				handler.startElement("", "", "EmsNo", attr);
-
-    				handler.characters("T4230W000031".toCharArray(), 0, "T4230W000031".length());
-    				handler.endElement("", "", "EmsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 账册序号
-    				attr.clear();
-    				handler.startElement("", "", "EmsSeqNo", attr);
-    				String EmsSeqNo ="";
-
-    				
-    				EmsSeqNo= hashMap.get("EMSSEQNO") == null ? "" : hashMap.get("EMSSEQNO").toString();//保税货物有账册商品序号
-    			
-    				handler.characters(EmsSeqNo.toCharArray(), 0, EmsSeqNo.length());
-    				handler.endElement("", "", "EmsSeqNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 仓库物料号
-    				attr.clear();
-    				handler.startElement("", "", "WmsMtsNo", attr);
-    				String wmsmtsNO = hashMap.get("WMSMTSNO") == null ? "" : hashMap.get("WMSMTSNO").toString();
-    				 handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
-    				handler.endElement("", "", "WmsMtsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品料号
-    				attr.clear();
-    				handler.startElement("", "", "GoodsMtsNo", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-    				String GoodsMtsNo = hashMap.get("GOODSMTSNO") == null ? "" : hashMap.get("GOODSMTSNO").toString();
-
-    				handler.characters(GoodsMtsNo.toCharArray(), 0, GoodsMtsNo.length());
-    				handler.endElement("", "", "GoodsMtsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品编码
-    				attr.clear();
-    				handler.startElement("", "", "CodeTs", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-    				String CodeTs = hashMap.get("hscode") == null ? "" : hashMap.get("hscode").toString();
-
-    				handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
-    				handler.endElement("", "", "CodeTs");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品名称
-    				attr.clear();
-    				handler.startElement("", "", "GoodsName", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-    				String GoodsName = hashMap.get("GOODSNAME") == null ? "" : hashMap.get("GOODSNAME").toString();
-
-    				handler.characters(GoodsName.toCharArray(), 0, GoodsName.length());
-    				handler.endElement("", "", "GoodsName");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品规格型号
-    				attr.clear();
-    				handler.startElement("", "", "GoodsModelDesc", attr);
-    				String GoodsModelDesc=hashMap.get("TYPESIZE") == null ? "" : hashMap.get("TYPESIZE").toString();
-    				handler.characters(GoodsModelDesc.toCharArray(), 0, GoodsModelDesc.length());
-
-    				// handler.characters(copBase.getGoodsModelDesc().toCharArray(),
-    				// 0, copBase.getGoodsModelDesc().length());
-    				handler.endElement("", "", "GoodsModelDesc");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 申报计量单位
-    				attr.clear();
-    				handler.startElement("", "", "WmsDclUnit", attr);
-    				String WmsDclUnit = hashMap.get("itemnum") == null ? "035" : hashMap.get("itemnum").toString();
-
-    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
-    				handler.endElement("", "", "WmsDclUnit");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 申报数量
-    				attr.clear();
-    				handler.startElement("", "", "WmsDclQty", attr);
-    				handler.characters(ZKTRADE.toCharArray(), 0, ZKTRADE.length());
-    				handler.endElement("", "", "WmsDclQty");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 法定单位
-    				attr.clear();
-    				handler.startElement("", "", "WmsLawUnit", attr);
-
-    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
-    				handler.endElement("", "", "WmsLawUnit");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 法定数量
-    				attr.clear();
-    				handler.startElement("", "", "WmsLawQty", attr);
-    				handler.characters(ZKTRADE.toCharArray(), 0, ZKTRADE.length());
-    				handler.endElement("", "", "WmsLawQty");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 库区号
-    				attr.clear();
-    				handler.startElement("", "", "PlaceIds", attr);
-    				String PlaceIds = hashMap.get("PLACEIDS") == null ? "" : hashMap.get("PLACEIDS").toString();
-
-    				handler.characters(PlaceIds.toCharArray(), 0, PlaceIds.length());
-    				handler.endElement("", "", "PlaceIds");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 库位号
-    				attr.clear();
-    				handler.startElement("", "", "LocationIds", attr);
-    				String LocationIds = hashMap.get("LOCATIONIDS") == null ? "" : hashMap.get("LOCATIONIDS").toString();
-
-    				handler.characters(LocationIds.toCharArray(), 0, LocationIds.length());
-    				handler.endElement("", "", "LocationIds");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 出入库状态 0 预出入库 1在库
-    				attr.clear();
-    				handler.startElement("", "", "StockStatus", attr);
-    				handler.characters("1".toCharArray(), 0, "1".length());
-    				handler.endElement("", "", "StockStatus");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 货物类型 0 非保 1 保税
-    				attr.clear();
-    				handler.startElement("", "", "GoodsType", attr);
-
-    				handler.characters("1".toCharArray(), 0, "1".length());
-    				handler.endElement("", "", "GoodsType");
-    				handler.characters(nine.toCharArray(), 0, nine.length());
-    				handler.endElement("", "", "StockInfo");
-    				handler.characters(eight.toCharArray(), 0, eight.length());
-    				
-
-
-					// 1.保税转一般贸易后库中一般贸易
-    				attr.clear();
-    				handler.startElement("", "", "StockInfo", attr);
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-
-    				// 账册号
-    				attr.clear();
-    				handler.startElement("", "", "EmsNo", attr);
-    				handler.characters("".toCharArray(), 0, "".length());
-    				handler.endElement("", "", "EmsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 账册序号
-    				attr.clear();
-    				handler.startElement("", "", "EmsSeqNo", attr);   				   			
-    				handler.characters("".toCharArray(), 0, "".length());
-    				handler.endElement("", "", "EmsSeqNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 仓库物料号
-    				attr.clear();
-    				handler.startElement("", "", "WmsMtsNo", attr);
-    				wmsmtsNO=wmsmtsNO+"YB";
-    				 handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
-    				handler.endElement("", "", "WmsMtsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品料号
-    				attr.clear();
-    				handler.startElement("", "", "GoodsMtsNo", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-
-    				handler.characters(GoodsMtsNo.toCharArray(), 0, GoodsMtsNo.length());
-    				handler.endElement("", "", "GoodsMtsNo");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品编码
-    				attr.clear();
-    				handler.startElement("", "", "CodeTs", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-    				handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
-    				handler.endElement("", "", "CodeTs");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品名称
-    				attr.clear();
-    				handler.startElement("", "", "GoodsName", attr);
-    				// handler.characters("".toCharArray(), 0, "".length());
-    				handler.characters(GoodsName.toCharArray(), 0, GoodsName.length());
-    				handler.endElement("", "", "GoodsName");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 商品规格型号
-    				attr.clear();
-    				handler.startElement("", "", "GoodsModelDesc", attr);
-    				 GoodsModelDesc=hashMap.get("TYPESIZE") == null ? "" : hashMap.get("TYPESIZE").toString();
-    				handler.characters(GoodsModelDesc.toCharArray(), 0, GoodsModelDesc.length());
-
-    				// handler.characters(copBase.getGoodsModelDesc().toCharArray(),
-    				// 0, copBase.getGoodsModelDesc().length());
-    				handler.endElement("", "", "GoodsModelDesc");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 申报计量单位
-    				attr.clear();
-    				handler.startElement("", "", "WmsDclUnit", attr);
-    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
-    				handler.endElement("", "", "WmsDclUnit");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 申报数量
-    				attr.clear();
-    				handler.startElement("", "", "WmsDclQty", attr);
-    				handler.characters(ZKFOWARD.toCharArray(), 0, ZKFOWARD.length());
-    				handler.endElement("", "", "WmsDclQty");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 法定单位
-    				attr.clear();
-    				handler.startElement("", "", "WmsLawUnit", attr);
-
-    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
-    				handler.endElement("", "", "WmsLawUnit");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 法定数量
-    				attr.clear();
-    				handler.startElement("", "", "WmsLawQty", attr);
-    				handler.characters(ZKFOWARD.toCharArray(), 0, ZKFOWARD.length());
-    				handler.endElement("", "", "WmsLawQty");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 库区号
-    				attr.clear();
-    				handler.startElement("", "", "PlaceIds", attr);
-    				String ZKPLACEIDS= hashMap.get("ZKPLACEIDS") == null ? "" : hashMap.get("ZKPLACEIDS").toString();
-
-    				handler.characters(ZKPLACEIDS.toCharArray(), 0, ZKPLACEIDS.length());
-    				handler.endElement("", "", "PlaceIds");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 库位号
-    				attr.clear();
-    				handler.startElement("", "", "LocationIds", attr);
-    				String ZKLOCATIONIDS = hashMap.get("ZKLOCATIONIDS") == null ? "" : hashMap.get("ZKLOCATIONIDS").toString();
-
-    				handler.characters(ZKLOCATIONIDS.toCharArray(), 0, ZKLOCATIONIDS.length());
-    				handler.endElement("", "", "LocationIds");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 出入库状态 0 预出入库 1在库
-    				attr.clear();
-    				handler.startElement("", "", "StockStatus", attr);
-    				handler.characters("1".toCharArray(), 0, "1".length());
-    				handler.endElement("", "", "StockStatus");
-    				handler.characters(ten.toCharArray(), 0, ten.length());
-    				// 货物类型 0 非保 1 保税
-    				attr.clear();
-    				handler.startElement("", "", "GoodsType", attr);
-
-    				handler.characters("0".toCharArray(), 0, "0".length());
-    				handler.endElement("", "", "GoodsType");
-    				handler.characters(nine.toCharArray(), 0, nine.length());
-    				handler.endElement("", "", "StockInfo");
-    				handler.characters(eight.toCharArray(), 0, eight.length());
-                 	
-                	
-                	
                 }
+//                else if (GoodsType.equals("1")){
+//
+//					//2.保税转一般贸易
+//					// 1.保税转一般贸易后库中保税
+//    				attr.clear();
+//    				handler.startElement("", "", "StockInfo", attr);
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//
+//    				// 账册号
+//    				attr.clear();
+//    				handler.startElement("", "", "EmsNo", attr);
+//
+//    				handler.characters("T4230W000031".toCharArray(), 0, "T4230W000031".length());
+//    				handler.endElement("", "", "EmsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 账册序号
+//    				attr.clear();
+//    				handler.startElement("", "", "EmsSeqNo", attr);
+//    				String EmsSeqNo ="";
+//
+//
+//    				EmsSeqNo= hashMap.get("EMSSEQNO") == null ? "" : hashMap.get("EMSSEQNO").toString();//保税货物有账册商品序号
+//
+//    				handler.characters(EmsSeqNo.toCharArray(), 0, EmsSeqNo.length());
+//    				handler.endElement("", "", "EmsSeqNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 仓库物料号
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsMtsNo", attr);
+//    				String wmsmtsNO = hashMap.get("WMSMTSNO") == null ? "" : hashMap.get("WMSMTSNO").toString();
+//    				 handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
+//    				handler.endElement("", "", "WmsMtsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品料号
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsMtsNo", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//    				String GoodsMtsNo = hashMap.get("GOODSMTSNO") == null ? "" : hashMap.get("GOODSMTSNO").toString();
+//
+//    				handler.characters(GoodsMtsNo.toCharArray(), 0, GoodsMtsNo.length());
+//    				handler.endElement("", "", "GoodsMtsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品编码
+//    				attr.clear();
+//    				handler.startElement("", "", "CodeTs", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//    				String CodeTs = hashMap.get("hscode") == null ? "" : hashMap.get("hscode").toString();
+//
+//    				handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
+//    				handler.endElement("", "", "CodeTs");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品名称
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsName", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//    				String GoodsName = hashMap.get("GOODSNAME") == null ? "" : hashMap.get("GOODSNAME").toString();
+//
+//    				handler.characters(GoodsName.toCharArray(), 0, GoodsName.length());
+//    				handler.endElement("", "", "GoodsName");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品规格型号
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsModelDesc", attr);
+//    				String GoodsModelDesc=hashMap.get("TYPESIZE") == null ? "" : hashMap.get("TYPESIZE").toString();
+//    				handler.characters(GoodsModelDesc.toCharArray(), 0, GoodsModelDesc.length());
+//
+//    				// handler.characters(copBase.getGoodsModelDesc().toCharArray(),
+//    				// 0, copBase.getGoodsModelDesc().length());
+//    				handler.endElement("", "", "GoodsModelDesc");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 申报计量单位
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsDclUnit", attr);
+//    				String WmsDclUnit = hashMap.get("itemnum") == null ? "035" : hashMap.get("itemnum").toString();
+//
+//    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
+//    				handler.endElement("", "", "WmsDclUnit");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 申报数量
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsDclQty", attr);
+//    				handler.characters(ZKTRADE.toCharArray(), 0, ZKTRADE.length());
+//    				handler.endElement("", "", "WmsDclQty");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 法定单位
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsLawUnit", attr);
+//
+//    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
+//    				handler.endElement("", "", "WmsLawUnit");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 法定数量
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsLawQty", attr);
+//    				handler.characters(ZKTRADE.toCharArray(), 0, ZKTRADE.length());
+//    				handler.endElement("", "", "WmsLawQty");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 库区号
+//    				attr.clear();
+//    				handler.startElement("", "", "PlaceIds", attr);
+//    				String PlaceIds = hashMap.get("PLACEIDS") == null ? "" : hashMap.get("PLACEIDS").toString();
+//
+//    				handler.characters(PlaceIds.toCharArray(), 0, PlaceIds.length());
+//    				handler.endElement("", "", "PlaceIds");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 库位号
+//    				attr.clear();
+//    				handler.startElement("", "", "LocationIds", attr);
+//    				String LocationIds = hashMap.get("LOCATIONIDS") == null ? "" : hashMap.get("LOCATIONIDS").toString();
+//
+//    				handler.characters(LocationIds.toCharArray(), 0, LocationIds.length());
+//    				handler.endElement("", "", "LocationIds");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 出入库状态 0 预出入库 1在库
+//    				attr.clear();
+//    				handler.startElement("", "", "StockStatus", attr);
+//    				handler.characters("1".toCharArray(), 0, "1".length());
+//    				handler.endElement("", "", "StockStatus");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 货物类型 0 非保 1 保税
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsType", attr);
+//
+//    				handler.characters("1".toCharArray(), 0, "1".length());
+//    				handler.endElement("", "", "GoodsType");
+//    				handler.characters(nine.toCharArray(), 0, nine.length());
+//    				handler.endElement("", "", "StockInfo");
+//    				handler.characters(eight.toCharArray(), 0, eight.length());
+//
+//
+//
+//					// 1.保税转一般贸易后库中一般贸易
+//    				attr.clear();
+//    				handler.startElement("", "", "StockInfo", attr);
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//
+//    				// 账册号
+//    				attr.clear();
+//    				handler.startElement("", "", "EmsNo", attr);
+//    				handler.characters("".toCharArray(), 0, "".length());
+//    				handler.endElement("", "", "EmsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 账册序号
+//    				attr.clear();
+//    				handler.startElement("", "", "EmsSeqNo", attr);
+//    				handler.characters("".toCharArray(), 0, "".length());
+//    				handler.endElement("", "", "EmsSeqNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 仓库物料号
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsMtsNo", attr);
+//    				wmsmtsNO=wmsmtsNO+"YB";
+//    				 handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
+//    				handler.endElement("", "", "WmsMtsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品料号
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsMtsNo", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//
+//    				handler.characters(GoodsMtsNo.toCharArray(), 0, GoodsMtsNo.length());
+//    				handler.endElement("", "", "GoodsMtsNo");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品编码
+//    				attr.clear();
+//    				handler.startElement("", "", "CodeTs", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//    				handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
+//    				handler.endElement("", "", "CodeTs");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品名称
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsName", attr);
+//    				// handler.characters("".toCharArray(), 0, "".length());
+//    				handler.characters(GoodsName.toCharArray(), 0, GoodsName.length());
+//    				handler.endElement("", "", "GoodsName");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 商品规格型号
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsModelDesc", attr);
+//    				 GoodsModelDesc=hashMap.get("TYPESIZE") == null ? "" : hashMap.get("TYPESIZE").toString();
+//    				handler.characters(GoodsModelDesc.toCharArray(), 0, GoodsModelDesc.length());
+//
+//    				// handler.characters(copBase.getGoodsModelDesc().toCharArray(),
+//    				// 0, copBase.getGoodsModelDesc().length());
+//    				handler.endElement("", "", "GoodsModelDesc");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 申报计量单位
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsDclUnit", attr);
+//    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
+//    				handler.endElement("", "", "WmsDclUnit");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 申报数量
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsDclQty", attr);
+//    				handler.characters(ZKFOWARD.toCharArray(), 0, ZKFOWARD.length());
+//    				handler.endElement("", "", "WmsDclQty");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 法定单位
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsLawUnit", attr);
+//
+//    				handler.characters(WmsDclUnit.toCharArray(), 0, WmsDclUnit.length());
+//    				handler.endElement("", "", "WmsLawUnit");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 法定数量
+//    				attr.clear();
+//    				handler.startElement("", "", "WmsLawQty", attr);
+//    				handler.characters(ZKFOWARD.toCharArray(), 0, ZKFOWARD.length());
+//    				handler.endElement("", "", "WmsLawQty");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 库区号
+//    				attr.clear();
+//    				handler.startElement("", "", "PlaceIds", attr);
+//    				String ZKPLACEIDS= hashMap.get("ZKPLACEIDS") == null ? "" : hashMap.get("ZKPLACEIDS").toString();
+//
+//    				handler.characters(ZKPLACEIDS.toCharArray(), 0, ZKPLACEIDS.length());
+//    				handler.endElement("", "", "PlaceIds");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 库位号
+//    				attr.clear();
+//    				handler.startElement("", "", "LocationIds", attr);
+//    				String ZKLOCATIONIDS = hashMap.get("ZKLOCATIONIDS") == null ? "" : hashMap.get("ZKLOCATIONIDS").toString();
+//
+//    				handler.characters(ZKLOCATIONIDS.toCharArray(), 0, ZKLOCATIONIDS.length());
+//    				handler.endElement("", "", "LocationIds");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 出入库状态 0 预出入库 1在库
+//    				attr.clear();
+//    				handler.startElement("", "", "StockStatus", attr);
+//    				handler.characters("1".toCharArray(), 0, "1".length());
+//    				handler.endElement("", "", "StockStatus");
+//    				handler.characters(ten.toCharArray(), 0, ten.length());
+//    				// 货物类型 0 非保 1 保税
+//    				attr.clear();
+//    				handler.startElement("", "", "GoodsType", attr);
+//
+//    				handler.characters("0".toCharArray(), 0, "0".length());
+//    				handler.endElement("", "", "GoodsType");
+//    				handler.characters(nine.toCharArray(), 0, nine.length());
+//    				handler.endElement("", "", "StockInfo");
+//    				handler.characters(eight.toCharArray(), 0, eight.length());
+//
+//
+//
+//                }
 
 			}
 			// 经营单位代码
