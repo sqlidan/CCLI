@@ -135,13 +135,13 @@
 				</td>
 			</tr>
 			<tr>
-				<td>生产日期开始时间</td>
+				<td>生产日期</td>
 				<td><input id="makeTimes" name="makeTimes"
 						   class="easyui-my97" datefmt="yyyy-MM-dd"
 						   data-options="width: 180"
 						   value="<fmt:formatDate value="${bisEnterStock.makeTimes}" pattern="yyyy-MM-dd" />" />
 				</td>
-				<td>生产日期截至时间</td>
+				<td>保质期截止时间</td>
 				<td><input id="makeTimee" name="makeTimee"
 						   class="easyui-my97" datefmt="yyyy-MM-dd"
 						   data-options="width: 180"
@@ -802,7 +802,7 @@
 			if (makeTimes == "" || makeTimes == null) {
 				parent.$.easyui.messager.show({
 					title: "操作提示",
-					msg: "请选择生产日期开始时间！",
+					msg: "请选择生产日期！",
 					position: "bottomRight"
 				});
 				return;
@@ -811,7 +811,7 @@
 			if (makeTimee == "" || makeTimee == null) {
 				parent.$.easyui.messager.show({
 					title: "操作提示",
-					msg: "请选择生产日期截至时间！",
+					msg: "请选择保质期截止时间！",
 					position: "bottomRight"
 				});
 				return;

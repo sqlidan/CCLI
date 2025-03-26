@@ -65,6 +65,8 @@
                    onkeyup="ischeckNum(this)" data-options="width:150,prompt: '报关票数'"/>
             <input type="text" name="filter_EQI_outCiqCount" class="easyui-validatebox" id="outCiqCount"
                    onkeyup="ischeckNum(this)" data-options="width:150,prompt: '报检票数'"/>
+            <input type="text" name="filter_LIKES_remark"
+                   class="easyui-validatebox" data-options="width:200,prompt: '备注'"/>
             <span class="toolbar-item dialog-tool-separator">
 
         </span> <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true"

@@ -366,6 +366,9 @@ public class BisEnterStock implements Serializable {
 	private String searchDxStrTime;//倒箱起止时间起
 	@Transient
 	private String searchDxEndTime;//倒箱结束时间
+	@Transient
+	private String searchRemark;//备注
+
 	@Column(name = "HSCODE")
 	private String hscode;//倒箱结束时间
 	
@@ -1234,5 +1237,12 @@ public class BisEnterStock implements Serializable {
 	public void setHscode(String hscode) {
 		this.hscode = hscode;
 	}
-	
+
+	public String getSearchRemark() {
+		return searchRemark;
+	}
+
+	public void setSearchRemark(String searchRemark) {
+		this.searchRemark = searchRemark;
+	}
 }

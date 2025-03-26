@@ -83,6 +83,9 @@
                    data-options="width:150,prompt: '倒箱日期'"/>
             - <input type="text" id="searchDxEndTime" name="searchDxEndTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"
                      data-options="width:150,prompt: '倒箱日期'"/>
+
+            <input type="text" id="searchRemark" name="searchRemark" class="easyui-validatebox"
+                   data-options="width:200,prompt: '备注'"/>
                      
             <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>

@@ -204,6 +204,10 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
             sb.append(" and ST.BACKDATE<to_date(:dxendtime,'yyyy-mm-dd hh24:mi:ss')");
             parme.put("dxendtime", obj.getSearchDxEndTime());
         }
+        if(null!=obj.getSearchRemark()&&!"".equals(obj.getSearchRemark())){
+            sb.append(" AND ST.REMARK LIKE:remark");
+            parme.put("remark","%"+obj.getSearchRemark()+"%");
+        }
         sb.append(" ORDER BY ST.OPERATE_TIME DESC"                                  );       
         Map<String, Object> paramType = new HashMap<>();
         paramType.put("linkId",String.class);//入库联系单号
