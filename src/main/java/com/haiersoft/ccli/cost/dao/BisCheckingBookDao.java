@@ -571,7 +571,12 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		//sb.append(" SELECT listagg(CTN_NUM,',') WITHIN GROUP (order by CTN_NUM ) AS CTN_NUM FROM BIS_OUT_STOCK_INFO ");
 
 		sb.append(" SELECT to_char (wmsys.wm_concat (DISTINCT CTN_NUM)) AS CTN_NUM FROM BIS_OUT_STOCK_INFO ");
-		sb.append(" WHERE bill_num=sb.bill_num AND instr(cargo_name,po.cargo_name)>0 GROUP BY bill_num ");
+		sb.append(" WHERE bill_num=sb.bill_num   ");
+		//2025-05-28 徐峥注释
+//		sb.append(" AND instr(cargo_name,po.cargo_name)>0 ");
+		//2025-05-28 徐峥增加
+		sb.append(" AND cargo_name = po.cargo_name ");
+		sb.append(" GROUP BY bill_num ");
 		sb.append("  ) END ) END )     ");
 		sb.append("   ELSE pe.CTN_NUM END) AS CTN_NUM,  ");
 		sb.append("   (CASE sb.crk_sign WHEN '2' THEN '' ELSE pe.LOT_NUM END) AS LOT_NUM ");
@@ -748,7 +753,12 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append(" load.out_link_id,    ");
 		sb.append(" load.BILL_NUM,       ");
 		sb.append(" load.cargo_name      ");
-		sb.append(" ) po ON (po.out_link_id = sb.link_id AND po.BILL_NUM=sb.BILL_NUM AND instr(sb.cargo_name,po.cargo_name)>0)  ");
+		sb.append(" ) po ON (po.out_link_id = sb.link_id AND po.BILL_NUM=sb.BILL_NUM   ");
+		// 2025-05-28 徐峥注释
+//		sb.append(" AND instr(sb.cargo_name,po.cargo_name)>0  ");
+		// 2025-05-28 徐峥添加
+		sb.append(" AND sb.cargo_name = po.cargo_name ");
+		sb.append(" ) ");
 		sb.append(" ) temp  ");
 		sb.append(" GROUP BY ");
 		sb.append(" temp.bill_num,");

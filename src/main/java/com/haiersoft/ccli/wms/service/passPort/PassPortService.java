@@ -85,6 +85,8 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		}else{
 			if(bisPassPortDataMap.get(0) != null){
 				String inAndOut = bisPassPortDataMap.get(0).get("IO_TYPECD")==null?"":bisPassPortDataMap.get(0).get("IO_TYPECD").toString();
+				String passportTypecd = bisPassPortDataMap.get(0).get("PASSPORT_TYPECD")==null?"":bisPassPortDataMap.get(0).get("PASSPORT_TYPECD").toString();
+				String areainEtpsNm = bisPassPortDataMap.get(0).get("AREAIN_ETPS_NM")==null?"":bisPassPortDataMap.get(0).get("AREAIN_ETPS_NM").toString();
 				BigDecimal vehicleWeight = bisPassPortDataMap.get(0).get("VEHICLE_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("VEHICLE_WT").toString());//车自重
 				BigDecimal vehicleFrameWeight = bisPassPortDataMap.get(0).get("VEHICLE_FRAME_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("VEHICLE_FRAME_WT").toString());//车架重
 				BigDecimal containerWeight = bisPassPortDataMap.get(0).get("CONTAINER_WT")==null?new BigDecimal(0):new BigDecimal(bisPassPortDataMap.get(0).get("CONTAINER_WT").toString());//箱重
@@ -111,8 +113,33 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 					map.put("inAndOutStr","");
 				}
 				map.put("hfdNo",hfdNo);//核放单号或预录入统一编号
+				map.put("passportTypecd",passportTypecd);//核放单类型
+				String passportTypecdName = "";
+				if("1".equals(passportTypecd)){
+					passportTypecdName = "先入区后报关";
+				}
+				if("2".equals(passportTypecd)){
+					passportTypecdName = "一线一体化进出区";
+				}
+				if("3".equals(passportTypecd)){
+					passportTypecdName = "二线进出区";
+				}
+				if("4".equals(passportTypecd)){
+					passportTypecdName = "非报关进出区";
+				}
+				if("5".equals(passportTypecd)){
+					passportTypecdName = "卡口登记货物";
+				}
+				if("6".equals(passportTypecd)){
+					passportTypecdName = "空车进出区";
+				}
+				if("7".equals(passportTypecd)){
+					passportTypecdName = "两步申报";
+				}
+				map.put("hfdType",passportTypecdName);//核放单类型
+				map.put("declareCompany",areainEtpsNm);//申报企业
 				map.put("carWeight",vehicleWeight.add(vehicleFrameWeight));//车自重+车架重
-				map.put("productWeight",totalGrossWeight);//货重(货毛重)
+				map.put("productWeight",totalGrossWeight);//货重（货毛重）
 				map.put("totalWeight",totalWeight);//总重(车自重+车架重+箱重+货毛重)
 
 				map.put("vehicleWeight",vehicleWeight);//车自重
@@ -120,6 +147,19 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 				map.put("containerWeight",containerWeight);//箱重
 				map.put("totalGrossWeight",totalGrossWeight);//货毛重
 				map.put("totalNetWeight",totalNetWeight);//货净重
+
+
+				// 20250512 徐峥增加核放单编号，进出标志，货物毛重，车号
+				String passPort = hfdNo;
+				String io = ioTypecd.trim();
+				if ("E".equals(ioTypecd.trim())){
+					io = "O";
+				}
+				map.put("passPort",passPort);//核放单编号
+				map.put("ioType",io);//进出标志 I-进区；O-出区
+				map.put("productGrossWeight",totalGrossWeight);//货物毛重
+				map.put("vehicleNo",vehicleNo);//车号
+
 
 				result.put("code", "200");
 				result.put("data", map);
