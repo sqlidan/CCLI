@@ -98,7 +98,7 @@
             textField: 'text',
             editable: false
         });
-        $("#CustomsCode").val('4258');
+        $("#CustomsCode").val('4230');
         $("#EmsNo").val("NH4230240017");
         $("#BondInvtNo").val("");
         $("#GNo").val("");

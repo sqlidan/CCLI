@@ -115,7 +115,7 @@
 				editable:false  
 			});
 			console.log("33333");
-			$("#CustomsCode").val('4258');
+			$("#CustomsCode").val('4230');
 			$("#EmsNo").val("NH4230240017");
 			$("#BondInvtNo").val("");
 			$("#GNo").val("");

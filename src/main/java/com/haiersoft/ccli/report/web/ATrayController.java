@@ -132,7 +132,7 @@ public class ATrayController extends BaseController {
             opApprHead.setApprType("3");//申请类型
             opApprHead.setIoType("1");//出入区类型
             opApprHead.setBondInvtNo("");//关联核注单编号
-            opApprHead.setCustomsCode("4258");//主管海关
+            opApprHead.setCustomsCode("4230");//主管海关
 //            opApprHead.setEmsNo("NH4230210001");//账册编号
             opApprHead.setEmsNo("NH4230240017");//新账册编号
             opApprHead.setItemNum(forATray.getBillCode());//提单号
@@ -502,7 +502,7 @@ public class ATrayController extends BaseController {
             OpApprHead opApprHead = new OpApprHead();
             opApprHead.setApprType("3");//申请类型
             opApprHead.setIoType("2");//出入区类型
-            opApprHead.setCustomsCode("4258");//主管海关
+            opApprHead.setCustomsCode("4230");//主管海关
             opApprHead.setEmsNo("NH4230210001");//账册编号
             opApprHead.setOwnerCode("3702631016");//货主单位代码
             opApprHead.setOwnerName("青岛港怡之航冷链物流有限公司");//货主单位名称

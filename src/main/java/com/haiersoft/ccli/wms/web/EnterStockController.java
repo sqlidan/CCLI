@@ -1596,7 +1596,7 @@ public class EnterStockController extends BaseController {
 			System.out.println("生成.FLJGRX成功");
 			String ftpHost="10.135.252.41";
 			String ftpUserName = "bsl";
-			String ftpPassword = "6r4=3Uc1=h@%";
+			String ftpPassword = "Bsl82987792";
 			int ftpPort = 21;
 
 			String ftpPath = "";
@@ -1626,7 +1626,7 @@ public class EnterStockController extends BaseController {
             int reply;
             ftpClient.connect("10.135.252.41", 21);// 连接FTP服务器
             // 如果采用默认端口，可以使用ftp.connect(url)的方式直接连接FTP服务器
-            ftpClient.login("bsl", "6r4=3Uc1=h@%");// 登录
+            ftpClient.login("bsl", "Bsl82987792");// 登录
             reply = ftpClient.getReplyCode();
             System.out.println("222222"+reply);
             ftpClient.setFileType(FTPClient.BINARY_FILE_TYPE);
@@ -1845,7 +1845,7 @@ public class EnterStockController extends BaseController {
         }
         enterStock.setItemNum(tydh);//入库提单号
         //如果备案号等于T4230W000036，且存在核注清单号标识为此报关单为保税单据
-        if (hzqdh !=null && hzqdh.trim().length() > 0 && ("T4230W000036".equals(bah) || "T4230W000042".equals(bah))){
+        if (hzqdh !=null && hzqdh.trim().length() > 0 && ("T4230W000036".equals(bah) || "T4230W000042".equals(bah) || "T4230W000044".equals(bah))){
             enterStock.setIfBonded("1");//默认渲染为勾选保税，且不可修改
         }
         if (hzqdh.trim().length() > 0){

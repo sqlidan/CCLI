@@ -156,6 +156,7 @@
                 <td>
                     <select class="easyui-combobox" id="emsNo" name="emsNo"  data-options="width:200,required:'required' ">
                         <option value="T4230W000042">新账册(T4230W000042)</option>
+                        <option value="T4230W000044">新账册(T4230W000044)</option>
                         <option value="T4230W000036">原账册(T4230W000036)</option>
                     </select>
                 </td>
