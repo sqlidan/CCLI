@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
+import com.haiersoft.ccli.api.service.PledgeStaticService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +38,7 @@ import com.haiersoft.ccli.wms.entity.TrayInfo;
  */
 @Service
 public class TransferTrayInfoService extends BaseService<BisTransferStockTrayInfo, String> {
+	private static final Logger log = LoggerFactory.getLogger(TransferTrayInfoService.class);
 
 	@Autowired
 	private TransferTrayInfoDao transferTrayInfoDao;
@@ -406,6 +411,26 @@ public class TransferTrayInfoService extends BaseService<BisTransferStockTrayInf
 					for(Map.Entry<String, Object> entry : actionMapNew.entrySet()){
 						AsnAction asnActionNew = new AsnAction();
 						asnActionNew = (AsnAction) entry.getValue();
+
+						//2025-07-24 徐峥 修改BIS_ASN_ACTION中货转后数据重复问题
+						List<PropertyFilter> actionPfs = new ArrayList<PropertyFilter>();
+						if(asnActionNew.getAsn()==null||"".equals(asnActionNew.getAsn())){
+							actionPfs.add(new PropertyFilter("NULLS_asn", "")); //ASN
+						}else{
+							actionPfs.add(new PropertyFilter("EQS_asn", asnActionNew.getAsn()));
+						}
+						actionPfs.add(new PropertyFilter("EQS_sku", asnActionNew.getSku()));
+						actionPfs.add(new PropertyFilter("EQS_clientId", asnActionNew.getClientId()));
+						actionPfs.add(new PropertyFilter("EQS_transferId", asnActionNew.getTransferId()!=null?asnActionNew.getTransferId():""));
+						actionPfs.add(new PropertyFilter("EQS_linkTransferId", asnActionNew.getLinkTransferId()!=null?asnActionNew.getLinkTransferId():""));
+						actionPfs.add(new PropertyFilter("EQS_status", "1"));
+						List<AsnAction> actions = asnActionService.search(actionPfs);
+						if(null != actions && actions.size() > 0 ){
+							log.error("重复存在的新BIS_ASN_ACTION信息:查询::{}", JSON.toJSONString(actions));
+							log.error("重复存在的新BIS_ASN_ACTION信息:::{}", JSON.toJSONString(asnActionNew));
+							continue;
+						}
+
 //						List<PropertyFilter> actionPfs = new ArrayList<PropertyFilter>();
 //						if(asnAction.getAsn()==null||"".equals(asnAction.getAsn())){
 //							actionPfs.add(new PropertyFilter("NULLS_asn", "")); //ASN
@@ -443,6 +468,25 @@ public class TransferTrayInfoService extends BaseService<BisTransferStockTrayInf
 					for(Map.Entry<String, Object> entry : actionMapOld.entrySet()){
 						AsnAction asnActionOld = new AsnAction();
 						asnActionOld = (AsnAction) entry.getValue();
+
+						//2025-07-24 徐峥 修改BIS_ASN_ACTION中货转后数据重复问题
+						List<PropertyFilter> actionPfs = new ArrayList<PropertyFilter>();
+						if(asnActionOld.getAsn()==null||"".equals(asnActionOld.getAsn())){
+							actionPfs.add(new PropertyFilter("NULLS_asn", "")); //ASN
+						}else{
+							actionPfs.add(new PropertyFilter("EQS_asn", asnActionOld.getAsn()));
+						}
+						actionPfs.add(new PropertyFilter("EQS_sku", asnActionOld.getSku()));
+						actionPfs.add(new PropertyFilter("EQS_clientId", asnActionOld.getClientId()));
+						actionPfs.add(new PropertyFilter("EQS_transferId", asnActionOld.getTransferId()!=null?asnActionOld.getTransferId():""));
+						actionPfs.add(new PropertyFilter("EQS_linkTransferId", asnActionOld.getLinkTransferId()!=null?asnActionOld.getLinkTransferId():""));
+						actionPfs.add(new PropertyFilter("EQS_status", "1"));
+						List<AsnAction> actions = asnActionService.search(actionPfs);
+						if(null != actions && actions.size() > 0 ){
+							log.error("重复存在的旧BIS_ASN_ACTION信息:查询::{}", JSON.toJSONString(actions));
+							log.error("重复存在的旧BIS_ASN_ACTION信息:::{}", JSON.toJSONString(asnActionOld));
+							continue;
+						}
 						
 //						List<PropertyFilter> actionPfs = new ArrayList<PropertyFilter>();
 //						if(asnAction.getAsn()==null||"".equals(asnAction.getAsn())){

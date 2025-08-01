@@ -1,11 +1,11 @@
 package com.haiersoft.ccli.wms.service.passPort;
 
+import com.alibaba.fastjson.JSON;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.wms.dao.PassPortDao;
-import com.haiersoft.ccli.wms.dao.PreEntryDao;
+import com.haiersoft.ccli.wms.dao.ScmDictDao;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
-import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntry;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +28,8 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 	
 	@Autowired
 	private PassPortDao passPortDao;
+	@Autowired
+	private ScmDictDao scmDictDao;
 
 	@Override
 	public HibernateDao<BisPassPort, String> getEntityDao() {
@@ -190,5 +192,21 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		}
 		return bisPreEntryDictDataList;
 	}
+//====================================================================================================================
+	//全量查询实时库存
+	public Map<String, Object> queryFullInventoryData(String startTime, String endTime){
+		Map<String, Object> result = new HashMap<>();
 
+		List<Map<String,Object>> mapList = scmDictDao.queryFullInventoryData(startTime, endTime);
+		if(mapList == null || mapList.size() == 0){
+			result.put("code", "500");
+			result.put("msg", "未找到对应的库存信息!");
+			return result;
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		result.put("code", "200");
+		result.put("data", JSON.toJSON(mapList));
+		result.put("msg", "success");
+		return result;
+	}
 }

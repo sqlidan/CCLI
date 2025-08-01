@@ -105,4 +105,14 @@ public class PassPortApiController extends BaseController {
         return passPortService.passButNotPassGate(PLATE_NO,FLAG);
     }
 
+//====================2.2.2.4全量查询实时库存================================================================
+    @RequestMapping(value = "queryFullInventoryData", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> queryFullInventoryData(HttpServletRequest request) {
+        SimpleDateFormat startTemp = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        SimpleDateFormat endTemp = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        String startTime = startTemp.format(new Date());
+        String endTime = endTemp.format(new Date());
+        return passPortService.queryFullInventoryData(startTime,endTime);
+    }
 }
