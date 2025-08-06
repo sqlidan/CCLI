@@ -73,9 +73,6 @@ public class ScmTaskTwoController implements Job {
         String startTime = startTemp.format(dateD);
         String endTime = endTemp.format(dateD);
 
-        startTime = "2024-11-01 00:00:00";
-        endTime = "2024-11-02 00:00:00";
-
         //查询增量推送入库明细
         List<Map<String,Object>> inboundAddList = new ArrayList<>();
         inboundAddList = scmDictService.queryInboundAddList(startTime,endTime);
@@ -136,7 +133,7 @@ public class ScmTaskTwoController implements Job {
                 .body();
         JSONObject respones2 = JSONObject.parseObject(bodys2);
         logger.info("增量推送入库明细结果：" + respones2.toJSONString());
-        if (0 != respones2.getIntValue("code")) {
+        if (200 != respones2.getIntValue("code")) {
             logger.info("增量推送入库明细推送失败：" + respones2.getString("msg"));
         }
     }

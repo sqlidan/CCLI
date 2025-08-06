@@ -561,11 +561,13 @@ public class PassPortController extends BaseController {
 
                 if (data != null) {
                     dataStr = data.toString();
+                    baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), SasCommonResponse.class);
+                    resultMap.put("data",baseResult.getSeqNo());
+                }else{
+                    resultMap.put("data",null);
                 }
-                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), SasCommonResponse.class);
                 resultMap.put("code","200");
                 resultMap.put("msg","success");
-                resultMap.put("data",baseResult.getSeqNo());
             } else {
                 Object data = jsonObject.get("msg");
                 if (data != null) {
@@ -608,11 +610,13 @@ public class PassPortController extends BaseController {
 
                 if (data != null) {
                     dataStr = data.toString();
+                    baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), SasCommonResponse.class);
+                    resultMap.put("data",baseResult.getPreNo());
+                }else{
+                    resultMap.put("data",null);
                 }
-                baseResult = JSON.toJavaObject(JSON.parseObject(dataStr), SasCommonResponse.class);
                 resultMap.put("code","200");
                 resultMap.put("msg","success");
-                resultMap.put("data",baseResult.getPreNo());
             } else {
                 Object data = jsonObject.get("msg");
                 if (data != null) {

@@ -73,9 +73,6 @@ public class ScmTaskThirdController implements Job {
         String startTime = startTemp.format(dateD);
         String endTime = endTemp.format(dateD);
 
-        startTime = "2024-11-01 00:00:00";
-        endTime = "2024-11-02 00:00:00";
-
         //查询增量推送出库明细
         List<Map<String,Object>> outboundAddList = new ArrayList<>();
         outboundAddList = scmDictService.queryOutboundAddList(startTime,endTime);
@@ -137,7 +134,7 @@ public class ScmTaskThirdController implements Job {
                 .body();
         JSONObject respones3 = JSONObject.parseObject(bodys3);
         logger.info("增量推送出库明细结果：" + respones3.toJSONString());
-        if (0 != respones3.getIntValue("code")) {
+        if (200 != respones3.getIntValue("code")) {
             logger.info("增量推送出库明细推送失败：" + respones3.getString("msg"));
         }
     }

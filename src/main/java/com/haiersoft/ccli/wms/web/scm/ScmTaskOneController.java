@@ -74,9 +74,6 @@ public class ScmTaskOneController implements Job {
         String startTime = startTemp.format(dateD);
         String endTime = endTemp.format(dateD);
 
-        startTime = "2024-11-01 00:00:00";
-        endTime = "2024-11-02 00:00:00";
-
         //查询增量推送入库订单明细
         List<Map<String,Object>> inboundOrderAddList = new ArrayList<>();
         inboundOrderAddList = scmDictService.queryInboundOrderAddList(startTime,endTime);
@@ -138,7 +135,7 @@ public class ScmTaskOneController implements Job {
                 .body();
         JSONObject respones1 = JSONObject.parseObject(bodys1);
         logger.info("增量推送入库订单明细结果："+ respones1.toJSONString());
-        if(0 != respones1.getIntValue("code")){
+        if(200 != respones1.getIntValue("code")){
             logger.info("增量推送入库订单明细推送失败："+respones1.getString("msg"));
         }
     }
