@@ -3,6 +3,7 @@ package com.haiersoft.ccli.wms.dao;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.wms.web.scm.ScmDict;
 import org.hibernate.SQLQuery;
+import org.hibernate.transform.BasicTransformerAdapter;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
@@ -69,13 +70,34 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
         sql.append(" left join BASE_CLIENT_INFO b on a.STOCK_ID = b.IDS ");
         sql.append(" where 1=1 AND tray.NOW_PIECE > 0 ");
         sql.append(" AND tray.CARGO_STATE = '01' ");
-//        sql.append(" AND tray.ENTER_TALLY_TIME >= to_date(:startTime, 'yyyy-mm-dd hh24:mi:ss') ");
-//        sql.append(" AND tray.ENTER_TALLY_TIME <= to_date(:endTime, 'yyyy-mm-dd hh24:mi:ss') ");
         HashMap<String,Object> parme=new HashMap<String,Object>();
-//       parme.put("startTime", startTime);
-//        parme.put("endTime", endTime);
         SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
-        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+//        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        String[] originalAliases = {
+                "warehouseName", "warehouseCode", "customerName", "socialCreditCode",
+                "isFutures", "isFuturesLabel", "businessType", "businessTypeLabel",
+                "tradeType", "tradeTypeLabel", "tradeMode", "tradeModeLabel",
+                "masterBillNo", "futuresReceiptNo", "futuresReceiptStatus", "containerNo",
+                "trayNo", "lotNo", "productType", "productTypeLabel", "productName",
+                "productBrand", "countL1", "countL2", "grossWeight", "netWeight",
+                "volume", "length", "countOneUnit", "countOneUnitLabel", "countTwoUnit",
+                "countTwoUnitLabel", "weightUnit", "weightUnitLabel", "volumeUnit",
+                "volumeUnitLabel", "lengthUnit", "lengthUnitLabel", "productionDate",
+                "inboundTime", "storageLocationKq", "storageLocationCk", "storageLocationQy",
+                "storageLocationKw", "operateTime"
+        };
+        // 使用自定义转换器保持别名的原始大小写
+        return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {
+            @Override
+            public Object transformTuple(Object[] tuple, String[] aliases) {
+                Map<String, Object> result = new HashMap<>(tuple.length);
+                for (int i = 0; i < tuple.length; i++) {
+                    // 直接使用原始别名作为key，不做大小写转换
+                    result.put(aliases[i], tuple[i]);
+                }
+                return result;
+            }
+        }).list();
     }
 
     //查询增量推送入库订单明细
@@ -111,7 +133,26 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
         parme.put("startTime", startTime);
         parme.put("endTime", endTime);
         SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
-        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+//        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        String[] originalAliases = {
+                "customerName", "socialCreditCode", "businessType", "tradeType",
+                "tradeMode", "businessNo", "masterBillNo", "inboundType",
+                "containerCount", "productType", "productName", "planInboundCountL1",
+                "planInboundCountL2", "planInboundGrossWeight", "planInboundNetWeight",
+                "planInboundVolume", "planInboundLength", "operateTime"
+        };
+        // 使用自定义转换器保持别名的原始大小写
+        return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {
+            @Override
+            public Object transformTuple(Object[] tuple, String[] aliases) {
+                Map<String, Object> result = new HashMap<>(tuple.length);
+                for (int i = 0; i < tuple.length; i++) {
+                    // 直接使用原始别名作为key，不做大小写转换
+                    result.put(originalAliases[i], tuple[i]);
+                }
+                return result;
+            }
+        }).list();
     }
 
     //查询增量推送入库明细
@@ -155,7 +196,28 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
         parme.put("startTime", startTime);
         parme.put("endTime", endTime);
         SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
-        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+//        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        String[] originalAliases = {
+                "customerName", "socialCreditCode", "businessType", "tradeType",
+                "tradeMode", "businessNo", "masterBillNo", "inboundType",
+                "containerNo", "containerType", "containerSize", "productType",
+                "productName", "productBrand", "planInboundCountL1", "planInboundCountL2",
+                "planInboundGrossWeight", "planInboundNetWeight", "planInboundVolume",
+                "planInboundLength", "inboundTime", "inboundKq", "inboundCk",
+                "inboundQy", "inboundKw", "operateTime"
+        };
+        // 使用自定义转换器保持别名的原始大小写
+        return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {
+            @Override
+            public Object transformTuple(Object[] tuple, String[] aliases) {
+                Map<String, Object> result = new HashMap<>(tuple.length);
+                for (int i = 0; i < tuple.length; i++) {
+                    // 直接使用原始别名作为key，不做大小写转换
+                    result.put(aliases[i], tuple[i]);
+                }
+                return result;
+            }
+        }).list();
     }
 
     //查询增量推送出库明细
@@ -195,6 +257,26 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
         parme.put("startTime", startTime);
         parme.put("endTime", endTime);
         SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
-        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+//        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+        String[] originalAliases = {
+                "customerName", "socialCreditCode", "businessType", "tradeType",
+                "tradeMode", "businessNo", "masterBillNo", "productType",
+                "productName", "productBrand", "outboundCountL1", "outboundCountL2",
+                "outboundGrossWeight", "outboundNetWeight", "outboundVolume",
+                "outboundLength", "outboundTime", "outboundKq", "outboundCk",
+                "outboundQy", "outboundKw", "operateTime"
+        };
+        // 使用自定义转换器保持别名的原始大小写
+        return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {
+            @Override
+            public Object transformTuple(Object[] tuple, String[] aliases) {
+                Map<String, Object> result = new HashMap<>(tuple.length);
+                for (int i = 0; i < tuple.length; i++) {
+                    // 直接使用原始别名作为key，不做大小写转换
+                    result.put(aliases[i], tuple[i]);
+                }
+                return result;
+            }
+        }).list();
     }
 }

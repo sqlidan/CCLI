@@ -212,10 +212,6 @@ public class PassPortController extends BaseController {
         }
     }
 
-    public static void main(String[] args) {
-
-    }
-
     /**
      * 同步
      */

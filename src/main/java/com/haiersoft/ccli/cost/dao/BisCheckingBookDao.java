@@ -480,9 +480,9 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append("   MIN (temp.hs) AS hs, ");
 		//sb.append("   min (temp.cargo_name) AS cargo_name, ");
 		sb.append("  temp.cargo_name AS cargo_name, ");
-		sb.append("   temp.piece,");
-		sb.append("   MIN (temp.net_weight) AS net_weight,");
-		sb.append("   MIN (temp.gross_weight) AS gross_weight, ");
+		sb.append("   SUM(temp.piece) as piece,");
+		sb.append("   SUM(temp.net_weight) AS net_weight,");
+		sb.append("   SUM(temp.gross_weight) AS gross_weight, ");
 		sb.append("   MIN (temp.charge_day) AS charge_day, ");
 		sb.append("   temp.charge_start_date, ");
 		sb.append("   temp.charge_end_date,");
