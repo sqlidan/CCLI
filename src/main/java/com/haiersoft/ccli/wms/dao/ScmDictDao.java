@@ -93,7 +93,7 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
                 Map<String, Object> result = new HashMap<>(tuple.length);
                 for (int i = 0; i < tuple.length; i++) {
                     // 直接使用原始别名作为key，不做大小写转换
-                    result.put(aliases[i], tuple[i]);
+                    result.put(originalAliases[i], tuple[i]);
                 }
                 return result;
             }
@@ -213,7 +213,7 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
                 Map<String, Object> result = new HashMap<>(tuple.length);
                 for (int i = 0; i < tuple.length; i++) {
                     // 直接使用原始别名作为key，不做大小写转换
-                    result.put(aliases[i], tuple[i]);
+                    result.put(originalAliases[i], tuple[i]);
                 }
                 return result;
             }
@@ -273,7 +273,7 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
                 Map<String, Object> result = new HashMap<>(tuple.length);
                 for (int i = 0; i < tuple.length; i++) {
                     // 直接使用原始别名作为key，不做大小写转换
-                    result.put(aliases[i], tuple[i]);
+                    result.put(originalAliases[i], tuple[i]);
                 }
                 return result;
             }

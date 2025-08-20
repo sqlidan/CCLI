@@ -84,11 +84,11 @@ public class ScmTaskTwoController implements Job {
 //                forMap.put("businessType","XXXX");//String-业务类型，字典项编码-是-字典项：business_type。
                 forMap.put("businessTypeLabel",scmDictAllMap.get("business_type-1"));//String-业务类型，字典项标签-是-字典项：business_type
 //                forMap.put("tradeType","XXXX");//String-贸易类型，字典项编码-是-字典项：trade_type
-                forMap.put("tradeTypeLabel",scmDictAllMap.get("trade_type-"+forMap.get("TRADETYPE")));//String-贸易类型，字典项标签-是-字典项：trade_type
+                forMap.put("tradeTypeLabel",scmDictAllMap.get("trade_type-"+forMap.get("tradeType")));//String-贸易类型，字典项标签-是-字典项：trade_type
 //                forMap.put("tradeMode","XXXX");//String-贸易方式，字典项编码-是-字典项：trade_mode
-                forMap.put("tradeModeLabel",scmDictAllMap.get("trade_mode-"+forMap.get("TRADEMODE")));//String-贸易方式，字典项标签-是-字典项：trade_mode
+                forMap.put("tradeModeLabel",scmDictAllMap.get("trade_mode-"+forMap.get("tradeMode")));//String-贸易方式，字典项标签-是-字典项：trade_mode
 //                forMap.put("inboundType","XXXX");//String-入库类型，字典项编码-是-字典项：inbound_type
-                forMap.put("inboundTypeLabel",scmDictAllMap.get("inbound_type-"+forMap.get("INBOUNDTYPE")));//String-入库类型，字典项标签-是-字典项：inbound_type
+                forMap.put("inboundTypeLabel",scmDictAllMap.get("inbound_type-"+forMap.get("inboundType")));//String-入库类型，字典项标签-是-字典项：inbound_type
 //                forMap.put("productType","XXXX");//String-货种，字典项编码-是-多个逗号分隔。字典项：product_type
                 forMap.put("productTypeLabel",scmDictAllMap.get("product_type-QT"));//String-货种，字典项标签-是-多个逗号分隔。字典项：product_type
                 forMap.put("countOneUnit","11");//String-数量一级单位，字典项编码-是-多个用 / 分隔。字典项：unit
