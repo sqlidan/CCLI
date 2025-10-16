@@ -194,6 +194,7 @@ public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 				 */
 
 				//	System.out.println(list);
+				List<String> wmsmtsNoList = new ArrayList<>();
 				for (HashMap hashMap : group) {
 					// CopBaseInfo copBase = (CopBaseInfo) list.get(i);
 					String ZKTRADE = hashMap.get("ZKTRADE") == null ? "" : hashMap.get("ZKTRADE").toString();//在库保税
@@ -244,6 +245,24 @@ public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 					attr.clear();
 					handler.startElement("", "", "WmsMtsNo", attr);
 					String wmsmtsNO = hashMap.get("WMSMTSNO") == null ? "" : hashMap.get("WMSMTSNO").toString();
+					//2025-10-16 修改非保税sku_id重复问题，在原编号后增加英文字符
+					if (!wmsmtsNoList.contains(wmsmtsNO)){
+						wmsmtsNoList.add(wmsmtsNO);
+					}else{
+						String[] strAry = new String[26];
+						// 循环生成从'A'到'Z'的字符（ASCII码中'A'是65，'Z'是90）
+						for (int k = 0; k < 26; k++) {
+							// 将ASCII码转换为字符，再转为字符串存入数组
+							strAry[k] = String.valueOf((char) ('A' + k));
+						}
+						for (int j = 0; j < strAry.length; j++) {
+							wmsmtsNO = wmsmtsNO+strAry[j];
+							if (!wmsmtsNoList.contains(wmsmtsNO)){
+								wmsmtsNoList.add(wmsmtsNO);
+								break;
+							}
+						}
+					}
 					wmsmtsNO = bSubstring(wmsmtsNO, 29);
 					handler.characters(wmsmtsNO.toCharArray(), 0, wmsmtsNO.length());
 					handler.endElement("", "", "WmsMtsNo");
@@ -261,7 +280,7 @@ public class SupervisionService extends BaseService<CopBaseInfo, Integer> {
 					attr.clear();
 					handler.startElement("", "", "CodeTs", attr);
 					// handler.characters("".toCharArray(), 0, "".length());
-					String CodeTs = hashMap.get("hscode") == null ? "" : hashMap.get("hscode").toString();
+					String CodeTs = hashMap.get("hscode") == null ? "/" : (hashMap.get("hscode").toString().trim().length()==0?"/":hashMap.get("hscode").toString());
 
 					handler.characters(CodeTs.toCharArray(), 0, CodeTs.length());
 					handler.endElement("", "", "CodeTs");
