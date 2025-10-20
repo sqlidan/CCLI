@@ -173,12 +173,12 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
         sql.append(" 'QT' as productType, ");//String-货种，字典项编码-是-多个逗号分隔。字典项：product_type
         sql.append(" tray.CARGO_NAME as productName, ");//String-商品名称-是-多个逗号分隔
         sql.append(" tray.CARGO_TYPE as productBrand, ");//String-规格型号-是-包含商品的品牌、品级、规格等信息
-        sql.append(" tray.NOW_PIECE as planInboundCountL1, ");//BigDecimal-计划入库数量 (一级)-是-最多支持小数点后2位
-        sql.append(" tray.NOW_PIECE as planInboundCountL2, ");//BigDecimal-计划入库数量（二级）-是-最多支持小数点后2位
-        sql.append(" tray.GROSS_WEIGHT as planInboundGrossWeight, ");//BigDecimal-计划入库毛重-是-最多支持小数点后3位
-        sql.append(" tray.NET_WEIGHT as planInboundNetWeight, ");//BigDecimal-计划入库净重-是-最多支持小数点后3位
-        sql.append(" 0.000 as planInboundVolume, ");//BigDecimal-计划入库体积-是-最多支持小数点后3位
-        sql.append(" 0.000 as planInboundLength, ");//BigDecimal-计划入库长度-是-最多支持小数点后3位
+        sql.append(" tray.NOW_PIECE as inboundCountL1, ");//BigDecimal-计划入库数量 (一级)-是-最多支持小数点后2位
+        sql.append(" tray.NOW_PIECE as inboundCountL2, ");//BigDecimal-计划入库数量（二级）-是-最多支持小数点后2位
+        sql.append(" tray.GROSS_WEIGHT as inboundGrossWeight, ");//BigDecimal-计划入库毛重-是-最多支持小数点后3位
+        sql.append(" tray.NET_WEIGHT as inboundNetWeight, ");//BigDecimal-计划入库净重-是-最多支持小数点后3位
+        sql.append(" 0.000 as inboundVolume, ");//BigDecimal-计划入库体积-是-最多支持小数点后3位
+        sql.append(" 0.000 as inboundLength, ");//BigDecimal-计划入库长度-是-最多支持小数点后3位
         sql.append(" b.OPERATE_TIME as inboundTime, ");//Date-实际入库时间-是-格式：yyyy-MM-dd HH:mm:ss
         sql.append(" TO_NUMBER(tray.FLOOR_NUM) as inboundKq, ");//String-入库库区-是-存放位置的一级
         sql.append(" TO_NUMBER(tray.ROOM_NUM) as inboundCk, ");//String-入库仓库-否-存放位置的二级
@@ -201,9 +201,9 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
                 "customerName", "socialCreditCode", "businessType", "tradeType",
                 "tradeMode", "businessNo", "masterBillNo", "inboundType",
                 "containerNo", "containerType", "containerSize", "productType",
-                "productName", "productBrand", "planInboundCountL1", "planInboundCountL2",
-                "planInboundGrossWeight", "planInboundNetWeight", "planInboundVolume",
-                "planInboundLength", "inboundTime", "inboundKq", "inboundCk",
+                "productName", "productBrand", "inboundCountL1", "inboundCountL2",
+                "inboundGrossWeight", "inboundNetWeight", "inboundVolume",
+                "inboundLength", "inboundTime", "inboundKq", "inboundCk",
                 "inboundQy", "inboundKw", "operateTime"
         };
         // 使用自定义转换器保持别名的原始大小写

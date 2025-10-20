@@ -148,8 +148,11 @@ public class SteveDroingReportDao extends HibernateDao<Stock, String> {
 					sql.append(" and t.DROBACKDATE<= to_date(:ENDTIME,'yyyy-mm-dd') ");
 				}
 				sql.append(" ) A join (select t.STANDING_NUM, t.CUSTOMS_NUM ,t.BILL_NUM ,t.LINK_ID,t.FEE_CODE,t.FEE_NAME,t.bis_type,t.FEE_PLAN,t.ASN,t.IF_RECEIVE,t.NUM,t.SHOULD_RMB,t.PRICE ");
-				sql.append(" from BIS_STANDING_BOOK t where t.if_receive=2 and t.bis_type=6) B on instr(A.STANDINGBOOKIDS,to_char(B.STANDING_NUM))>0 )");
-			} 
+				//20250826 注释
+//				sql.append(" from BIS_STANDING_BOOK t where t.if_receive=2 and t.bis_type=6) B on instr(A.STANDINGBOOKIDS,to_char(B.STANDING_NUM))>0 )");
+				//20250826修改
+				sql.append(" from BIS_STANDING_BOOK t where t.if_receive=2 and t.bis_type=6) B on A.STANDINGBOOKIDS = to_char(B.STANDING_NUM) )");
+			}
 			if(reportType.trim().length()<=0)
 				 sql.append(" union");
 			if(reportType.trim().length()<=0 ||reportType.trim().equals("4") ){//日工

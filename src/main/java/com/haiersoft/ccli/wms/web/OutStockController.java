@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -220,6 +222,14 @@ public class OutStockController extends BaseController {
 		String[] aaa = new String[4];
 		String[] bbb = new String[4];
 		int size = filters.size();
+		if (size == 0){
+			// 计算 60 天前的日期
+			LocalDate sixtyDaysAgoLocalDate = LocalDate.now().minusDays(60);
+			// 转换为 Hibernate 支持的 java.util.Date（若实体字段用 Date 类型）
+			Date sixtyDaysAgo = Date.from(sixtyDaysAgoLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+			PropertyFilter filter = new PropertyFilter("GED_operateTime", sixtyDaysAgo);
+			filters.add(filter);
+		}
 		for(int i=0;i<size;i++){
 			PropertyFilter obj = filters.get(i);
 			if("NULL".equals(obj.getMatchType().toString())){
