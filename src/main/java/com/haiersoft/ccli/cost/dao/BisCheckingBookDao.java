@@ -500,7 +500,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append("   sb.customs_name AS uname, ");
 		sb.append("   sb.order_STORAGESTATE,  ");
 		sb.append("   sb.STORAGE_STATE, ");
-		sb.append("   (CASE sb.STORAGE_STATE WHEN '1' THEN '在库' WHEN '2' THEN '出' WHEN '3' THEN '在库' WHEN '4' THEN '在库' ");
+		sb.append("   (CASE sb.STORAGE_STATE WHEN '1' THEN '在库' WHEN '2' THEN '出' WHEN '3' THEN (CASE sb.crk_sign WHEN '1' THEN '出' ELSE '在库' END ) WHEN '4' THEN '在库' ");
 		sb.append("   ELSE(CASE sb.crk_sign WHEN '1' THEN '入库' ELSE '出' END)END) AS CRK_SIGN,");
 		sb.append("   (CASE sb.STORAGE_STATE WHEN '4' THEN '1' ELSE	'0' END) AS hs, ");
 		sb.append("   NVL(sb.cargo_name,(CASE crk_sign WHEN '1' THEN pe.cargo_name WHEN '2' THEN ");
@@ -834,7 +834,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			sb.append("    WHEN '2' THEN                                                                                                     ");
 			sb.append("      '出'                                                                                                            ");
 			sb.append("    WHEN '3' THEN                                                                                                     ");
-			sb.append("      '在库'                                                                                                          ");
+			sb.append("      (CASE sb.crk_sign WHEN '1' THEN '出' ELSE '在库' END )                                                                                                          ");
 			sb.append("    WHEN '4' THEN                                                                                                     ");
 			sb.append("      '在库'                                                                                                          ");
 			sb.append("    END                                                                                                               ");

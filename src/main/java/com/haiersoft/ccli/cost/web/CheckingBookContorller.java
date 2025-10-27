@@ -60,7 +60,12 @@ public class CheckingBookContorller extends BaseController {
 			if(null==getlist||getlist.size()==0){
 				return;
 			}
-    		String formatFileName = URLEncoder.encode("应收对账单" +".xls","UTF-8");
+			//2025-10-24 注释
+//    		String formatFileName = URLEncoder.encode("应收对账单" +".xls","UTF-8");
+			//2025-10-24 新增
+//			String name = bisCheckingBook.getCustom()+bisCheckingBook.getYearMonth().split("-")[1];
+			String name = bisCheckingBook.getCustom()+bisCheckingBook.getYearMonth()+"月对账单";
+    		String formatFileName = URLEncoder.encode(name +".xls","UTF-8");
         	ExcelUtil excelUtil=new ExcelUtil();
         	String  filePath=PropertiesUtil.getPropertiesByName("filepath", "application");
         	String srcPath =null; 
@@ -187,12 +192,16 @@ public class CheckingBookContorller extends BaseController {
 					sumnet+=Double.valueOf(detailMap.get("NET_WEIGHT").toString());
 					sumwet+=Double.valueOf(detailMap.get("GROSS_WEIGHT").toString());
 				}
-            	
+
+            	int sumCellindex = col;
             	for (int j = 0; j <gethead.size(); j++) {
 					excelUtil.setCellDoubleValue(row,col,Double.valueOf((detailMap.get("KURMB"+j)!=null?detailMap.get("KURMB"+j).toString():"0")));
 					col++;
 				}
-				excelUtil.setCellDoubleValue(row,col,Double.valueOf((detailMap.get("SUMRMB")!=null?detailMap.get("SUMRMB").toString():"0")));
+            	//2025-10-25 徐峥 注释
+//				excelUtil.setCellDoubleValue(row,col,Double.valueOf((detailMap.get("SUMRMB")!=null?detailMap.get("SUMRMB").toString():"0")));
+				//2025-10-25 徐峥 新增
+				excelUtil.setCellSumValue(row,col,getCellName((row+1),(sumCellindex-1)),getCellName((row+1),(col-1)));
 				if((1==obj.getnType()||3==obj.getnType())){
 					int count=Integer.parseInt(hsMap.get((detailMap.get("BILL_NUM")!=null?detailMap.get("BILL_NUM").toString():"")).toString());
 					if(!bill_num.equals((detailMap.get("BILL_NUM")!=null?detailMap.get("BILL_NUM").toString():""))){
@@ -399,6 +408,7 @@ public class CheckingBookContorller extends BaseController {
 	    					}
 	    				}
 	    			}
+
 	    		String formatFileName = URLEncoder.encode("应收对账单" +".xls","UTF-8");
 	        	ExcelUtil excelUtil=new ExcelUtil();
 	        	String  filePath=PropertiesUtil.getPropertiesByName("filepath", "application");
@@ -492,6 +502,8 @@ public class CheckingBookContorller extends BaseController {
 	        				}
 	        				excelUtil.setCellStrValue2(0,2,billDate+"对账单明细");
 	        				excelUtil.setCellStrValue2(0,4,"对账客户："+(map.get("UNAME")!=null?map.get("UNAME").toString():""));
+							String name = (map.get("UNAME")!=null?map.get("UNAME").toString():"")+billDate+"月对账单";
+							formatFileName = URLEncoder.encode(name +".xls","UTF-8");
 	        			}
 	        			//获取分组唯一标示
 	        			keys=map.get("KEYS").toString();
@@ -971,6 +983,7 @@ public class CheckingBookContorller extends BaseController {
 	        	}
 	       		sbHtml.append("</tr>");
 	       		String userName=null;// 客户名称
+				String formatFileName = URLEncoder.encode("应收对账单明细" +".pdf","UTF-8");
 	       		//填充内容
 	       		if(getlist!=null && getlist.size()>0){
 	        		Map<String,Object> map=null;
@@ -991,6 +1004,15 @@ public class CheckingBookContorller extends BaseController {
 	        			if(null==userName){
 	        				userName=map.get("UNAME")!=null?map.get("UNAME").toString():"";
 	        			}
+						if(0==i){
+							String billDate=map.get("BILL_DATE")!=null?map.get("BILL_DATE").toString():"";
+							String[] billDatelist=billDate.split("-");
+							if(3==billDatelist.length){
+								billDate=billDatelist[0]+"-"+billDatelist[1];
+							}
+							String name = (map.get("UNAME")!=null?map.get("UNAME").toString():"")+billDate+"月对账单明细";
+							formatFileName = URLEncoder.encode(name +".xls","UTF-8");
+						}
 	        			//获取分组唯一标示
 	        			keys=map.get("KEYS").toString();
 	        			if(keyMap.get(keys)!=null || keys.split(":").length<3){
@@ -1118,7 +1140,6 @@ public class CheckingBookContorller extends BaseController {
 	       		FileInputStream in = new FileInputStream(new File(pathPdf));
 	        	int len = 0;
 	        	byte[] buffer = new byte[1024];
-	        	String formatFileName = URLEncoder.encode("对账单明细" +".pdf","UTF-8");
 	        	response.setHeader("Content-disposition", "attachment; filename=\"" +formatFileName+"\"");// 设定输出文件头
 	        	response.setContentType("application/msexcel");// 定义输出类型
 	        	OutputStream out = response.getOutputStream();

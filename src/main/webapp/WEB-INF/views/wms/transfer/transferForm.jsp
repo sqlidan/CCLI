@@ -119,10 +119,10 @@
 							<td>计费日期：</td><td>
 							 	 <c:choose>
 									<c:when test="${obj.isEdite == 1}">
-										<input type="text" name="startStoreDate" class="easyui-validatebox" readonly="readonly"   data-options="width:150" value="<fmt:formatDate value="${obj.startStoreDate}"/>" />
+										<input type="text" name="startStoreDate" class="easyui-validatebox" readonly="readonly"   data-options="width:150, required:'required'" value="<fmt:formatDate value="${obj.startStoreDate}"/>" />
 									</c:when>
 									<c:otherwise>
-									 	<input id="startStoreDate" name="startStoreDate" type="text"   class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 150,prompt: '计费按此日期为准'"  value="<fmt:formatDate value="${obj.startStoreDate}"/>" />
+									 	<input id="startStoreDate" name="startStoreDate" type="text"   class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 150, required:'required',prompt: '计费按此日期为准'"  value="<fmt:formatDate value="${obj.startStoreDate}"/>" />
 									</c:otherwise>
 								</c:choose>
 							</td>
@@ -901,17 +901,92 @@ function save(){
 		if( $("#startStoreDate").datebox("getValue")!="" && $("#feeId").combobox("getValue") !="" ){
 			if(savenum==0){
 				savenum++;
+				// 显示loading
+				parent.$.messager.progress({title: "处理中", msg: "正在保存数据，请稍候...", text: "加载中..."});
+				// 5秒后自动关闭loading
+				setTimeout(() => {
+					parent.$.messager.progress('close');
+				}, 5000);
 				$("#transferform").submit();
+				// const progress = parent.$.messager.progress({
+				// 	title: "处理中",
+				// 	msg: "正在保存数据，请稍候...",
+				// 	text: "加载中..."
+				// });
+				// // 5秒自动关闭（兜底）
+				// const timer = setTimeout(() => {
+				// 	parent.$.messager.progress('close');
+				// }, 5000);
+				// // 异步提交表单
+				// $.ajax({
+				// 	url: $("#transferform").attr("action"), // 表单提交地址
+				// 	type: $("#transferform").attr("method") || "post", // 提交方式（默认post）
+				// 	data: $("#transferform").serialize(), // 序列化表单数据
+				// 	success: function(response) {
+				// 		// 提交成功（根据实际后端返回判断）
+				// 		clearTimeout(timer); // 清除兜底定时器
+				// 		parent.$.messager.progress('close'); // 关闭loading
+				// 		// 可添加成功提示
+				// 		parent.$.messager.show({ title: "提示", msg: "保存成功！", position: "bottomRight" });
+				// 		// 如需跳转或刷新页面，这里处理（例如：parent.location.reload();）
+				// 	},
+				// 	error: function() {
+				// 		// 提交失败
+				// 		clearTimeout(timer); // 清除兜底定时器
+				// 		parent.$.messager.progress('close'); // 关闭loading
+				// 		parent.$.messager.show({ title: "错误", msg: "保存失败，请重试！", position: "bottomRight" });
+				// 	}
+				// });
 			} 
 		}else{
 			parent.$.messager.show({ title : "提示",msg: "请填写费用方案和计费日期！", position: "bottomRight" });
 			return;
 		}
 	}else{
-			if(savenum==0){
+		if( $("#startStoreDate").datebox("getValue")!="") {
+			if (savenum == 0) {
 				savenum++;
+				parent.$.messager.progress({title: "处理中", msg: "正在保存数据，请稍候...", text: "加载中..."});
+				// 5秒后自动关闭loading
+				setTimeout(() => {
+					parent.$.messager.progress('close');
+				}, 5000);
 				$("#transferform").submit();
-			} 
+				// // 显示 loading
+				// const progress = parent.$.messager.progress({
+				// 	title: "处理中",
+				// 	msg: "正在保存数据，请稍候...",
+				// 	text: "加载中..."
+				// });
+				// // 5秒自动关闭（兜底）
+				// const timer = setTimeout(() => {
+				// 	parent.$.messager.progress('close');
+				// }, 5000);
+				// // 异步提交表单
+				// $.ajax({
+				// 	url: $("#transferform").attr("action"), // 表单提交地址
+				// 	type: $("#transferform").attr("method") || "post", // 提交方式（默认post）
+				// 	data: $("#transferform").serialize(), // 序列化表单数据
+				// 	success: function(response) {
+				// 		// 提交成功（根据实际后端返回判断）
+				// 		clearTimeout(timer); // 清除兜底定时器
+				// 		parent.$.messager.progress('close'); // 关闭loading
+				// 		// 可添加成功提示
+				// 		parent.$.messager.show({ title: "提示", msg: "保存成功！", position: "bottomRight" });
+				// 		// 如需跳转或刷新页面，这里处理（例如：parent.location.reload();）
+				// 	},
+				// 	error: function() {
+				// 		// 提交失败
+				// 		clearTimeout(timer); // 清除兜底定时器
+				// 		parent.$.messager.progress('close'); // 关闭loading
+				// 		parent.$.messager.show({ title: "错误", msg: "保存失败，请重试！", position: "bottomRight" });
+				// 	}
+				// });
+			}
+		}else{
+			parent.$.messager.show({ title : "提示",msg: "请填写计费日期！", position: "bottomRight" });
+			return;
+		}
 	}
 }
 //遍历表单获取行号
