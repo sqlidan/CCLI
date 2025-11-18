@@ -167,7 +167,11 @@ public class CheckingBookContorller extends BaseController {
             		}else{//柜号
             			excelUtil.setCellStrValue(row,1,(detailMap.get("LOT_NUM")!=null?detailMap.get("LOT_NUM").toString():""));
             		}
-            		excelUtil.setCellStrValue(row,2,(detailMap.get("CRK_SIGN")!=null?detailMap.get("CRK_SIGN").toString():""));
+					if(1==obj.getnType() || 2==obj.getnType()) {
+						excelUtil.setCellStrValue(row, 2, (detailMap.get("CRK_SIGN") != null ? detailMap.get("CRK_SIGN").toString() : ""));
+					}else{
+						excelUtil.setCellStrValue(row, 2, getIOType(detailMap.get("CRK_SIGN") != null ? detailMap.get("CRK_SIGN").toString() : ""));
+					}
     				excelUtil.setCellStrValue(row,3,(detailMap.get("CHARGE_START_DATE")!=null?detailMap.get("CHARGE_START_DATE").toString():""));
     				excelUtil.setCellStrValue(row,4,(detailMap.get("CARGO_NAME")!=null?detailMap.get("CARGO_NAME").toString():""));
     			    excelUtil.setCellDoubleValue(row,5,Double.valueOf((detailMap.get("PIECE")!=null?detailMap.get("PIECE").toString():"0")));
@@ -177,7 +181,11 @@ public class CheckingBookContorller extends BaseController {
     				excelUtil.setCellStrValue(row,9,(detailMap.get("CHARGE_END_DATE")!=null?detailMap.get("CHARGE_END_DATE").toString():""));
     				col=10;
             	}else{
-					excelUtil.setCellStrValue(row,1,(detailMap.get("CRK_SIGN")!=null?detailMap.get("CRK_SIGN").toString():""));
+					if(1==obj.getnType() || 2==obj.getnType()) {
+						excelUtil.setCellStrValue(row, 1, (detailMap.get("CRK_SIGN") != null ? detailMap.get("CRK_SIGN").toString() : ""));
+					}else{
+						excelUtil.setCellStrValue(row, 1, getIOType(detailMap.get("CRK_SIGN") != null ? detailMap.get("CRK_SIGN").toString() : ""));
+					}
     				excelUtil.setCellStrValue(row,2,(detailMap.get("CHARGE_START_DATE")!=null?detailMap.get("CHARGE_START_DATE").toString():""));
     				excelUtil.setCellStrValue(row,3,(detailMap.get("CARGO_NAME")!=null?detailMap.get("CARGO_NAME").toString():""));
     			    excelUtil.setCellDoubleValue(row,4,Double.valueOf((detailMap.get("PIECE")!=null?detailMap.get("PIECE").toString():"0")));
@@ -257,11 +265,11 @@ public class CheckingBookContorller extends BaseController {
 	    		excelUtil.setCellStrValue(row+2,3," ");
 				excelUtil.setCellStrValue(row+2,4,(1==obj.getnType() || 2==obj.getnType())?"结余":"Balance");
 //				excelUtil.setCellSumValue(row+2,5,this.getCellName(4,5),this.getCellName(row,5));
-				excelUtil.setCellSumValue2(row+2,5,this.getCellName(4, 5),this.getCellName(row, 5),"4",row+"",this.getCellName(4, 12),this.getCellName(row, 12),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,5,this.getCellName(4, 5),this.getCellName(row, 5),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 //				excelUtil.setCellSumValue(row+2,6,this.getCellName(4,6),this.getCellName(row,6));
-				excelUtil.setCellSumValue2(row+2,6,this.getCellName(4, 6),this.getCellName(row, 6),"4",row+"",this.getCellName(4, 12),this.getCellName(row, 12),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,6,this.getCellName(4, 6),this.getCellName(row, 6),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 //				excelUtil.setCellSumValue(row+2,7,this.getCellName(4,7),this.getCellName(row,7));
-				excelUtil.setCellSumValue2(row+2,7,this.getCellName(4, 7),this.getCellName(row, 7),"4",row+"",this.getCellName(4, 12),this.getCellName(row, 12),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,7,this.getCellName(4, 7),this.getCellName(row, 7),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 				excelUtil.setCellStrValue(row+2,8," ");
 				excelUtil.setCellStrValue(row+2,9," ");
 				sumcol=10;
@@ -270,11 +278,11 @@ public class CheckingBookContorller extends BaseController {
 	    		excelUtil.setCellStrValue(row+2,2," ");
 				excelUtil.setCellStrValue(row+2,3,(1==obj.getnType() || 2==obj.getnType())?"结余":"Balance");
 				excelUtil.setCellSumValue(row+2,4,this.getCellName(4,4),this.getCellName(row,4));
-				excelUtil.setCellSumValue2(row+2,4,this.getCellName(4, 4),this.getCellName(row, 4),"4",row+"",this.getCellName(4, 11),this.getCellName(row, 11),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,4,this.getCellName(4, 4),this.getCellName(row, 4),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 //				excelUtil.setCellSumValue(row+2,5,this.getCellName(4,5),this.getCellName(row,5));
-				excelUtil.setCellSumValue2(row+2,5,this.getCellName(4, 5),this.getCellName(row, 5),"4",row+"",this.getCellName(4, 11),this.getCellName(row, 11),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,5,this.getCellName(4, 5),this.getCellName(row, 5),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 //				excelUtil.setCellSumValue(row+2,6,this.getCellName(4,6),this.getCellName(row,6));
-				excelUtil.setCellSumValue2(row+2,6,this.getCellName(4, 6),this.getCellName(row, 6),"4",row+"",this.getCellName(4, 11),this.getCellName(row, 11),obj.getnType().toString(),obj.getType());
+				excelUtil.setCellSumValue2(row+2,6,this.getCellName(4, 6),this.getCellName(row, 6),"4",row+"",this.getCellName(4, 1000),this.getCellName(row, 1000),obj.getnType().toString(),obj.getType());
 				excelUtil.setCellStrValue(row+2,7," ");
 				excelUtil.setCellStrValue(row+2,8," ");
 				sumcol=9;
