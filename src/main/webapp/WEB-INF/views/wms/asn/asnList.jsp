@@ -402,20 +402,32 @@
         var row = dg.datagrid('getSelected');
         if (rowIsNull(row)) return;
         if (3 == row.asnState || 4 == row.asnState) {
-            $.ajax({
-                type: 'post',
-                url: "${ctx}/platform/reservationData/inbound/" + row.asn,
-                success: function (data) {
-                    if(data=="success"){
-                        successTip(data, dg);
-                    }else{
-                        parent.$.messager.show({ title : "提示",msg: "生成预约入库信息失败！", position: "bottomRight" });
-                        return;
-                    }
+            parent.$.easyui.messager.alert("ASN号：" + row.asn + " 未上架或未完成，不允许生成！");
+        } else {
+            parent.$.messager.prompt('提示', '请输入预约入库日期(格式为：20260101)。', function(content){
+                if (content){
+                    var params = "";
+                    params = row.asn +"-"+ content;
+                    $.ajax({
+                        type: 'post',
+                        url: "${ctx}/platform/reservationData/inbound/" + params,
+                        success: function (data) {
+                            if(data=="success"){
+                                successTip(data, dg);
+                            }else if(data=="warn"){
+                                parent.$.messager.show({ title : "提示",msg: "当前ASN信息已生成预约信息，请删除后再生成！", position: "bottomRight" });
+                                return;
+                            }else{
+                                parent.$.messager.show({ title : "提示",msg: "生成预约入库信息失败！", position: "bottomRight" });
+                                return;
+                            }
+                        }
+                    });
+                }else{
+                    parent.$.messager.show({ title : "提示",msg: "请输入预约入库日期！", position: "bottomRight" });
+                    return;
                 }
             });
-        } else {
-            parent.$.easyui.messager.alert("ASN号：" + row.asn + " 未上架或未完成，不允许生成！");
         }
     }
 </script>

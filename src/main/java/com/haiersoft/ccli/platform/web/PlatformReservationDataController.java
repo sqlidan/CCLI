@@ -1,5 +1,6 @@
 package com.haiersoft.ccli.platform.web;
 
+import com.haiersoft.ccli.base.entity.BaseTray;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.platform.entity.PlatformReservationInbound;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -77,14 +80,29 @@ public class PlatformReservationDataController extends BaseController {
 	 */
 	@RequestMapping(value = "/inbound/{asn}", method = RequestMethod.POST)
 	@ResponseBody
-	public String inbound(@PathVariable("asn") String asn) {
+	public String inbound(@PathVariable("asn") String asn) throws ParseException {
 		User user = UserUtil.getCurrentUser();
+
+		String appointDate = null;
+		if (asn.contains("-")){
+			String[] stringAry = asn.split("-");
+			asn = stringAry[0];
+			appointDate = stringAry[1];
+		}
+
 		List<PropertyFilter> filtersOrder = new ArrayList<>();
 		filtersOrder.add(new PropertyFilter("EQS_asn", asn));
 		List<BisAsn> bisAsnList = asnService.search(filtersOrder);
 		if (bisAsnList != null && bisAsnList.size() == 1) {
 			//订单信息
 			BisAsn bisAsn = bisAsnList.get(0);
+			List<PropertyFilter> filtersOrderCheck = new ArrayList<>();
+			filtersOrderCheck.add(new PropertyFilter("EQS_asn", asn));
+			List<PlatformReservationInbound> platformReservationInboundList = reservationInboundService.search(filtersOrderCheck);
+			if (platformReservationInboundList!=null && platformReservationInboundList.size() > 0){
+				return "warn";
+			}
+
 			List<PropertyFilter> filtersOrder2 = new ArrayList<>();
 			filtersOrder2.add(new PropertyFilter("EQS_linkId", bisAsn.getLinkId()));
 			List<BisEnterStock> bisEnterStockList = enterStockService.search(filtersOrder2);
@@ -93,41 +111,57 @@ public class PlatformReservationDataController extends BaseController {
 				bisEnterStock = bisEnterStockList.get(0);
 			}
 			//订单明细信息
+			int num = 0;
+			PlatformReservationInbound insertPlatformReservationInbound = new PlatformReservationInbound();
+			Double piece = 0.00;//件数
+			Double netWeight = 0.00;//总净重
 			List<PropertyFilter> filtersOrderInfo = new ArrayList<>();
 			filtersOrderInfo.add(new PropertyFilter("EQS_asnId", asn));
 			List<BisAsnInfo> bisAsnInfoList = asnInfoService.search(filtersOrderInfo);
 			if (bisAsnInfoList != null && bisAsnInfoList.size() > 0) {
 				for (BisAsnInfo forBisAsnInfo : bisAsnInfoList) {
-					PlatformReservationInbound insertPlatformReservationInbound = new PlatformReservationInbound();
-					Random random = new Random();
-					int randomNumber = random.nextInt(1000000) + 1; // 生成一个[1, 999999]之间的随机数
-					insertPlatformReservationInbound.setId(System.currentTimeMillis()+""+String.format("%06d", randomNumber));
-					insertPlatformReservationInbound.setCustomerService(bisAsn.getCreateUser()==null?user.getName():bisAsn.getCreateUser());//客服
-					insertPlatformReservationInbound.setConsumeCompany(bisAsn.getStockIn());//客户名称
-					insertPlatformReservationInbound.setBillNo(bisAsn.getBillNum());//提单号
-					insertPlatformReservationInbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
-					insertPlatformReservationInbound.setContainerNo(bisAsn.getCtnNum());//箱号
-					insertPlatformReservationInbound.setQueuingTime(new Date());//排队时间
-					insertPlatformReservationInbound.setProductName(forBisAsnInfo.getCargoName());//品名
-					insertPlatformReservationInbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
-					insertPlatformReservationInbound.setNum(forBisAsnInfo.getPiece().toString());//件数
-					insertPlatformReservationInbound.setNetWeight(forBisAsnInfo.getNetWeight());//总净重
-					insertPlatformReservationInbound.setCarNumber("");//车牌号
-					insertPlatformReservationInbound.setDriverMobile("");//手机号
-					insertPlatformReservationInbound.setAppointDate(new Date());//预约时间
-					insertPlatformReservationInbound.setStorageTemperature(bisEnterStock.getTemperature());//存放温度
-					insertPlatformReservationInbound.setCheckInstructions(bisEnterStock.getIfCheck());//是否查验
-					insertPlatformReservationInbound.setIsFreetax(bisEnterStock.getIfBonded());//是否保税
-					insertPlatformReservationInbound.setIsZdmt(bisEnterStock.getIfWithWooden());//是否带木托
-					insertPlatformReservationInbound.setSealNo("");//铅封号
-					insertPlatformReservationInbound.setOriginCountry(forBisAsnInfo.getProducingArea());//原产国(产地)
-					insertPlatformReservationInbound.setFactoryNo(forBisAsnInfo.getRkNum());//厂号
-					insertPlatformReservationInbound.setReportNumber(bisEnterStock.getBgdh());//报关单号
-					insertPlatformReservationInbound.setCreatedTime(new Date());//预约日期
-					insertPlatformReservationInbound.setType("1");//区分同步和系统生成
-					reservationInboundService.save(insertPlatformReservationInbound);
+					num++;
+					if (num == 1) {
+						Random random = new Random();
+						int randomNumber = random.nextInt(1000000) + 1; // 生成一个[1, 999999]之间的随机数
+						insertPlatformReservationInbound.setId(System.currentTimeMillis() + "" + String.format("%06d", randomNumber));
+						insertPlatformReservationInbound.setCustomerService(bisAsn.getCreateUser() == null ? user.getName() : bisAsn.getCreateUser());//客服
+						insertPlatformReservationInbound.setConsumeCompany(bisAsn.getStockName());//客户名称
+						insertPlatformReservationInbound.setBillNo(bisAsn.getBillNum());//提单号
+						insertPlatformReservationInbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
+						insertPlatformReservationInbound.setContainerNo(bisAsn.getCtnNum());//箱号
+						insertPlatformReservationInbound.setQueuingTime(new Date());//排队时间
+						insertPlatformReservationInbound.setProductName(forBisAsnInfo.getCargoName());//品名
+						insertPlatformReservationInbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
+						insertPlatformReservationInbound.setCarNumber("");//车牌号
+						insertPlatformReservationInbound.setDriverMobile("");//手机号
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+						SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+						if (appointDate!=null && appointDate.trim().length() > 0){
+							insertPlatformReservationInbound.setAppointDate(sdf.parse(sdf.format(sdf2.parse(appointDate))));//预约时间
+						}else{
+							insertPlatformReservationInbound.setAppointDate(new Date());//预约时间
+						}
+						insertPlatformReservationInbound.setStorageTemperature(bisEnterStock.getTemperature());//存放温度
+						insertPlatformReservationInbound.setCheckInstructions(bisEnterStock.getIfCheck());//是否查验
+						insertPlatformReservationInbound.setIsFreetax(bisEnterStock.getIfBonded());//是否保税
+						insertPlatformReservationInbound.setIsZdmt(bisEnterStock.getIfWithWooden());//是否带木托
+						insertPlatformReservationInbound.setSealNo("");//铅封号
+						insertPlatformReservationInbound.setOriginCountry(forBisAsnInfo.getProducingArea());//原产国(产地)
+						insertPlatformReservationInbound.setFactoryNo(forBisAsnInfo.getRkNum());//厂号
+						insertPlatformReservationInbound.setReportNumber(bisEnterStock.getBgdh());//报关单号
+						insertPlatformReservationInbound.setCreatedTime(new Date());//预约日期
+						insertPlatformReservationInbound.setType("1");//区分同步和系统生成
+						insertPlatformReservationInbound.setAsn(asn);
+					}
+					//合计件数和重量
+					piece = piece + (forBisAsnInfo.getPiece()==null?0:forBisAsnInfo.getPiece());
+					netWeight = netWeight + (forBisAsnInfo.getNetWeight()==null?0.00:forBisAsnInfo.getNetWeight());
 				}
 			}
+			insertPlatformReservationInbound.setNum(piece+"");//件数
+			insertPlatformReservationInbound.setNetWeight(netWeight);//重量
+			reservationInboundService.save(insertPlatformReservationInbound);
 		}else{
 			return "error";
 		}
@@ -140,6 +174,8 @@ public class PlatformReservationDataController extends BaseController {
 	private LoadingOrderService loadingOrderService;
 	@Autowired
 	private LoadingOrderInfoService loadingOrderInfoService;
+	@Autowired
+	private TrayInfoService trayInfoService;
 
 	/**
 	 * 跳转修改预约出库记录信息
@@ -180,53 +216,117 @@ public class PlatformReservationDataController extends BaseController {
 	 */
 	@RequestMapping(value = "/outbound/{orderNum}", method = RequestMethod.POST)
 	@ResponseBody
-	public String outbound(@PathVariable("orderNum") String orderNum) {
+	public String outbound(@PathVariable("orderNum") String orderNum) throws ParseException {
 		User user = UserUtil.getCurrentUser();
-		List<PropertyFilter> filtersOrder = new ArrayList<>();
-		filtersOrder.add(new PropertyFilter("EQS_orderNum", orderNum));
-		List<BisLoadingOrder> bisLoadingOrderList = loadingOrderService.search(filtersOrder);
-		if (bisLoadingOrderList!=null && bisLoadingOrderList.size() ==1){
-			//订单信息
-			BisLoadingOrder bisLoadingOrder = bisLoadingOrderList.get(0);
-			//订单明细信息
-			List<PropertyFilter> filtersOrderInfo = new ArrayList<>();
-			filtersOrderInfo.add(new PropertyFilter("EQS_loadingPlanNum", orderNum));
-			List<BisLoadingOrderInfo> bisLoadingOrderInfoList = loadingOrderInfoService.search(filtersOrderInfo);
-			if (bisLoadingOrderInfoList!=null && bisLoadingOrderInfoList.size() > 0){
-				for (BisLoadingOrderInfo forBisLoadingOrderInfo:bisLoadingOrderInfoList) {
-					PlatformReservationOutbound insertPlatformReservationOutbound = new PlatformReservationOutbound();
-					Random random = new Random();
-					int randomNumber = random.nextInt(1000000) + 1; // 生成一个[1, 999999]之间的随机数
-					insertPlatformReservationOutbound.setId(System.currentTimeMillis()+""+String.format("%06d", randomNumber));
-					insertPlatformReservationOutbound.setYyid("100000"+(new Date()).getTime());//预约id
-					insertPlatformReservationOutbound.setCustomerService(bisLoadingOrder.getCreatePerson()==null?user.getName():bisLoadingOrder.getCreatePerson());//客服
-					insertPlatformReservationOutbound.setAppointDate(new Date());//预约出库日期
-					insertPlatformReservationOutbound.setConsumeCompany(bisLoadingOrder.getStockName());//客户名称
-					insertPlatformReservationOutbound.setBillNo(forBisLoadingOrderInfo.getBillNum());//提单号
-					insertPlatformReservationOutbound.setContainerNo(forBisLoadingOrderInfo.getCtnNum());//箱号
-					insertPlatformReservationOutbound.setOriginCountry("");//原产国
-					insertPlatformReservationOutbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
-					insertPlatformReservationOutbound.setProductName(forBisLoadingOrderInfo.getCatgoName());//品名
-					insertPlatformReservationOutbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
-					insertPlatformReservationOutbound.setNum(forBisLoadingOrderInfo.getPiece().toString());//件数
-					insertPlatformReservationOutbound.setWeight(forBisLoadingOrderInfo.getPiece()*forBisLoadingOrderInfo.getNetWeight());//重量
-					insertPlatformReservationOutbound.setQueuingTime(new Date());//排队时间
-					insertPlatformReservationOutbound.setCarNumber(bisLoadingOrder.getCarNum());//车牌号
-					insertPlatformReservationOutbound.setDriverMobile("");//手机号
-					insertPlatformReservationOutbound.setLocationNo("");//库号
-					insertPlatformReservationOutbound.setRoomNum("");//房间号
-					insertPlatformReservationOutbound.setDeletedFlag(0);
-					insertPlatformReservationOutbound.setCreatedTime(new Date());
-					insertPlatformReservationOutbound.setIsBulkCargo(null);//是否散货
-					insertPlatformReservationOutbound.setType("1");//区分同步和系统生成
-					reservationOutboundService.save(insertPlatformReservationOutbound);
-				}
-				return "success";
-			}
-			return "当前订单没有明细信息";
-		}else{
-			return "未找到对应的出库订单信息";
+
+		String appointDate = null;
+		if (orderNum.contains("-")){
+			String[] stringAry = orderNum.split("-");
+			orderNum = stringAry[0];
+			appointDate = stringAry[1];
 		}
+
+		List<String> stringList = new ArrayList<>();
+		if (orderNum.contains(",")){
+			String[] strings = orderNum.split(",");
+			for (int i = 0; i < strings.length; i++) {
+				if (strings[i]!=null && strings[i].trim().length() > 0){
+					if (!stringList.contains(strings[i])){
+						stringList.add(strings[i]);
+					}
+				}
+			}
+		}else{
+			stringList.add(orderNum);
+		}
+
+		int num = 0;
+		String plateNo = null;
+		PlatformReservationOutbound insertPlatformReservationOutbound = new PlatformReservationOutbound();
+		Integer piece = 0;//件数
+		Double netWeight = 0.00;//总净重
+		for (String str:stringList) {
+			List<PropertyFilter> filtersOrder = new ArrayList<>();
+			filtersOrder.add(new PropertyFilter("EQS_orderNum", str));
+			List<BisLoadingOrder> bisLoadingOrderList = loadingOrderService.search(filtersOrder);
+			if (bisLoadingOrderList!=null && bisLoadingOrderList.size() ==1){
+				//订单信息
+				BisLoadingOrder bisLoadingOrder = bisLoadingOrderList.get(0);
+				if (plateNo==null){
+					plateNo = bisLoadingOrder.getCarNum();
+				}else{
+					if(!plateNo.equals(bisLoadingOrder.getCarNum())){
+						return "warn";
+					}
+				}
+
+				List<PropertyFilter> filtersOrderCheck = new ArrayList<>();
+				filtersOrderCheck.add(new PropertyFilter("EQS_orderNum", bisLoadingOrderList.get(0).getOrderNum()));
+				List<PlatformReservationOutbound> platformReservationOutboundList = reservationOutboundService.search(filtersOrderCheck);
+				if (platformReservationOutboundList!=null && platformReservationOutboundList.size() > 0){
+					return "warn1";
+				}
+
+				//订单明细信息
+				List<PropertyFilter> filtersOrderInfo = new ArrayList<>();
+				filtersOrderInfo.add(new PropertyFilter("EQS_loadingPlanNum", bisLoadingOrderList.get(0).getOrderNum()));
+				List<BisLoadingOrderInfo> bisLoadingOrderInfoList = loadingOrderInfoService.search(filtersOrderInfo);
+				if (bisLoadingOrderInfoList!=null && bisLoadingOrderInfoList.size() > 0){
+					for (BisLoadingOrderInfo forBisLoadingOrderInfo:bisLoadingOrderInfoList) {
+						num++;
+						if (num == 1){
+							Random random = new Random();
+							int randomNumber = random.nextInt(1000000) + 1; // 生成一个[1, 999999]之间的随机数
+							insertPlatformReservationOutbound.setId(System.currentTimeMillis()+""+String.format("%06d", randomNumber));
+							insertPlatformReservationOutbound.setYyid("100000"+(new Date()).getTime());//预约id
+							insertPlatformReservationOutbound.setCustomerService(bisLoadingOrder.getCreatePerson()==null?user.getName():bisLoadingOrder.getCreatePerson());//客服
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+							SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+							if (appointDate!=null && appointDate.trim().length() > 0){
+								insertPlatformReservationOutbound.setAppointDate(sdf.parse(sdf.format(sdf2.parse(appointDate))));//预约出库日期
+							}else{
+								insertPlatformReservationOutbound.setAppointDate(new Date());//预约出库日期
+							}
+							insertPlatformReservationOutbound.setConsumeCompany(bisLoadingOrder.getStockName());//客户名称
+							insertPlatformReservationOutbound.setBillNo(forBisLoadingOrderInfo.getBillNum());//提单号
+							insertPlatformReservationOutbound.setContainerNo(forBisLoadingOrderInfo.getCtnNum());//箱号
+							insertPlatformReservationOutbound.setOriginCountry("");//原产国
+							insertPlatformReservationOutbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
+							insertPlatformReservationOutbound.setProductName(forBisLoadingOrderInfo.getCatgoName());//品名
+							insertPlatformReservationOutbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
+							insertPlatformReservationOutbound.setQueuingTime(new Date());//排队时间
+							insertPlatformReservationOutbound.setCarNumber(bisLoadingOrder.getCarNum());//车牌号
+							insertPlatformReservationOutbound.setDriverMobile("");//手机号
+							List<PropertyFilter> filters = new ArrayList<PropertyFilter>();
+							PropertyFilter filter = new PropertyFilter("EQS_ctnNum", insertPlatformReservationOutbound.getContainerNo());
+							filters.add(filter);
+							PropertyFilter filter1 = new PropertyFilter("EQS_billNum", insertPlatformReservationOutbound.getBillNo());
+							filters.add(filter1);
+							List<TrayInfo> trayInfoList = trayInfoService.search(filters);
+							if (trayInfoList != null && trayInfoList.size() > 0){
+								insertPlatformReservationOutbound.setLocationNo(trayInfoList.get(0).getRoomNum());//库号
+								insertPlatformReservationOutbound.setRoomNum(trayInfoList.get(0).getStoreroomNum());//房间号
+							}else{
+								insertPlatformReservationOutbound.setLocationNo("");//库号
+								insertPlatformReservationOutbound.setRoomNum("");//房间号
+							}
+							insertPlatformReservationOutbound.setDeletedFlag(0);
+							insertPlatformReservationOutbound.setCreatedTime(new Date());
+							insertPlatformReservationOutbound.setIsBulkCargo(null);//是否散货
+							insertPlatformReservationOutbound.setType("1");//区分同步和系统生成
+							insertPlatformReservationOutbound.setOrderNum(str);//订单编号
+						}
+						//合计件数和重量
+						piece = piece + (forBisLoadingOrderInfo.getPiece()==null?0:forBisLoadingOrderInfo.getPiece());
+						netWeight = netWeight + (forBisLoadingOrderInfo.getNetWeight()==null?0.00:forBisLoadingOrderInfo.getNetWeight());
+					}
+				}
+			}
+		}
+		insertPlatformReservationOutbound.setNum(piece+"");//件数
+		insertPlatformReservationOutbound.setWeight(netWeight);//重量
+		reservationOutboundService.save(insertPlatformReservationOutbound);
+		return "success";
 	}
 
 }

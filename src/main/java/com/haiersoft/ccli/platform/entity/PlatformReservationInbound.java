@@ -131,6 +131,8 @@ public class PlatformReservationInbound implements Serializable {
      private  String status;
     @Column(name = "TYPE")
      private  String type;
+    @Column(name = "ASN")
+    private  String asn;
 
     public String getType() {
         return type;
@@ -454,5 +456,13 @@ public class PlatformReservationInbound implements Serializable {
 
     public void setDelFlag(Integer delFlag) {
         this.delFlag = delFlag;
+    }
+
+    public String getAsn() {
+        return asn;
+    }
+
+    public void setAsn(String asn) {
+        this.asn = asn;
     }
 }

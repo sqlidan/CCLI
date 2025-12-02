@@ -550,18 +550,37 @@
 
     //生成预约出库信息
     function createReservation() {
-        var row = dg.datagrid('getSelected');
-        if (rowIsNull(row)) return;
-        $.ajax({
-            type: 'post',
-            url: "${ctx}/platform/reservationData/outbound/" + row.orderNum,
-            success: function (data) {
-                if(data=="success"){
-                    successTip(data, dg);
-                }else{
-                    parent.$.messager.show({ title : "提示",msg: "生成预约出库信息失败！", position: "bottomRight" });
-                    return;
-                }
+        var rows = dg.datagrid('getSelections');
+        if(rowIsNull(rows)) return;
+        var orderNums= [];
+        for(var i=0; i<rows.length; i++){
+            orderNums.push(rows[i].orderNum);
+        }
+        parent.$.messager.prompt('提示', '请输入预约出库日期(格式为：20260101)。', function(content){
+            if (content){
+                var params = "";
+                params = orderNums+"-"+content;
+                $.ajax({
+                    type: 'post',
+                    url: "${ctx}/platform/reservationData/outbound/" + params,
+                    success: function (data) {
+                        if(data=="success"){
+                            successTip(data, dg);
+                        }else if(data=="warn"){
+                            parent.$.messager.show({ title : "提示",msg: "请选择同一辆车进行生成！", position: "bottomRight" });
+                            return;
+                        }else if(data=="warn1"){
+                            parent.$.messager.show({ title : "提示",msg: "当前订单信息已生成预约信息，请删除后再生成！", position: "bottomRight" });
+                            return;
+                        }else{
+                            parent.$.messager.show({ title : "提示",msg: "生成预约出库信息失败！", position: "bottomRight" });
+                            return;
+                        }
+                    }
+                });
+            }else{
+                parent.$.messager.show({ title : "提示",msg: "请输入预约出库日期！", position: "bottomRight" });
+                return;
             }
         });
     }

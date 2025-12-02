@@ -140,6 +140,9 @@ public class PlatformReservationOutbound implements Serializable {
     @Column(name = "TYPE")
     private  String type;
 
+    @Column(name = "ORDER_NUM")
+    private  String orderNum;
+
     public String getType() {
         return type;
     }
@@ -416,11 +419,35 @@ public class PlatformReservationOutbound implements Serializable {
         this.roomNum = roomNum;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getIsSuccess() {
+        return isSuccess;
+    }
+
+    public void setIsSuccess(String isSuccess) {
+        this.isSuccess = isSuccess;
+    }
+
     public String getIsBulkCargo() {
         return isBulkCargo;
     }
 
     public void setIsBulkCargo(String isBulkCargo) {
         this.isBulkCargo = isBulkCargo;
+    }
+
+    public String getOrderNum() {
+        return orderNum;
+    }
+
+    public void setOrderNum(String orderNum) {
+        this.orderNum = orderNum;
     }
 }
