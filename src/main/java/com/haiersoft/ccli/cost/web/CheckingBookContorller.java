@@ -209,7 +209,7 @@ public class CheckingBookContorller extends BaseController {
             	//2025-10-25 徐峥 注释
 //				excelUtil.setCellDoubleValue(row,col,Double.valueOf((detailMap.get("SUMRMB")!=null?detailMap.get("SUMRMB").toString():"0")));
 				//2025-10-25 徐峥 新增
-				excelUtil.setCellSumValue(row,col,getCellName((row+1),(sumCellindex-1)),getCellName((row+1),(col-1)));
+				excelUtil.setCellSumValue(row,col,getCellName((row+1),(sumCellindex)),getCellName((row+1),(col-1)));
 				if((1==obj.getnType()||3==obj.getnType())){
 					int count=Integer.parseInt(hsMap.get((detailMap.get("BILL_NUM")!=null?detailMap.get("BILL_NUM").toString():"")).toString());
 					if(!bill_num.equals((detailMap.get("BILL_NUM")!=null?detailMap.get("BILL_NUM").toString():""))){
