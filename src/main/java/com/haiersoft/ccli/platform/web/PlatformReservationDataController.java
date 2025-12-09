@@ -75,20 +75,20 @@ public class PlatformReservationDataController extends BaseController {
 	}
 
 
+	@RequestMapping(value = "/inbound/getDate/{asn}", method = RequestMethod.GET)
+	public String getInboundDate(@PathVariable("asn") String asn, Model model) {
+		model.addAttribute("productName", asn);
+		return "wms/asn/inboundAppointForm";
+	}
 	/**
 	 * 入库联系单生成预约入库记录
 	 */
-	@RequestMapping(value = "/inbound/{asn}", method = RequestMethod.POST)
+	@RequestMapping(value = "/inbound/create", method = RequestMethod.POST)
 	@ResponseBody
-	public String inbound(@PathVariable("asn") String asn) throws ParseException {
+	public String inbound(PlatformReservationInbound platformReservationInbound) throws ParseException {
 		User user = UserUtil.getCurrentUser();
-
-		String appointDate = null;
-		if (asn.contains("-")){
-			String[] stringAry = asn.split("-");
-			asn = stringAry[0];
-			appointDate = stringAry[1];
-		}
+		String asn = platformReservationInbound.getProductName();
+		Date appointDate = platformReservationInbound.getAppointDate();
 
 		List<PropertyFilter> filtersOrder = new ArrayList<>();
 		filtersOrder.add(new PropertyFilter("EQS_asn", asn));
@@ -135,13 +135,7 @@ public class PlatformReservationDataController extends BaseController {
 						insertPlatformReservationInbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
 						insertPlatformReservationInbound.setCarNumber("");//车牌号
 						insertPlatformReservationInbound.setDriverMobile("");//手机号
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-						SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-						if (appointDate!=null && appointDate.trim().length() > 0){
-							insertPlatformReservationInbound.setAppointDate(sdf.parse(sdf.format(sdf2.parse(appointDate))));//预约时间
-						}else{
-							insertPlatformReservationInbound.setAppointDate(new Date());//预约时间
-						}
+						insertPlatformReservationInbound.setAppointDate(appointDate);//预约时间
 						insertPlatformReservationInbound.setStorageTemperature(bisEnterStock.getTemperature());//存放温度
 						insertPlatformReservationInbound.setCheckInstructions(bisEnterStock.getIfCheck());//是否查验
 						insertPlatformReservationInbound.setIsFreetax(bisEnterStock.getIfBonded());//是否保税
@@ -211,20 +205,20 @@ public class PlatformReservationDataController extends BaseController {
 		return "success";
 	}
 
+	@RequestMapping(value = "/outbound/getDate/{orderNum}", method = RequestMethod.GET)
+	public String getOutboundDate(@PathVariable("orderNum") String orderNum, Model model) {
+		model.addAttribute("productName", orderNum);
+		return "wms/loadingorder/outboundAppointForm";
+	}
 	/**
 	 * 出库订单生成预约出库记录
 	 */
-	@RequestMapping(value = "/outbound/{orderNum}", method = RequestMethod.POST)
+	@RequestMapping(value = "/outbound/create", method = RequestMethod.POST)
 	@ResponseBody
-	public String outbound(@PathVariable("orderNum") String orderNum) throws ParseException {
+	public String outbound(PlatformReservationOutbound platformReservationOutbound) throws ParseException {
 		User user = UserUtil.getCurrentUser();
-
-		String appointDate = null;
-		if (orderNum.contains("-")){
-			String[] stringAry = orderNum.split("-");
-			orderNum = stringAry[0];
-			appointDate = stringAry[1];
-		}
+		String orderNum = platformReservationOutbound.getProductName();
+		Date appointDate = platformReservationOutbound.getAppointDate();
 
 		List<String> stringList = new ArrayList<>();
 		if (orderNum.contains(",")){
@@ -280,13 +274,7 @@ public class PlatformReservationDataController extends BaseController {
 							insertPlatformReservationOutbound.setId(System.currentTimeMillis()+""+String.format("%06d", randomNumber));
 							insertPlatformReservationOutbound.setYyid("100000"+(new Date()).getTime());//预约id
 							insertPlatformReservationOutbound.setCustomerService(bisLoadingOrder.getCreatePerson()==null?user.getName():bisLoadingOrder.getCreatePerson());//客服
-							SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-							SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-							if (appointDate!=null && appointDate.trim().length() > 0){
-								insertPlatformReservationOutbound.setAppointDate(sdf.parse(sdf.format(sdf2.parse(appointDate))));//预约出库日期
-							}else{
-								insertPlatformReservationOutbound.setAppointDate(new Date());//预约出库日期
-							}
+							insertPlatformReservationOutbound.setAppointDate(appointDate);//预约出库日期
 							insertPlatformReservationOutbound.setConsumeCompany(bisLoadingOrder.getStockName());//客户名称
 							insertPlatformReservationOutbound.setBillNo(forBisLoadingOrderInfo.getBillNum());//提单号
 							insertPlatformReservationOutbound.setContainerNo(forBisLoadingOrderInfo.getCtnNum());//箱号

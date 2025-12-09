@@ -404,30 +404,52 @@
         if (3 == row.asnState || 4 == row.asnState) {
             parent.$.easyui.messager.alert("ASN号：" + row.asn + " 未上架或未完成，不允许生成！");
         } else {
-            parent.$.messager.prompt('提示', '请输入预约入库日期(格式为：20260101)。', function(content){
-                if (content){
-                    var params = "";
-                    params = row.asn +"-"+ content;
-                    $.ajax({
-                        type: 'post',
-                        url: "${ctx}/platform/reservationData/inbound/" + params,
-                        success: function (data) {
-                            if(data=="success"){
-                                successTip(data, dg);
-                            }else if(data=="warn"){
-                                parent.$.messager.show({ title : "提示",msg: "当前ASN信息已生成预约信息，请删除后再生成！", position: "bottomRight" });
-                                return;
-                            }else{
-                                parent.$.messager.show({ title : "提示",msg: "生成预约入库信息失败！", position: "bottomRight" });
-                                return;
-                            }
-                        }
-                    });
-                }else{
-                    parent.$.messager.show({ title : "提示",msg: "请输入预约入库日期！", position: "bottomRight" });
-                    return;
-                }
+            var params = "";
+            params = row.asn;
+            d=$("#dlg").dialog({
+                title: "生成预约入库信息",
+                width: 450,
+                height:225,
+                href:'${ctx}/platform/reservationData/inbound/getDate/'+params,
+                maximizable:true,
+                modal:true,
+                buttons:[{
+                    text:'确认',
+                    handler:function(){
+                        $("#mainform").submit();
+                    }
+                },{
+                    text:'取消',
+                    handler:function(){
+                        d.panel('close');
+                    }
+                }]
             });
+
+            <%--parent.$.messager.prompt('提示', '请输入预约入库日期(格式为：20260101)。', function(content){--%>
+            <%--    if (content){--%>
+            <%--        var params = "";--%>
+            <%--        params = row.asn +"-"+ content;--%>
+            <%--        $.ajax({--%>
+            <%--            type: 'post',--%>
+            <%--            url: "${ctx}/platform/reservationData/inbound/" + params,--%>
+            <%--            success: function (data) {--%>
+            <%--                if(data=="success"){--%>
+            <%--                    successTip(data, dg);--%>
+            <%--                }else if(data=="warn"){--%>
+            <%--                    parent.$.messager.show({ title : "提示",msg: "当前ASN信息已生成预约信息，请删除后再生成！", position: "bottomRight" });--%>
+            <%--                    return;--%>
+            <%--                }else{--%>
+            <%--                    parent.$.messager.show({ title : "提示",msg: "生成预约入库信息失败！", position: "bottomRight" });--%>
+            <%--                    return;--%>
+            <%--                }--%>
+            <%--            }--%>
+            <%--        });--%>
+            <%--    }else{--%>
+            <%--        parent.$.messager.show({ title : "提示",msg: "请输入预约入库日期！", position: "bottomRight" });--%>
+            <%--        return;--%>
+            <%--    }--%>
+            <%--});--%>
         }
     }
 </script>

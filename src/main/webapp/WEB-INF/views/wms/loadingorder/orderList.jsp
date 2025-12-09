@@ -556,33 +556,56 @@
         for(var i=0; i<rows.length; i++){
             orderNums.push(rows[i].orderNum);
         }
-        parent.$.messager.prompt('提示', '请输入预约出库日期(格式为：20260101)。', function(content){
-            if (content){
-                var params = "";
-                params = orderNums+"-"+content;
-                $.ajax({
-                    type: 'post',
-                    url: "${ctx}/platform/reservationData/outbound/" + params,
-                    success: function (data) {
-                        if(data=="success"){
-                            successTip(data, dg);
-                        }else if(data=="warn"){
-                            parent.$.messager.show({ title : "提示",msg: "请选择同一辆车进行生成！", position: "bottomRight" });
-                            return;
-                        }else if(data=="warn1"){
-                            parent.$.messager.show({ title : "提示",msg: "当前订单信息已生成预约信息，请删除后再生成！", position: "bottomRight" });
-                            return;
-                        }else{
-                            parent.$.messager.show({ title : "提示",msg: "生成预约出库信息失败！", position: "bottomRight" });
-                            return;
-                        }
-                    }
-                });
-            }else{
-                parent.$.messager.show({ title : "提示",msg: "请输入预约出库日期！", position: "bottomRight" });
-                return;
-            }
+
+        var params = "";
+        params = orderNums;
+        d=$("#dlg").dialog({
+            title: "生成预约入库信息",
+            width: 450,
+            height:225,
+            href:'${ctx}/platform/reservationData/outbound/getDate/'+params,
+            maximizable:true,
+            modal:true,
+            buttons:[{
+                text:'确认',
+                handler:function(){
+                    $("#mainform").submit();
+                }
+            },{
+                text:'取消',
+                handler:function(){
+                    d.panel('close');
+                }
+            }]
         });
+
+        <%--parent.$.messager.prompt('提示', '请输入预约出库日期(格式为：20260101)。', function(content){--%>
+        <%--    if (content){--%>
+        <%--        var params = "";--%>
+        <%--        params = orderNums+"-"+content;--%>
+        <%--        $.ajax({--%>
+        <%--            type: 'post',--%>
+        <%--            url: "${ctx}/platform/reservationData/outbound/" + params,--%>
+        <%--            success: function (data) {--%>
+        <%--                if(data=="success"){--%>
+        <%--                    successTip(data, dg);--%>
+        <%--                }else if(data=="warn"){--%>
+        <%--                    parent.$.messager.show({ title : "提示",msg: "请选择同一辆车进行生成！", position: "bottomRight" });--%>
+        <%--                    return;--%>
+        <%--                }else if(data=="warn1"){--%>
+        <%--                    parent.$.messager.show({ title : "提示",msg: "当前订单信息已生成预约信息，请删除后再生成！", position: "bottomRight" });--%>
+        <%--                    return;--%>
+        <%--                }else{--%>
+        <%--                    parent.$.messager.show({ title : "提示",msg: "生成预约出库信息失败！", position: "bottomRight" });--%>
+        <%--                    return;--%>
+        <%--                }--%>
+        <%--            }--%>
+        <%--        });--%>
+        <%--    }else{--%>
+        <%--        parent.$.messager.show({ title : "提示",msg: "请输入预约出库日期！", position: "bottomRight" });--%>
+        <%--        return;--%>
+        <%--    }--%>
+        <%--});--%>
     }
     
     //数组消除重复的元素
