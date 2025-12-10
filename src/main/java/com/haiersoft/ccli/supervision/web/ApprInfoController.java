@@ -1,10 +1,13 @@
 package com.haiersoft.ccli.supervision.web;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.haiersoft.ccli.supervision.entity.ManiInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +42,18 @@ public class ApprInfoController extends BaseController{
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		PropertyFilter filter = new PropertyFilter("EQS_headId", id);
 		filters.add(filter);
-		page = apprInfoService.search(page, filters);		
+		page = apprInfoService.search(page, filters);
+		if (page!=null && page.getResult()!=null && page.getResult().size() > 0){
+			for (ApprInfo forApprInfo:page.getResult()) {
+				if (forApprInfo.getGrossWt()!=null && forApprInfo.getGrossWt().trim().length() > 0){
+					BigDecimal originalNumber = new BigDecimal(forApprInfo.getGrossWt());
+					BigDecimal roundedNumber = originalNumber.setScale(2, RoundingMode.HALF_UP); // 四舍五入到一位小数
+					String GrossWt = roundedNumber.toString();
+					forApprInfo.setGrossWt(GrossWt);
+					apprInfoService.update(forApprInfo);
+				}
+			}
+		}
 		return getEasyUIData(page);
 	}
 }

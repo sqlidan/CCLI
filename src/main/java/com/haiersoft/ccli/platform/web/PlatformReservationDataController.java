@@ -130,7 +130,7 @@ public class PlatformReservationDataController extends BaseController {
 						insertPlatformReservationInbound.setBillNo(bisAsn.getBillNum());//提单号
 						insertPlatformReservationInbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
 						insertPlatformReservationInbound.setContainerNo(bisAsn.getCtnNum());//箱号
-						insertPlatformReservationInbound.setQueuingTime(new Date());//排队时间
+//						insertPlatformReservationInbound.setQueuingTime(new Date());//排队时间
 						insertPlatformReservationInbound.setProductName(forBisAsnInfo.getCargoName());//品名
 						insertPlatformReservationInbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
 						insertPlatformReservationInbound.setCarNumber("");//车牌号
@@ -282,7 +282,7 @@ public class PlatformReservationDataController extends BaseController {
 							insertPlatformReservationOutbound.setProductType("3");//货类  1 水产 2 肉类 3 其他
 							insertPlatformReservationOutbound.setProductName(forBisLoadingOrderInfo.getCatgoName());//品名
 							insertPlatformReservationOutbound.setStatus("0");//状态 0：已保存，1：已入闸，2：已出闸；
-							insertPlatformReservationOutbound.setQueuingTime(new Date());//排队时间
+//							insertPlatformReservationOutbound.setQueuingTime(new Date());//排队时间
 							insertPlatformReservationOutbound.setCarNumber(bisLoadingOrder.getCarNum());//车牌号
 							insertPlatformReservationOutbound.setDriverMobile("");//手机号
 							List<PropertyFilter> filters = new ArrayList<PropertyFilter>();

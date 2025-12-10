@@ -1,5 +1,7 @@
 package com.haiersoft.ccli.supervision.web;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,7 +44,18 @@ public class ManiInfoController extends BaseController{
 		List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
 		PropertyFilter filter = new PropertyFilter("EQS_headId", id);
 		filters.add(filter);
-		page = maniInfoService.search(page, filters);		
+		page = maniInfoService.search(page, filters);
+		if (page!=null && page.getResult()!=null && page.getResult().size() > 0){
+			for (ManiInfo forManiInfo:page.getResult()) {
+				if (forManiInfo.getGrossWt()!=null && forManiInfo.getGrossWt().trim().length() > 0){
+					BigDecimal originalNumber = new BigDecimal(forManiInfo.getGrossWt());
+					BigDecimal roundedNumber = originalNumber.setScale(2, RoundingMode.HALF_UP); // 四舍五入到一位小数
+					String GrossWt = roundedNumber.toString();
+					forManiInfo.setGrossWt(GrossWt);
+					maniInfoService.update(forManiInfo);
+				}
+			}
+		}
 		return getEasyUIData(page);
 	}
 }

@@ -76,7 +76,7 @@ public class PlatformReservationController extends BaseController {
 			start.set(Calendar.MILLISECOND, 0);
 
 
-			end.add(Calendar.DATE, 30);
+			end.add(Calendar.DATE, 1);
 			// 时
 			end.set(Calendar.HOUR_OF_DAY, 0);
 			// 分
