@@ -560,7 +560,7 @@
         var params = "";
         params = orderNums;
         d=$("#dlg").dialog({
-            title: "生成预约入库信息",
+            title: "生成预约出库信息",
             width: 450,
             height:225,
             href:'${ctx}/platform/reservationData/outbound/getDate/'+params,

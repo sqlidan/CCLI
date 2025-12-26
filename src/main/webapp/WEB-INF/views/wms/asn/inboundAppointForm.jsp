@@ -15,7 +15,7 @@
 			</tr>
 			<tr>
 				<td>有效日期：  </td>
-				<td><input name="appointDate" type="text" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 150" /></td>
+				<td><input name="appointDate" type="text" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 150,required:'required'" /></td>
 			</tr>
 		</table>
 	</form>
@@ -27,7 +27,8 @@ $(document).ready(function(){
 		//提交表单
 	$('#mainform').form({
 		onSubmit: function(){
-			return true;
+			var isValid =  $(this).form('validate');
+			return isValid;
 		},
 		success:function(data){
 			if(data=="success"){
