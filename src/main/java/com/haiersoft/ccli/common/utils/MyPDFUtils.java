@@ -18,6 +18,8 @@ public class MyPDFUtils {
 
     public static String sHTML = "";
     public static String sDEST = "";
+    public static String sDESTTemp = "";
+    public static String sImage = "";
     public static Document document = null;
     public static PdfWriter writer = null;
 
@@ -27,6 +29,12 @@ public class MyPDFUtils {
 
     public static void setsDEST(String sDEST) {
         MyPDFUtils.sDEST = sDEST;
+    }
+    public static void setsDESTTemp(String sDESTTemp) {
+        MyPDFUtils.sDESTTemp = sDESTTemp;
+    }
+    public static void setsImage(String sImage) {
+        MyPDFUtils.sImage = sImage;
     }
 
     public static void createPdf(Rectangle pageSize, String pdfHead, String pdfTitle) {
@@ -76,6 +84,38 @@ public class MyPDFUtils {
 
         }
 
+    }
+
+    public static void createPdf2(Rectangle pageSize, String pdfHead, String pdfTitle) {
+        document = new Document(pageSize.rotate(), 5, 5, 80, 30);
+        try {
+            writer = PdfWriter.getInstance(document, new FileOutputStream(sDESTTemp));
+            setFooter(writer, pdfHead, pdfTitle);
+            writer.setFullCompression();
+            writer.setPdfVersion(PdfWriter.VERSION_1_4);
+            document.open();
+            XMLWorkerHelper.getInstance().parseXHtml(writer, document, new FileInputStream(sHTML), Charset.forName("UTF-8"));
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (DocumentException e1) {
+            e1.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            if (document.isOpen()) {
+                try {
+                    document.close();
+                } catch (Exception e) {
+                }
+            }
+            if (writer.isCloseStream() == false) {
+                writer.close();
+            }
+        }
+
+        float x = pageSize.getWidth() - 80 - 20;
+        float y = 20;
+        PdfSealUtils.addSealToPdf(sDESTTemp, sDEST,sImage,1,x,y);
     }
 
     private static void setFooter(PdfWriter writer, String pdfHead, String pdfTitle) throws DocumentException, IOException {

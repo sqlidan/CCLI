@@ -835,6 +835,8 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			sb.append("      '出'                                                                                                            ");
 			sb.append("    WHEN '3' THEN                                                                                                     ");
 			sb.append("      '在库'                                                                                                          ");
+			//2025-12-04 徐峥
+//			sb.append("      (CASE when sb.CUSTOMS_NUM <> pe.stock_in AND SUBSTR(sb.LINK_ID, 1, 1) = 'E' THEN '在库(转出)' when sb.CUSTOMS_NUM <> pe.stock_in AND SUBSTR(sb.LINK_ID, 1, 1) = 'T'  THEN '在库(转入)' ELSE '在库' END)                                                                                                          ");
 			sb.append("    WHEN '4' THEN                                                                                                     ");
 			sb.append("      '在库'                                                                                                          ");
 			sb.append("    END                                                                                                               ");
@@ -949,6 +951,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			sb.append("LEFT JOIN (                                                                                                           ");
 			sb.append("  SELECT                                                                                                              ");
 			sb.append("    tray.bill_num,                                                                                                         ");
+			sb.append("    tray.stock_in,                                                                                                         ");
 			sb.append("    sum(                                                                                                              ");
 			sb.append("      tray.original_piece - tray.remove_piece                                                                                   ");
 			sb.append("    ) AS piece,                                                                                                       ");
@@ -970,7 +973,8 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			sb.append("  WHERE                                                                                                               ");
 			sb.append("    tray.CARGO_STATE <> '99' AND asn.if_second_enter<> '2'                                                            ");//去掉重收的数量
 			sb.append("  GROUP BY                                                                                                            ");
-			sb.append("    tray.bill_num                                                                                                     ");
+			sb.append("    tray.bill_num,                                                                                                     ");
+			sb.append("    tray.stock_in                                                                                                     ");
 			sb.append(") pe ON pe.bill_num = sb.bill_num                                                                                     ");
 			sb.append("LEFT JOIN (                                                                                                           ");
 			sb.append("  SELECT                                                                                                              ");
@@ -989,6 +993,9 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			sb.append("  crk_sign,                                                                                                           ");
 			sb.append("  order_STORAGESTATE,                                                                                                 ");
 			sb.append("  STORAGE_STATE,                                                                                                      ");
+			//2025-12-04 徐峥
+//			sb.append("  stock_in,                                                                                                           ");
+//			sb.append("  CUSTOMS_NUM,                                                                                                      ");
 			sb.append("  charge_start_date,                                                                                                  ");
 			sb.append("  charge_end_date,                                                                                                    ");
 			sb.append("  sb.piece,                                                                                                           ");

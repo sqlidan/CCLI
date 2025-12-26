@@ -3,7 +3,6 @@ package com.haiersoft.ccli.report.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.OutputStream;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -12,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.haiersoft.ccli.common.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jeecgframework.poi.excel.ExcelExportUtil;
 import org.jeecgframework.poi.excel.entity.TemplateExportParams;
@@ -24,13 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.haiersoft.ccli.common.persistence.Page;
-import com.haiersoft.ccli.common.utils.CreatPDFUtils;
-import com.haiersoft.ccli.common.utils.DateUtils;
-import com.haiersoft.ccli.common.utils.ExcelUtil;
-import com.haiersoft.ccli.common.utils.MyFileUtils;
-import com.haiersoft.ccli.common.utils.MyPDFUtils;
-import com.haiersoft.ccli.common.utils.PropertiesUtil;
-import com.haiersoft.ccli.common.utils.parameterReflect;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.report.entity.Stock;
 import com.haiersoft.ccli.report.service.InStockReportService;
@@ -653,7 +646,11 @@ public class InStockReportController extends BaseController {
             MyPDFUtils.setsDEST(pathPdf);
             MyPDFUtils.setsHTML(pathHtml);
             MyPDFUtils.createPdf(PageSize.A3, pdfCN.toString(), pdfTitle);
-
+//            String sImage = path + "电子章.png";
+//            MyPDFUtils.setsImage(sImage);
+//            String sDESTTemp = path + "insyspdfTemp.pdf";
+//            MyPDFUtils.setsDESTTemp(sDESTTemp);
+//            MyPDFUtils.createPdf2(PageSize.A3, pdfCN.toString(), pdfTitle);
 
             //下载操作
             FileInputStream in = new FileInputStream(new File(pathPdf));

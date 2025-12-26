@@ -147,6 +147,7 @@ public class PlatformReservationDataController extends BaseController {
 						insertPlatformReservationInbound.setCreatedTime(new Date());//预约日期
 						insertPlatformReservationInbound.setType("1");//区分同步和系统生成
 						insertPlatformReservationInbound.setAsn(asn);
+						insertPlatformReservationInbound.setYyid(insertPlatformReservationInbound.getId());
 					}
 					//合计件数和重量
 					piece = piece + (forBisAsnInfo.getPiece()==null?0:forBisAsnInfo.getPiece());
@@ -301,8 +302,9 @@ public class PlatformReservationDataController extends BaseController {
 							insertPlatformReservationOutbound.setDeletedFlag(0);
 							insertPlatformReservationOutbound.setCreatedTime(new Date());
 							insertPlatformReservationOutbound.setIsBulkCargo(null);//是否散货
-							insertPlatformReservationOutbound.setType("1");//区分同步和系统生成
+							insertPlatformReservationOutbound.setType("1");//区分同步和系统生成getLoadingTruckNum
 							insertPlatformReservationOutbound.setOrderNum(str);//订单编号
+							insertPlatformReservationOutbound.setYyid(insertPlatformReservationOutbound.getId());
 						}
 						//合计件数和重量
 						piece = piece + (forBisLoadingOrderInfo.getPiece()==null?0:forBisLoadingOrderInfo.getPiece());

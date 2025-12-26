@@ -472,14 +472,24 @@ public class ExcelUtil {
         cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
         if(null!=type&&!"".equals(type)){
 	        if ("1".equals(ntype) || "2".equals(ntype)) {
+                //2025-12-04 徐峥
+//	            =SUMPRODUCT((ISNUMBER(SEARCH("在库",C4:C6)))*(FM4:FM6=0)*F4:F6)
+//	            cell.setCellFormula("SUMPRODUCT( (ISNUMBER(SEARCH(\"在库\",C" + beginB + ":C" + endB + "))) * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	            cell.setCellFormula("SUMPRODUCT( (C" + beginB + ":C" + endB + "=\"在库\") * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	        } else {
+                //2025-12-04 徐峥
+//	            cell.setCellFormula("SUMPRODUCT( (ISNUMBER(SEARCH(\"pre_in\",C" + beginB + ":C" + endB + "))) * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	            cell.setCellFormula("SUMPRODUCT( (C" + beginB + ":C" + endB + "=\"pre_in\") * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	        }
         }else{
         	if ("1".equals(ntype) || "2".equals(ntype)) {
+                //2025-12-04 徐峥
+//	            =SUMPRODUCT((ISNUMBER(SEARCH("在库",C4:C6)))*(FM4:FM6=0)*F4:F6)
+//                cell.setCellFormula("SUMPRODUCT( (ISNUMBER(SEARCH(\"在库\",B" + beginB + ":B" + endB + "))) * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	            cell.setCellFormula("SUMPRODUCT( (B" + beginB + ":B" + endB + "=\"在库\") * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	        } else {
+                //2025-12-04 徐峥
+//                cell.setCellFormula("SUMPRODUCT( (ISNUMBER(SEARCH(\"pre_in\",B" + beginB + ":B" + endB + "))) * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	            cell.setCellFormula("SUMPRODUCT( (B" + beginB + ":B" + endB + "=\"pre_in\") * (" + hsBegin + ":" + hsEnd + "=0) * " + begin + ":" + end + ")");
 	        }
         }
