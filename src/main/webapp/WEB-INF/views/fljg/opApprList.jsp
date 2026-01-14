@@ -35,8 +35,14 @@
 	      	<a id="submit" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="submit()" >申报</a>
 	      	<span class="toolbar-item dialog-tool-separator"></span>
 
-	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="deleteappr()">删除</a>
+	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="deleteappr()">作废并删除</a>
 	      	<span class="toolbar-item dialog-tool-separator"></span>
+
+			<a id="createMani" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="createMani()" >生成手工核放单</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+
+<%--			<a id="createManiAndAppr" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="createManiAndAppr()" >生成手工核放单且申报</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
 
         </div>
 	<table id="dg"></table> 
@@ -261,6 +267,63 @@ function submit(){
 
 			});
 }
+//生成手工核放单
+function createMani() {
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)) return
+	d=$("#dlg").dialog({
+		title: '生成手工核放单',
+		width: 560,
+		height: 380,
+		href:'${ctx}/supervision/opAppr/createMani/'+row.id,
+		modal:true,
+		buttons:[{
+			text:'确认',
+			handler:function(){
+				$("#mainform").submit();
+			}
+		},{
+			text:'取消',
+			handler:function(){
+				d.panel('close');
+			}
+		}]
+	});
+}
+<%--//生成手工核放单且申报--%>
+<%--function createManiAndAppr() {--%>
+<%--	var row = dg.datagrid('getSelected');--%>
+<%--	if(rowIsNull(row)) return--%>
+<%--	d=$("#dlg").dialog({--%>
+<%--		title: '生成手工核放单',--%>
+<%--		width: 560,--%>
+<%--		height: 380,--%>
+<%--		href:'${ctx}/supervision/opAppr/createManiAndAppr/'+row.id,--%>
+<%--		modal:true,--%>
+<%--		buttons:[{--%>
+<%--			text:'确认',--%>
+<%--			handler:function(){--%>
+<%--				$("#mainform").submit();--%>
+<%--				&lt;%&ndash;$.get('${ctx}/supervision/opMani/apply/'+row.id,&ndash;%&gt;--%>
+<%--				&lt;%&ndash;	function(data){&ndash;%&gt;--%>
+<%--				&lt;%&ndash;		if(data == "success"){&ndash;%&gt;--%>
+<%--				&lt;%&ndash;			successTip("申报成功");&ndash;%&gt;--%>
+<%--				&lt;%&ndash;			dg.datagrid('load');&ndash;%&gt;--%>
+<%--				&lt;%&ndash;			$('#submit').linkbutton({disabled:false});&ndash;%&gt;--%>
+<%--				&lt;%&ndash;		}else{&ndash;%&gt;--%>
+<%--				&lt;%&ndash;			parent.$.messager.alert(data);&ndash;%&gt;--%>
+<%--				&lt;%&ndash;			$('#submit').linkbutton({disabled:false});&ndash;%&gt;--%>
+<%--				&lt;%&ndash;		}&ndash;%&gt;--%>
+<%--				&lt;%&ndash;	});&ndash;%&gt;--%>
+<%--			}--%>
+<%--		},{--%>
+<%--			text:'取消',--%>
+<%--			handler:function(){--%>
+<%--				d.panel('close');--%>
+<%--			}--%>
+<%--		}]--%>
+<%--	});--%>
+<%--}--%>
 //删除记录
 function deleteappr(){
 	var rows = dg.datagrid('getSelections');

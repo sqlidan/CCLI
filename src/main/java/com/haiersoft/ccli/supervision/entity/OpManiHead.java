@@ -164,6 +164,9 @@ public class OpManiHead implements Serializable {
 
 	@Column(name = "APPR_ADD_TYPE")
 	private String apprAddType;//手工申请单添加方式
+
+	@Transient
+	private String qty;
 	
 	public String getId() {
 		return id;
@@ -437,4 +440,11 @@ public class OpManiHead implements Serializable {
 		this.apprAddType = apprAddType;
 	}
 
+	public String getQty() {
+		return qty;
+	}
+
+	public void setQty(String qty) {
+		this.qty = qty;
+	}
 }

@@ -27,8 +27,11 @@
 	      	<a id="submit" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true" onclick="submit()">申报</a>
 	      	<span class="toolbar-item dialog-tool-separator"></span>
 
-	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="deleteMani()">删除</a>
+	      	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="deleteMani()">作废并删除</a>
 	      	<span class="toolbar-item dialog-tool-separator"></span>
+
+<%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-user-edit" plain="true" data-options="disabled:false" onclick="cancelMani()">作废</a>--%>
+<%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
         </div>
 	<table id="dg"></table> 
 </div>
@@ -257,6 +260,33 @@ function deleteMani() {
                 });
             }
         });   	
+}
+//核放单作废
+function cancelMani() {
+	var rows = dg.datagrid('getSelections');
+	//如果没有选择行记录
+	if(rows.length==0) return;
+	var ids= [];
+	for(var i=0; i<rows.length; i++){
+		ids.push(rows[i].id);
+	}
+
+	parent.$.messager.confirm('提示', '是否确定要作废？', function (data) {
+		if (data) {
+			$.ajax({
+				type: 'get',
+				url: "${ctx}/supervision/opMani/cancel/" + ids,
+				success: function (data) {
+					if(data == "success"){
+						dg.datagrid('clearSelections');
+						successTip(data, dg, d);
+					}else{
+						parent.$.messager.alert(data);
+					}
+				}
+			});
+		}
+	});
 }
 
 //新增核放单

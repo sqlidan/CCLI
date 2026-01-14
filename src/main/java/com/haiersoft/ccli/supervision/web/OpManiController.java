@@ -156,6 +156,66 @@ public class OpManiController extends BaseController{
 
 
 	}
+	//作废核放单
+	@Transactional
+	@RequestMapping(value="/cancel/{ids}")
+	@ResponseBody
+	public String cancelMani(@PathVariable("ids") List<String> ids) throws RemoteException, ServiceException {
+
+//		List<OpManiHead> toCancelRemote = new ArrayList<OpManiHead>();
+//		List<OpManiHead> toCancelLocal = new ArrayList<OpManiHead>();
+//		//检查本地状态,先整理出需要接口作废的核放单
+//		for(String id : ids) {
+//			OpManiHead opManiHead = opManiHeadService.get(id);
+//			if((null ==opManiHead.getManifestId()) || ("".equals(opManiHead.getManifestId()))) {
+//				toCancelLocal.add(opManiHead);
+//			}else {
+//				toCancelRemote.add(opManiHead);
+//			}
+//		}
+//
+//		//需要调用接口作废的mani
+//		if(toCancelRemote.size() != 0) {
+//			// 1 获得key
+//			String tickId = getKeyService.builder();
+//			System.out.println(tickId);
+//			if((null ==tickId) || ("".equals(tickId)))
+//			{
+//				return "没有获得tickId,请重新操作";
+//			}
+//			// 2 调用接口
+//			//设置接口名
+//			String serviceName = "ManiNullify";
+//			for(OpManiHead mani:toCancelRemote) {
+//				String maninullify="{\"KeyModel\":{\"ManifestId\":\""+mani.getManifestId()+"\"}}";
+//				logger.error(">>>>>>>>>>>>>>>>>调用核放单作废json： "+maninullify);
+//				String result = fljgWsClient.getResult(maninullify, tickId, serviceName);
+//				System.out.println("result: " + result);
+//				logger.error(">>>>>>>>>>>>>>>>>调用核放单作废result： "+result);
+//				JSONObject jsonObject = JSON.parseObject(result);
+//				String state = jsonObject.getString("state");
+//				//如果接口state返回1为作废成功
+//				if(state.equals("1")) {
+//					//作废本地数据库中的记录
+//					mani.setDeclType("2");
+//					mani.setLocalStatus("3");
+//					opManiHeadService.save(mani);
+//					return "success";
+//				}else {
+//
+//					return "接口错误";
+//				}
+//			}
+//		}
+//
+//		//不需要调用接口作废的 list
+//		for(OpManiHead mani:toCancelLocal) {
+//			mani.setLocalStatus("2");
+//			opManiHeadService.save(mani);
+//		}
+
+		return "success";
+	}
 	
 
 

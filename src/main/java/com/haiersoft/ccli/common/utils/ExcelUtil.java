@@ -18,6 +18,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.RichTextString;
 import javax.servlet.http.HttpServletRequest;
 /**
@@ -331,6 +332,9 @@ public class ExcelUtil {
             style.setLeftBorderColor(HSSFColor.BLACK.index);
             style.setRightBorderColor(HSSFColor.BLACK.index);
         }
+        DataFormat format = wb.createDataFormat();
+        short decimalFormatCode = format.getFormat("#,##0.00");
+        style.setDataFormat(decimalFormatCode);
         cell.setCellStyle(style);
         cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
         cell.setCellFormula("SUM(" + begin + ":" + end + ")");
