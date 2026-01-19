@@ -24,7 +24,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 
 	public void updateByApprId(OpApprHead apprHead) {
         Map<String, Object> params = new HashMap<String, Object>();
-        String sql = "update FLJG_APPR_HEAD set TRADE_CODE  = :tradeCode, "
+        String sql = "update FLJG_OP_APPR_HEAD set TRADE_CODE  = :tradeCode, "
         		+ "TRADE_NAME = :tradeName, "
          		+ "OWNER_CODE = :ownerCode, "
         		+ "OWNER_NAME = :ownerName, "
@@ -69,7 +69,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("id", id);
 		params.put("status", status);
-		String sql = "update FLJG_APPR_HEAD set LOCAL_STATUS = :status where ID = :id ";
+		String sql = "update FLJG_OP_APPR_HEAD set LOCAL_STATUS = :status where ID = :id ";
 		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		sqlQuery.executeUpdate();
 		
@@ -85,7 +85,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 	@SuppressWarnings("unchecked")
 	public List<String> findAllUpdateApprID(){
 		StringBuffer sb=new StringBuffer();
-		sb.append("SELECT APPR_ID apprId FROM FLJG_APPR_HEAD where APPR_ID is not null and STATUS !='2'");
+		sb.append("SELECT APPR_ID apprId FROM FLJG_OP_APPR_HEAD where APPR_ID is not null and STATUS !='2'");
 		SQLQuery sqlQuery=createSQLQuery(sb.toString());
 		return sqlQuery.list();
 	}
@@ -93,7 +93,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 	
 	//获取最大底账项号
 	public String getMaxGno() {
-		StringBuffer sb=new StringBuffer ( "SELECT  MAX(TO_NUMBER(fah.GNO)) as gno  FROM FLJG_APPR_HEAD  fah WHERE  IO_TYPE = '1'");
+		StringBuffer sb=new StringBuffer ( "SELECT  MAX(TO_NUMBER(fah.GNO)) as gno  FROM FLJG_OP_APPR_HEAD  fah WHERE  IO_TYPE = '1'");
 		SQLQuery sqlQuery=createSQLQuery(sb.toString());
 		return (String.valueOf(sqlQuery.uniqueResult()));		
 	}
@@ -123,7 +123,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 				"select infos.LINK_ID,COUNT(infos.LINK_ID) counts from (\r\n" + 
 				"\r\n" + 
 				"select info.LINK_ID,info.CTN_NUM,COUNT(info.CTN_NUM) counts  from BIS_ENTER_STOCK_INFO info\r\n" + 
-				"where info.LINK_ID in (select LINK_ID from FLJG_APPR_HEAD t where t.IO_TYPE = 1 and t.APPR_TYPE = 3 and t.EMS_NO = 'NH4230210001' and t.appr_id is not null)\r\n" + 
+				"where info.LINK_ID in (select LINK_ID from FLJG_OP_APPR_HEAD t where t.IO_TYPE = 1 and t.APPR_TYPE = 3 and t.EMS_NO = 'NH4230210001' and t.appr_id is not null)\r\n" +
 				"GROUP BY info.LINK_ID,info.CTN_NUM ) infos\r\n" + 
 				"\r\n" + 
 				"GROUP BY infos.LINK_ID ) res\r\n" + 
@@ -135,7 +135,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 
 	public List<String> findAllBatchApplyApprID() {
 		StringBuffer sb=new StringBuffer();
-		sb.append("select id from FLJG_APPR_HEAD where APPR_ID is null and EMS_NO = 'NH4230210001'");
+		sb.append("select id from FLJG_OP_APPR_HEAD where APPR_ID is null and EMS_NO = 'NH4230210001'");
 		SQLQuery sqlQuery=createSQLQuery(sb.toString());
 		return sqlQuery.list();
 	}
@@ -144,7 +144,7 @@ public class OpApprHeadDao extends HibernateDao<OpApprHead, String> {
 		// TODO Auto-generated method stub
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("id", id);
-		String sql = "delete FLJG_APPR_HEAD where ID = :id";
+		String sql = "delete FLJG_OP_APPR_HEAD where ID = :id";
 		SQLQuery sqlQuery=createSQLQuery(sql, params);
 		sqlQuery.executeUpdate();
 	}

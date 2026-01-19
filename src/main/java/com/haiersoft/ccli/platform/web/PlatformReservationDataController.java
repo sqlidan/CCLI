@@ -293,8 +293,8 @@ public class PlatformReservationDataController extends BaseController {
 							filters.add(filter1);
 							List<TrayInfo> trayInfoList = trayInfoService.search(filters);
 							if (trayInfoList != null && trayInfoList.size() > 0){
-								insertPlatformReservationOutbound.setLocationNo(trayInfoList.get(0).getRoomNum());//库号
-								insertPlatformReservationOutbound.setRoomNum(trayInfoList.get(0).getStoreroomNum());//房间号
+								insertPlatformReservationOutbound.setLocationNo(trayInfoList.get(0).getStoreroomNum());//库号
+								insertPlatformReservationOutbound.setRoomNum(trayInfoList.get(0).getRoomNum());//房间号
 							}else{
 								insertPlatformReservationOutbound.setLocationNo("");//库号
 								insertPlatformReservationOutbound.setRoomNum("");//房间号

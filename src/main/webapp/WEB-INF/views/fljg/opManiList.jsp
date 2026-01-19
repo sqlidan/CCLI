@@ -32,6 +32,12 @@
 
 <%--			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-user-edit" plain="true" data-options="disabled:false" onclick="cancelMani()">作废</a>--%>
 <%--			<span class="toolbar-item dialog-tool-separator"></span>--%>
+
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="applyDetail()">更新手工核放单详情</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
+
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="maniConfirm()">入库到货确认</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
         </div>
 	<table id="dg"></table> 
 </div>
@@ -287,6 +293,40 @@ function cancelMani() {
 			});
 		}
 	});
+}
+//更新详情
+function applyDetail(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)) return;
+	$.get('${ctx}/supervision/opMani/applyDetail/'+row.id,
+			function(data){
+				if(data == "success"){
+					successTip(" 更新成功");
+					dg.datagrid('load');
+				}else{
+					parent.$.messager.alert(data);
+				}
+
+			});
+}
+
+//入库到货确认
+function maniConfirm(){
+	var row = dg.datagrid('getSelected');
+	if(rowIsNull(row)) return;
+	if(row.IeFlag !== "I"){
+		parent.$.messager.show({ title : "提示",msg: "进出类型为入库才能进行到货确认！", position: "bottomRight" });
+		return;
+	}
+	$.get('${ctx}/supervision/opMani/request/'+row.id,
+			function(data){
+				if(data == "success"){
+					successTip(" 确认成功");
+					dg.datagrid('load');
+				}else{
+					parent.$.messager.alert(data);
+				}
+			});
 }
 
 //新增核放单

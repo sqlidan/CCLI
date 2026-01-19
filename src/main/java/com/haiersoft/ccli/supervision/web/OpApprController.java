@@ -368,7 +368,7 @@ public class OpApprController extends BaseController {
             /// 状态 0-暂存，1-申报2-审批通过，3审批退回，4删除
             opManiHead.setStatus("0");
             /// 0：未过闸；1：已过闸 2 到货确认
-            opManiHead.setPassStatus("2");
+            opManiHead.setPassStatus("0");
             /// 录入员
             opManiHead.setInputEr(user.getName());
             /// 录入日期
