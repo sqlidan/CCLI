@@ -579,7 +579,12 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 					//查询方案 的费目(过滤仓储费跟分拣)
 					//2019-1-14新加入调整处理，财务费用按钮跟客服的区分开来
 					//财务引入处理出入库一次性降温、进口操作费、换单代理、押箱代理
-					List<ExpenseSchemeInfo> schemeInfos = expenseSchemeInfoDao.find(Restrictions.eq("schemeNum",id),Restrictions.or(Restrictions.eq("feeCode","crk"),Restrictions.eq("feeCode","jkcz"),Restrictions.eq("feeCode","hddl"),Restrictions.eq("feeCode","yxdl")));
+					List<ExpenseSchemeInfo> schemeInfos = expenseSchemeInfoDao.find(Restrictions.eq("schemeNum",id),
+							Restrictions.or(Restrictions.eq("feeCode","crk"),
+//									Restrictions.eq("feeCode","hddl"),
+//									Restrictions.eq("feeCode","yxdl"),
+									Restrictions.eq("feeCode","jkcz")
+							));
 					//用于判断计费方式是否是按重量收费
 					if(null != schemeInfos && schemeInfos.size() > 0){
 						for (ExpenseSchemeInfo schemeInfo : schemeInfos){
