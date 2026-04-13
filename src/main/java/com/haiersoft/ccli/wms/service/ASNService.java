@@ -135,6 +135,11 @@ public class ASNService extends BaseService<BisAsn, String> {
 //				getBisEnterStock=null;//TODO 
 //				obj.setWarehouseId(getBisEnterStock.getWarehouseId());
 //				obj.setWarehouse(getBisEnterStock.getWarehouse());
+
+                obj.setStockIn(transferObj.getReceiverOrgId());
+                obj.setStockName(transferObj.getReceiverOrg());
+                obj.setWarehouseId(transferObj.getWarehouseId());
+                obj.setWarehouse(transferObj.getWarehouse());
             }
             obj.setMark("1");
         }

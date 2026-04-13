@@ -733,7 +733,7 @@ public class EnterStockController extends BaseController {
 		List<AsnAction> asnActions = asnActionDao.find(asnActionFilters);//查询ASN区间表
 		if(asnActions.size()>0){
 			for(AsnAction aa :asnActions){
-				
+				//TODO 2026-03-03 依据货转字段判断是否存在货转操作，如果有货转操作就查询货转信息，使用货转信息中的接收方结算单位
 				aa.setJfClientId(enterStock.getStockOrgId());
 				aa.setFeePlanId(enterStock.getFeeId());
 				asnActionService.update(aa);

@@ -155,6 +155,8 @@ public class VehicleQueueController extends BaseController {
       //  queue.setQueueTime(DateUtils.addSecond(queueTime.getQueueTime(),-1));
         vehicleQueueService.update(queue);
 
+//        vehicleQueueService.updatePLATFORM_CURRENT_INFO(queue);
+
 
         //添加优先队列
         Map<String,String> sendMap = new HashMap<>();

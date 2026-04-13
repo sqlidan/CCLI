@@ -36,4 +36,8 @@ public class VehicleQueueService extends BaseService<VehicleQueue,String> {
 
         return vehicleQueueDao.getTodayQueue();
     }
+
+    public int updatePLATFORM_CURRENT_INFO(VehicleQueue queue) {
+        return vehicleQueueDao.updatePLATFORM_CURRENT_INFO(queue);
+    }
 }

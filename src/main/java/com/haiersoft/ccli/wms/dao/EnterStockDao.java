@@ -745,7 +745,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sb.append("	(                  ");
         sb.append("		SELECT           ");
         sb.append("			ai.pro_time,   ");
-        sb.append("			t.inbound_date,");
+        sb.append("			a.inbound_date,");
         sb.append("			a.is_bonded,   ");
         sb.append("			t.stock_in,    ");
         sb.append("			t.bill_num,    ");
@@ -768,6 +768,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sb.append("			(                    ");
         sb.append("				SELECT             ");
         sb.append("					ba.asn,          ");
+        sb.append("					ba.inbound_date,          ");
         sb.append("					ba.is_bonded,    ");
         sb.append("					ba.ctn_num,      ");
         sb.append("					ba.bill_num,     ");
@@ -805,7 +806,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sb.append("				bt.stock_in,      ");
         sb.append("				bt.ctn_num,       ");
         sb.append("				bt.enter_state,   ");
-        sb.append("				to_char(bt.ENTER_TALLY_TIME, 'yyyy-mm-dd') AS inbound_date,   ");
+//        sb.append("				to_char(bt.ENTER_TALLY_TIME, 'yyyy-mm-dd') AS inbound_date,   ");
         sb.append("				bt.original_piece,");
         sb.append("				bt.remove_piece   ");
         sb.append("			FROM                ");
@@ -846,7 +847,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sb.append("			t.ctn_num,     ");
         sb.append("			t.sku_id,      ");
         sb.append("			ai.pro_time,   ");
-        sb.append("			t.inbound_date,");
+        sb.append("			a.inbound_date,");
         sb.append("			a.is_bonded,   ");
         sb.append("			t.enter_state, ");
         sb.append("			t.stock_in     ");

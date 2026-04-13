@@ -581,8 +581,8 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 					//财务引入处理出入库一次性降温、进口操作费、换单代理、押箱代理
 					List<ExpenseSchemeInfo> schemeInfos = expenseSchemeInfoDao.find(Restrictions.eq("schemeNum",id),
 							Restrictions.or(Restrictions.eq("feeCode","crk"),
-//									Restrictions.eq("feeCode","hddl"),
-//									Restrictions.eq("feeCode","yxdl"),
+									Restrictions.eq("feeCode","hddl"),
+									Restrictions.eq("feeCode","yxdl"),
 									Restrictions.eq("feeCode","jkcz")
 							));
 					//用于判断计费方式是否是按重量收费
@@ -1257,7 +1257,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 			standingBook.setExamineSign(1);
 			standingBook.setExaminePerson(user.getName());
 			standingBook.setExamineDate(now);
-			
+
 			standingBook.setUpdatePerson(user.getName());
 			standingBook.setUpdateDate(now);
 			//判断是不是业务付款单的数据，若是，则此业务付款单明细改为已审核状态
