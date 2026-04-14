@@ -614,6 +614,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append(" 	bis_standing_book sb    ");
 		sb.append("  LEFT JOIN BASE_EXPENSE_CATEGORY_INFO ci ON sb.fee_code = ci. CODE ");
 		sb.append("  WHERE reconcile_num =:code AND reconcile_sign = '1'  AND EXAMINE_SIGN = 1  ");
+		sb.append("  AND nvl(sb.CHARGE_SIGN,0) = 0 ");
 		sb.append("  GROUP BY                ");
 		sb.append(" 	SB.LINK_ID,           ");
 		sb.append(" 	SB.BILL_NUM,          ");

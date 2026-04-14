@@ -188,7 +188,10 @@ public class PreEntryBondedController extends BaseController {
 				resultMap.put("data",null);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
+//			throw new RuntimeException(e.getMessage());
+			resultMap.put("code", "500");
+			resultMap.put("msg", "保税监管_保税核注清单列表查询服务接口"+"异常：" + e.getMessage());
+			resultMap.put("data", null);
 		}
 		return resultMap;
 	}
@@ -231,7 +234,10 @@ public class PreEntryBondedController extends BaseController {
 				resultMap.put("data",null);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e.getMessage());
+//			throw new RuntimeException(e.getMessage());
+			resultMap.put("code", "500");
+			resultMap.put("msg", "保税监管_保税核注清单详细查询接口"+"异常：" + e.getMessage());
+			resultMap.put("data", null);
 		}
 		return resultMap;
 	}
