@@ -84,10 +84,10 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append("	SUM(t.piece) AS piece,  ");
 		sb.append("	round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT, ");
 		sb.append("	round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
-		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id ");
 		sb.append(" FROM bis_transfer_stock_info t ");
-		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
-		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id) t  ");
 		sb.append("LEFT JOIN BIS_TRANSFER_STOCK m ON t.transfer_link_id = m.transfer_id      ");
 		sb.append("WHERE 1 = 1    ");
 		String transferId="";
@@ -101,13 +101,13 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 			}
 			sb.append(" and t.TRANSFER_LINK_ID in ("+transferId+") ");
 		}
-		if(null!=ifBonded&&!"".equals(ifBonded)){
-        	if("1".equals(ifBonded)){
-        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
-        	}else{
-        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
-        	}
-        }
+//		if(null!=ifBonded&&!"".equals(ifBonded)){
+//        	if("1".equals(ifBonded)){
+//        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
+//        	}else{
+//        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
+//        	}
+//        }
 		sb.append("GROUP BY    "); 
 		sb.append("	t.cargo_name,");
 		sb.append("	t.bill_num,");
@@ -154,10 +154,10 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append(" SUM(t.piece) piece,   ");
 		sb.append(" round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT,    ");
 		sb.append(" round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT ");
-		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id ");
 		sb.append(" FROM bis_transfer_stock_info t ");
-		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
-		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id) t  ");
 //		sb.append(" FROM                                          ");
 //		sb.append(" 	BIS_TRANSFER_STOCK_INFO t                   ");
 		sb.append(" LEFT JOIN base_sku_base_info s ON s.SKU_ID = t.sku_id                    ");
@@ -176,13 +176,13 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 			}
 			sb.append(" and t.TRANSFER_LINK_ID in ("+transferId+") ");
 		}
-		if(null!=ifBonded&&!"".equals(ifBonded)){
-        	if("1".equals(ifBonded)){
-        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
-        	}else{
-        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
-        	}
-        }
+//		if(null!=ifBonded&&!"".equals(ifBonded)){
+//        	if("1".equals(ifBonded)){
+//        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
+//        	}else{
+//        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
+//        	}
+//        }
 	    sb.append("GROUP BY            "); 
 	    sb.append(" s.rkdh,            ");
 		sb.append(" t.cargo_name,      ");
@@ -235,10 +235,10 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 		sb.append("  round(SUM(t.NET_WEIGHT), 2) AS NET_WEIGHT,  ");
 		sb.append("  round(SUM(t.GROSS_WEIGHT), 2) AS GROSS_WEIGHT, ");
 		sb.append("  e.ORDER_NUM  ");
-		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded ");
+		sb.append(" FROM  (SELECT t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id ");
 		sb.append(" FROM bis_transfer_stock_info t ");
-		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
-		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id,a.is_bonded) t  ");
+//		sb.append(" left join bis_asn a  on (t.bill_num = a.bill_num and t.ctn_num = a.ctn_num)  ");
+		sb.append(" GROUP BY t.bill_num,t.ctn_num,t.cargo_name,t.sku_id,t.OPERATE_TIME,t.enter_state,t.piece,t.NET_WEIGHT,t.GROSS_WEIGHT,t.transfer_link_id) t  ");
 //		sb.append("FROM    ");
 //		sb.append("  BIS_TRANSFER_STOCK_INFO t  ");
 		sb.append("LEFT JOIN bis_enter_stock_info e ON t.bill_num = e.ITEM_NUM ");
@@ -260,13 +260,13 @@ public class TransferDao  extends HibernateDao<BisTransferStock, String> {
 			}
 			sb.append(" and t.TRANSFER_LINK_ID in ("+transferId+") ");
 		}
-		if(null!=ifBonded&&!"".equals(ifBonded)){
-        	if("1".equals(ifBonded)){
-        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
-        	}else{
-        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
-        	}
-        }
+//		if(null!=ifBonded&&!"".equals(ifBonded)){
+//        	if("1".equals(ifBonded)){
+//        		sb.append(" AND t.is_bonded='"+ifBonded+"'");
+//        	}else{
+//        		sb.append(" AND (t.is_bonded ='0' or t.is_bonded is null)    ");
+//        	}
+//        }
 		sb.append(" GROUP BY    "); 
 		sb.append("  t.cargo_name,  ");
 		sb.append("  t.bill_num,  ");
