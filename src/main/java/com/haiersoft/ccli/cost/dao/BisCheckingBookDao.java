@@ -578,13 +578,15 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append(" AND cargo_name = po.cargo_name ");
 		sb.append(" GROUP BY bill_num ");
 		sb.append("  ) END ) END )     ");
-		sb.append("   ELSE pe.CTN_NUM END) AS CTN_NUM,  ");
-		sb.append("   (CASE sb.crk_sign WHEN '2' THEN '' ELSE pe.LOT_NUM END) AS LOT_NUM ");
+		sb.append("   ELSE nvl(pe.CTN_NUM,sb.CTN_NUM) END) AS CTN_NUM,  ");
+		sb.append("   (CASE sb.crk_sign WHEN '2' THEN '' ELSE nvl(pe.LOT_NUM,sb.LOT_NUM) END) AS LOT_NUM ");
 		sb.append("  FROM  ");
 		sb.append(" 	(     ");
 		sb.append(" 	SELECT   ");
 		sb.append(" 	 SB.LINK_ID,  ");
 		sb.append(" 	 SB.BILL_NUM, ");
+		sb.append(" 	 LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM, ");
+		sb.append(" 	 LISTAGG (INFO.LOT_NUM, ',') WITHIN GROUP (ORDER BY INFO.LOT_NUM) AS LOT_NUM, ");
 		sb.append(" 	 SB.crk_sign, ");
 		sb.append(" 	(   ");
 		sb.append(" 	 CASE  ");
@@ -613,6 +615,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append("  FROM  ");
 		sb.append(" 	bis_standing_book sb    ");
 		sb.append("  LEFT JOIN BASE_EXPENSE_CATEGORY_INFO ci ON sb.fee_code = ci. CODE ");
+		sb.append("  LEFT JOIN BIS_ENTER_STOCK_INFO INFO ON sb.BILL_NUM = INFO.ITEM_NUM ");
 		sb.append("  WHERE reconcile_num =:code AND reconcile_sign = '1'  AND EXAMINE_SIGN = 1  ");
 		sb.append("  AND nvl(sb.CHARGE_SIGN,0) = 0 ");
 		sb.append("  GROUP BY                ");

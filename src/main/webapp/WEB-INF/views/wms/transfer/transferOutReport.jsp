@@ -86,14 +86,14 @@ $(function(){
            columns: [[
 			   {field: 'contactCode', title: '货转单号', sortable: true, width: 200},       
                {field: 'clientName', title: '存货方名称', sortable: true, width: 200},
-               {field: 'isBonded', title: '是否保税', sortable: true, width: 70,
-                 	formatter:function(val,rowData,rowIndex){
-                         if(val=="1")
-                             return "是";
-                         else
-                             return "否";
-                    }
-                },
+<%--               {field: 'isBonded', title: '是否保税', sortable: true, width: 70,--%>
+<%--                 	formatter:function(val,rowData,rowIndex){--%>
+<%--                         if(val=="1")--%>
+<%--                             return "是";--%>
+<%--                         else--%>
+<%--                             return "否";--%>
+<%--                    }--%>
+<%--                },--%>
                {field: 'billCode', title: '提单号', sortable: true, width: 150},
                {field: 'ctnNum', title: '箱号', sortable: true, width: 150},
                {field: 'sku', title: 'SKU', sortable: true, width: 200},
