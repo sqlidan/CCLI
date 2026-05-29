@@ -1,21 +1,24 @@
 package com.haiersoft.ccli.wms.service.passPort;
 
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.wms.dao.PassPortDao;
 import com.haiersoft.ccli.wms.dao.ScmDictDao;
 import com.haiersoft.ccli.wms.entity.passPort.BisPassPort;
 import com.haiersoft.ccli.wms.entity.preEntry.BisPreEntryDictData;
+import com.haiersoft.ccli.wms.web.scm.ScmTaskOneController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 
@@ -25,6 +28,7 @@ import java.util.Map;
 @Service
 @Transactional(readOnly = true)
 public class PassPortService extends BaseService<BisPassPort, String> {
+	private static final Logger logger = LoggerFactory.getLogger(PassPortService.class);
 	
 	@Autowired
 	private PassPortDao passPortDao;
@@ -208,5 +212,65 @@ public class PassPortService extends BaseService<BisPassPort, String> {
 		result.put("data", JSON.toJSON(mapList));
 		result.put("msg", "success");
 		return result;
+	}
+//====================================================================================================================
+	//转口货物备案查询
+	public Map<String, Object> queryDeclarationTransshipmentGoods(String accountBook,String emsNo){
+		Map<String, Object> result = new HashMap<>();
+
+		List<Map<String,Object>> mapList = scmDictDao.queryDeclarationTransshipmentGoods(accountBook,emsNo);
+		if(mapList == null || mapList.size() == 0){
+			result.put("code", "500");
+			result.put("msg", "未找到对应的库存信息!");
+			return result;
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+		result.put("code", "200");
+		result.put("data", JSON.toJSON(mapList));
+		result.put("msg", "success");
+		return result;
+	}
+	//一键推送转口货物备案
+	public Map<String, Object> pushDeclarationTransshipmentGoods(String accountBook,String emsNo){
+		Map<String, Object> result = new HashMap<>();
+		//查询
+		List<Map<String,Object>> mapList = scmDictDao.queryDeclarationTransshipmentGoods(accountBook,emsNo);
+		if(mapList == null || mapList.size() == 0){
+			result.put("code", "500");
+			result.put("msg", "暂无数据");
+			return result;
+		}
+		//推送
+		execute(mapList);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		result.put("code", "200");
+		result.put("msg", "一键推送转口货物备案数据成功");
+		return result;
+	}
+	//执行发送
+	public static final String url = "https://apiplat.sdland-sea.com/scm/XXXXX";//一键推送转口货物备案地址
+	public void execute(List<Map<String,Object>> mapList) {
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = new Date();
+		//增量推送入库订单明细
+		Map<String, Object> params1 = new HashMap<String, Object>();
+		UUID uuid1 = UUID.randomUUID();
+		String str1 = uuid1.toString().replace("-","");
+		params1.put("requestId",str1);
+		params1.put("requestDate",sdf.format(date));
+		params1.put("key",UUID.randomUUID());
+		params1.put("list",mapList);
+		params1.put("data",mapList);
+		logger.info("一键推送转口货物备案参数："+ JSON.toJSONString(params1));
+		String bodys1 = HttpUtil.createPost(url)
+				.body(JSON.toJSONString(params1))
+				.execute()
+				.body();
+		JSONObject respones1 = JSONObject.parseObject(bodys1);
+		logger.info("一键推送转口货物备案结果："+ respones1.toJSONString());
+		if(0 != respones1.getIntValue("code")){
+			logger.info("一键推送转口货物备案推送失败："+respones1.getString("msg"));
+		}
 	}
 }

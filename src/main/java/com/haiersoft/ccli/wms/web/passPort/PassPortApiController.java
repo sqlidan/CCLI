@@ -115,4 +115,35 @@ public class PassPortApiController extends BaseController {
         String endTime = endTemp.format(new Date());
         return passPortService.queryFullInventoryData(startTime,endTime);
     }
+
+//====================转口货物备案查询================================================================
+    @RequestMapping(value = "queryDeclarationTransshipmentGoods", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> queryDeclarationTransshipmentGoods(HttpServletRequest request) {
+        Map<String, Object> result = new HashMap<>();
+
+        String accountBook = request.getParameter("accountBook");//HS编码
+        System.out.println("accountBook："+accountBook);
+        String emsNo = request.getParameter("emsNo");//账册号
+        System.out.println("emsNo："+emsNo);
+        if(accountBook != null && accountBook.trim().length() > 0){
+
+        }else{
+            result.put("code", "500");
+            result.put("msg", "HS编码为必填参数!");
+            return result;
+        }
+
+        return passPortService.queryDeclarationTransshipmentGoods(accountBook,emsNo);
+    }
+    //一键推送转口货物备案
+    @RequestMapping(value = "push")
+    @ResponseBody
+    public String push() {
+        Map<String, Object> result = passPortService.pushDeclarationTransshipmentGoods("","");
+        if("200".equals(result.get("code").toString())){
+            return "success";
+        }
+        return "error";
+    }
 }

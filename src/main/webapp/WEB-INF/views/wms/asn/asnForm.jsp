@@ -43,6 +43,9 @@
 								</c:otherwise>
 							</c:choose>
 							</td>
+							<td style="width:60px; ">货转单号：</td><td>
+								<input type="text" id="transferId" name="transferId" class="easyui-validatebox" <c:if test="${asn.isEdite == 1}"> readonly="readonly" </c:if> data-options="width:150,validType:'length[4,100]'" value="${asn.transferId}"/>
+							</td>
 							<td style="width:60px; ">提单号：</td><td>
 							<input type="text" id="billNum" name="billNum" readonly="readonly" class="easyui-validatebox" <c:if test="${asn.isEdite == 1}"> readonly="readonly" </c:if> data-options="width:150,required:'required',validType:'length[4,100]'" value="${asn.billNum}"/></td>
 							<td style="width:60px; ">入库类型：</td><td>

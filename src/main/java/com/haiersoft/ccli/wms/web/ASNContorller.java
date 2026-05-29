@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.haiersoft.ccli.common.utils.parameterReflect;
+import com.haiersoft.ccli.cost.entity.BisAsnActionLog;
+import com.haiersoft.ccli.wms.entity.*;
+import com.haiersoft.ccli.wms.service.*;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,22 +45,6 @@ import com.haiersoft.ccli.cost.service.AsnActionLogService;
 import com.haiersoft.ccli.cost.service.StandingBookService;
 import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
-import com.haiersoft.ccli.wms.entity.AsnAction;
-import com.haiersoft.ccli.wms.entity.BisAsn;
-import com.haiersoft.ccli.wms.entity.BisAsnInfo;
-import com.haiersoft.ccli.wms.entity.BisEnterStock;
-import com.haiersoft.ccli.wms.entity.BisEnterStockInfo;
-import com.haiersoft.ccli.wms.entity.BisLoadingInfo;
-import com.haiersoft.ccli.wms.entity.BisTransferStock;
-import com.haiersoft.ccli.wms.entity.TrayInfo;
-import com.haiersoft.ccli.wms.service.ASNInfoService;
-import com.haiersoft.ccli.wms.service.ASNService;
-import com.haiersoft.ccli.wms.service.AsnActionService;
-import com.haiersoft.ccli.wms.service.EnterStockInfoService;
-import com.haiersoft.ccli.wms.service.EnterStockService;
-import com.haiersoft.ccli.wms.service.LoadingInfoService;
-import com.haiersoft.ccli.wms.service.TransferService;
-import com.haiersoft.ccli.wms.service.TrayInfoService;
 
 /**
  * ASNcontroller
@@ -1029,6 +1016,86 @@ public class ASNContorller extends BaseController {
             enterInfo.setCargoName(sb.toString());
             enterInfo.setBgdh(sby.toString());
             enterInfo.setYcg(sbg.toString());
+            model.addAttribute("asn",asn);
+            model.addAttribute("enter",enter);
+            model.addAttribute("enterInfo",enterInfo);
+            model.addAttribute("enterTime",enter.getEnterTime()!=null?sdf.format(enter.getEnterTime()):"");
+        }
+        return "wms/asn/asnPrint";
+    }
+
+    /**
+     * 货转总览打印跺卡
+     * @param transferId
+     * @param model
+     * @return
+     */
+    @RequiresPermissions("bis:asn:print")
+    @RequestMapping(value = "printTransferCard/{transferId}", method = RequestMethod.GET)
+    public String printTransferCard(@PathVariable("transferId") String transferId, Model model,HttpServletRequest request) {
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        if (transferId != null && !"".equals(transferId)) {
+            BisTransferStock bisTransferStock = transferService.get(transferId);
+            Page<BisAsn> page = getPage(request);
+            BisAsn queryBisAsn = new BisAsn();
+            parameterReflect.reflectParameter(queryBisAsn, request);
+            Page<BisAsn> bisAsnPage= asnService.getAllASN(page,queryBisAsn);
+            BisAsn asn = bisAsnPage.getResult().get(0);
+            String asnid = asn.getAsn();
+            BisEnterStock enter= enterStockService.get(asn.getLinkId());
+            //根据入库联系单以及提单跟箱号获取明细数据
+            List<BisEnterStockInfo> listInfo=enterStockInfoService.getEnterInfo(asn.getLinkId(),asn.getBillNum(),asn.getCtnNum());
+            StringBuffer sb=new StringBuffer();
+            StringBuffer sby=new StringBuffer();
+            StringBuffer sbg=new StringBuffer();
+            String flag="";
+            String flagy="";
+            String flagg="";
+            for (int i = 0; i<listInfo.size(); i++) {
+                BisEnterStockInfo stInfo=listInfo.get(i);
+                if(stInfo.getCargoName()!=null&&!stInfo.getCargoName().equals(flag)){
+                    sb.append(stInfo.getCargoName());
+                    if(i!=listInfo.size()-1){
+                        sb.append(",");
+                    }
+                    flag=stInfo.getCargoName();
+                }
+                if(stInfo.getBgdh()!=null&&!stInfo.getBgdh().equals(flagy)){
+                    sby.append(stInfo.getBgdh());
+                    if(i!=listInfo.size()-1){
+                        sby.append(",");
+                    }
+                    flagy=stInfo.getBgdh();
+                }
+                if(stInfo.getYcg()!=null&&!stInfo.getYcg().equals(flagg)){
+                    sbg.append(stInfo.getYcg());
+                    if(i!=listInfo.size()-1){
+                        sbg.append(",");
+                    }
+                    flagg=stInfo.getYcg();
+                }
+            }
+            //获取库存中的数量
+            List<Map<String,Object>> list=asnService.getAanT(asnid,null);
+            Map<String,Object> zmap=((list!=null&&list.size()>0)?asnService.getAanT(asnid,null).get(0):null);
+            //Map<String,Object> cmap=asnService.getAanT(asnid,"12").get(0);
+            if(zmap!=null){
+                model.addAttribute("location",zmap.get("CARGO_LOCATION"));
+                model.addAttribute("num",zmap.get("NUM"));
+                model.addAttribute("znet",zmap.get("ZNET"));
+            }
+            /*if(cmap!=null){
+                model.addAttribute("cnum",cmap.get("NUM"));
+                model.addAttribute("cgross",cmap.get("ZGROSS"));
+            }*/
+            /*if(zmap!=null&&cmap!=null){
+               model.addAttribute("cha",Double.valueOf(zmap.get("NUM").toString())-Double.valueOf(cmap.get("NUM").toString()));
+            }*/
+            BisEnterStockInfo enterInfo=new BisEnterStockInfo();
+            enterInfo.setCargoName(sb.toString());
+            enterInfo.setBgdh(sby.toString());
+            enterInfo.setYcg(sbg.toString());
+            asn.setStockName(bisTransferStock.getReceiverName());
             model.addAttribute("asn",asn);
             model.addAttribute("enter",enter);
             model.addAttribute("enterInfo",enterInfo);

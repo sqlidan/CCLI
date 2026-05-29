@@ -130,7 +130,7 @@ public class BackStevedoringContorller extends BaseController {
 		if(null==billNum||"".equals(billNum)){
 			return result;
 		}
-		List<BisEnterStock> enterStockList = enterStockService.getEnterStockByBillNum(billNum.replace("笑脸","/"));
+		List<BisEnterStock> enterStockList = enterStockService.getEnterStockByBillNumNotLike(billNum.replace("笑脸","/"));
 		if(!enterStockList.isEmpty()){
 			//从出库订单表中获取装车状态
 			BisEnterStock enterStock = enterStockList.get(0);

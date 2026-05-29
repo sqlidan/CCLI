@@ -70,9 +70,15 @@ public class BisAsn implements Serializable {
 	private String [] hsCode;//hs编码
 	private String [] hsItemname;//海关品名
 	private String [] accountBook;//商品账册序号
-	
-	
-	
+
+	private String transferId;//(货转联系单)
+	public String getTransferId() {
+		return transferId;
+	}
+	public void setTransferId(String transferId) {
+		this.transferId = transferId;
+	}
+
 	private Double realGrossWeight;//总毛重 20170823
 	// Constructors
 

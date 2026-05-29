@@ -1,12 +1,16 @@
 package com.haiersoft.ccli.wms.dao;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.wms.web.scm.ScmDict;
+import org.apache.poi.ss.formula.functions.T;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.BasicTransformerAdapter;
 import org.hibernate.transform.Transformers;
+import org.jeecgframework.poi.excel.annotation.Excel;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -265,6 +269,95 @@ public class ScmDictDao extends HibernateDao<ScmDict, String> {
                 "outboundGrossWeight", "outboundNetWeight", "outboundVolume",
                 "outboundLength", "outboundTime", "outboundKq", "outboundCk",
                 "outboundQy", "outboundKw", "operateTime"
+        };
+        // 使用自定义转换器保持别名的原始大小写
+        return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {
+            @Override
+            public Object transformTuple(Object[] tuple, String[] aliases) {
+                Map<String, Object> result = new HashMap<>(tuple.length);
+                for (int i = 0; i < tuple.length; i++) {
+                    // 直接使用原始别名作为key，不做大小写转换
+                    result.put(originalAliases[i], tuple[i]);
+                }
+                return result;
+            }
+        }).list();
+    }
+
+//====================================================================================================================
+    //转口货物备案查询
+    public List<Map<String,Object>> queryDeclarationTransshipmentGoods(String accountBook,String emsNo){
+        HashMap<String,Object> parme=new HashMap<String,Object>();
+        StringBuffer sql = new StringBuffer();
+        sql.append(" SELECT ");
+        sql.append(" '' AS filingNo, ");
+        sql.append(" '' AS contactPerson, ");
+        sql.append(" '' AS contactPhone, ");
+        sql.append(" t.CLIENT_NAME AS customerName, ");
+        sql.append(" t.EMS_NO AS accountNo, ");
+        sql.append(" t.BILL_NUM AS blNo, ");
+        sql.append(" t.CD_NUM AS declarationNo, ");
+        sql.append(" t.CTN_NUM AS containerNo, ");
+        sql.append(" t.HS_CODE AS hsCode, ");
+        sql.append(" t.HS_ITEMNAME AS goodsName, ");
+        sql.append(" SUM(NVL(t.DCL_QTY, 0)) AS goodsWeight, ");
+        sql.append(" 0 AS remainingWeight, ");
+        sql.append(" 0 AS goodsQuantity, ");
+        sql.append(" 0 AS remainingQuantity, ");
+        sql.append(" t.DCL_UNIT AS quantityUnit, ");
+        sql.append(" st.YCG AS countryOfOrigin, ");
+        sql.append(" t.CARGO_LOCATION AS warehouseLocation, ");
+        sql.append(" st.ETA_WAREHOUSE AS warehouseDate, ");
+        sql.append(" st.MAKE_TIMES AS productionDate, ");
+        sql.append(" '' AS certificateNo, ");
+        sql.append(" '' AS healthCertNo, ");
+        sql.append(" '' AS declarationFormUrl, ");
+        sql.append(" '' AS packingListUrl, ");
+        sql.append(" '' AS invoiceUrl, ");
+        sql.append(" '' AS healthCertUrl, ");
+        sql.append(" '' AS originCertUrl, ");
+        sql.append(" '' AS warehousePhotoUrl, ");
+        sql.append(" '' AS outerPackageUrl, ");
+        sql.append(" '' AS labelPhotoUrl, ");
+        sql.append(" '' AS filingStatus, ");
+        sql.append(" '' AS filingTime, ");
+        sql.append(" '' AS delFlag ");
+        sql.append(" FROM BASE_BOUNDED t ");
+        sql.append(" LEFT JOIN BIS_ENTER_STOCK st ON T.BILL_NUM=ST.ITEM_NUM ");
+        sql.append(" WHERE t.DCL_QTY > 0 ");
+        if (isNotNull(accountBook)) {
+            sql.append(" AND t.ACCOUNT_BOOK = :accountBook ");
+            parme.put("accountBook", accountBook);
+        }
+        if (isNotNull(emsNo)) {
+            sql.append(" AND t.EMS_NO = :emsNo ");
+            parme.put("emsNo", emsNo);
+        }
+        sql.append(" GROUP BY ");
+        sql.append(" t.CLIENT_NAME, ");
+        sql.append(" t.EMS_NO, ");
+        sql.append(" t.BILL_NUM, ");
+        sql.append(" t.CD_NUM, ");
+        sql.append(" t.CTN_NUM, ");
+        sql.append(" t.HS_CODE, ");
+        sql.append(" t.HS_ITEMNAME, ");
+        sql.append(" t.DCL_UNIT, ");
+        sql.append(" st.YCG, ");
+        sql.append(" t.CARGO_LOCATION, ");
+        sql.append(" st.ETA_WAREHOUSE, ");
+        sql.append(" st.MAKE_TIMES ");
+        SQLQuery sqlQuery = createSQLQuery(sql.toString(),parme);
+        String[] originalAliases = {
+                "filingNo", "contactPerson", "contactPhone", "customerName",
+                "accountNo", "blNo", "declarationNo", "containerNo",
+                "hsCode", "goodsName", "goodsWeight", "remainingWeight",
+                "goodsQuantity", "remainingQuantity", "quantityUnit",
+                "countryOfOrigin", "warehouseLocation", "warehouseDate", "productionDate",
+                "certificateNo", "healthCertNo", "declarationFormUrl",
+                "packingListUrl", "invoiceUrl", "healthCertUrl",
+                "originCertUrl", "warehousePhotoUrl", "outerPackageUrl",
+                "labelPhotoUrl", "filingStatus", "filingTime",
+                "delFlag"
         };
         // 使用自定义转换器保持别名的原始大小写
         return sqlQuery.setResultTransformer(new BasicTransformerAdapter() {

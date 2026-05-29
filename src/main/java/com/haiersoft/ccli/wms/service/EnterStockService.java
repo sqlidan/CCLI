@@ -95,13 +95,25 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	/**
 	 * 
 	 * @author pyl
-	 * @Description: 根据提单号获得对应的入库联系单号
+	 * @Description: 根据提单号获得对应的入库联系单号(模糊查询)
 	 * @date 2016年3月5日 下午12:08:24
 	 * @return
 	 * @throws
 	 */
 	public List<BisEnterStock> getEnterStockByBillNum(String billNum) {
 		return enterStockDao.find(Restrictions.eq("delFlag","0"),Restrictions.like("itemNum", billNum,MatchMode.ANYWHERE));
+	}
+
+	/**
+	 *
+	 * @author pyl
+	 * @Description: 根据提单号获得对应的入库联系单号(准确查询)
+	 * @date 2016年3月5日 下午12:08:24
+	 * @return
+	 * @throws
+	 */
+	public List<BisEnterStock> getEnterStockByBillNumNotLike(String billNum) {
+		return enterStockDao.find(Restrictions.eq("delFlag","0"),Restrictions.eq("itemNum", billNum));
 	}
 	
 	/**

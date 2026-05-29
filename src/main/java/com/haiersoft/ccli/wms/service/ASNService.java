@@ -105,6 +105,10 @@ public class ASNService extends BaseService<BisAsn, String> {
      */
     @Transactional(readOnly = false)
     public String saveASN(BisAsn obj) {
+        if (null != obj.getIfSecondEnter() && "3".equals(obj.getIfSecondEnter().trim())) {
+        }else{
+            obj.setTransferId(null);
+        }
         String retStr = "error";
         BisAsn getObj = this.get(obj.getAsn());
         //防页面多次点击保存页面
@@ -114,6 +118,7 @@ public class ASNService extends BaseService<BisAsn, String> {
         }
         /************************ASN基本信息*********************************************/
         BisEnterStock getBisEnterStock = null;
+        BisTransferStock transferObj = null;
         //判断是货转还是入库 通过联系单标示入库联系单 前缀E 货转联系单 前缀T
         if (obj.getLinkId().indexOf("E") == 0) {
             //根据联系单id获取联系单对象
@@ -126,16 +131,13 @@ public class ASNService extends BaseService<BisAsn, String> {
                 obj.setWarehouse(getBisEnterStock.getWarehouse());
             }
             obj.setMark("0");
-        } else if (obj.getLinkId().indexOf("T") == 0) {
+        }
+        //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+        if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
             //根据货转单id获取货转单对象
-            BisTransferStock transferObj = transferService.get(obj.getLinkId());
+            transferObj = transferService.get(obj.getTransferId());
             if (transferObj != null && transferObj.getTransferId() != null) {
-                obj.setStockName(transferObj.getStockIn());
-                //根据提单号获取入库联系单号，添加仓库信息
-//				getBisEnterStock=null;//TODO 
-//				obj.setWarehouseId(getBisEnterStock.getWarehouseId());
-//				obj.setWarehouse(getBisEnterStock.getWarehouse());
-
+                obj.setBillNum(getObj.getBillNum());
                 obj.setStockIn(transferObj.getReceiverOrgId());
                 obj.setStockName(transferObj.getReceiverOrg());
                 obj.setWarehouseId(transferObj.getWarehouseId());
@@ -166,7 +168,11 @@ public class ASNService extends BaseService<BisAsn, String> {
             asnActionObj.setAsn(obj.getAsn());
             asnActionObj.setClientId(obj.getStockIn());//客户id
             asnActionObj.setJfClientId(getBisEnterStock.getStockOrgId());//结算单位id
-            BaseClientInfo getClient = clientService.get(Integer.valueOf(getBisEnterStock.getStockOrgId()));
+            //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+            if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                asnActionObj.setJfClientId(transferObj.getReceiverOrgId());//收货方结算单位id
+            }
+            BaseClientInfo getClient = clientService.get(Integer.valueOf(asnActionObj.getJfClientId()));
             if (getClient != null) {
                 asnActionObj.setClientDay(getClient.getCheckDay());//客户计费日期
             }
@@ -182,11 +188,16 @@ public class ASNService extends BaseService<BisAsn, String> {
             if ("0".equals(obj.getMark())) {
                 asnActionObj.setEnterId(obj.getLinkId());
             } else {//货转联系单
-                asnActionObj.setTransferId(obj.getLinkId());
+                //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                asnActionObj.setTransferId(obj.getTransferId());
             }
             //填入费用方案
             if (getBisEnterStock != null) {
                 asnActionObj.setFeePlanId(getBisEnterStock.getFeeId());
+                //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                    asnActionObj.setFeePlanId(transferObj.getFeeId());
+                }
             }
             asnActionObj.setBillCode(getBisEnterStock.getItemNum());//提单号
             AsnAction newAsnAction = null;
@@ -243,11 +254,16 @@ public class ASNService extends BaseService<BisAsn, String> {
     @SuppressWarnings("null")
 	@Transactional(readOnly = false)
     public String updateASN(BisAsn obj) {
+        if (null != obj.getIfSecondEnter() && "3".equals(obj.getIfSecondEnter().trim())) {
+        }else{
+            obj.setTransferId(null);
+        }
         String retStr = "error";
         if (obj != null && !"".equals(obj.getAsn())) {
             BisAsn getObj = this.get(obj.getAsn());
             /************************ASN基本信息更新*********************************************/
             BisEnterStock getBisEnterStock = null;
+            BisTransferStock transferObj = null;
             //只有在途状态下才会修改
             if ("1".equals(getObj.getAsnState())) {
                 //判断是货转还是入库 通过联系单标示入库联系单 前缀E 货转联系单 前缀T
@@ -262,15 +278,18 @@ public class ASNService extends BaseService<BisAsn, String> {
                         obj.setWarehouse(getBisEnterStock.getWarehouse());
                     }
                     obj.setMark("0");
-                } else if (obj.getLinkId().indexOf("T") == 0) {
+                }
+                //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
                     //根据货转单id获取货转单对象
-                    BisTransferStock transferObj = transferService.get(obj.getLinkId());
+                    transferObj = transferService.get(obj.getTransferId());
                     if (transferObj != null && transferObj.getTransferId() != null) {
-                        obj.setStockName(transferObj.getStockIn());
-                        //根据提单号获取入库联系单号，添加仓库信息
-                        getBisEnterStock = null;//TODO
-                        obj.setWarehouseId(getBisEnterStock.getWarehouseId());
-                        obj.setWarehouse(getBisEnterStock.getWarehouse());
+
+                        obj.setBillNum(getObj.getBillNum());
+                        obj.setStockIn(transferObj.getReceiverOrgId());
+                        obj.setStockName(transferObj.getReceiverOrg());
+                        obj.setWarehouseId(transferObj.getWarehouseId());
+                        obj.setWarehouse(transferObj.getWarehouse());
                     }
                     obj.setMark("1");
                 }
@@ -423,6 +442,10 @@ public class ASNService extends BaseService<BisAsn, String> {
                     asnActionObj.setAsn(obj.getAsn());
                     asnActionObj.setClientId(obj.getStockIn());//客户id
                     asnActionObj.setJfClientId(getBisEnterStock.getStockOrgId());//结算单位id
+                    //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                    if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                        asnActionObj.setJfClientId(transferObj.getReceiverOrgId());//收货方结算单位id
+                    }
                     BaseClientInfo getClient = clientService.get(Integer.valueOf(getBisEnterStock.getStockOrgId()));
                     if (getClient != null) {
                         asnActionObj.setClientDay(getClient.getCheckDay());//客户计费日期
@@ -442,13 +465,18 @@ public class ASNService extends BaseService<BisAsn, String> {
                     if ("0".equals(obj.getMark())) {
                         asnActionObj.setEnterId(obj.getLinkId());
                     } else {//货转联系单
-                        asnActionObj.setTransferId(obj.getLinkId());
+                        //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                        asnActionObj.setTransferId(obj.getTransferId());
                     }
                     //填入费用方案
                     if (getBisEnterStock != null) {
                         asnActionObj.setFeePlanId(getBisEnterStock.getFeeId());
-                        asnActionObj.setBillCode(getBisEnterStock.getItemNum());
+                        //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                        if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                            asnActionObj.setFeePlanId(transferObj.getFeeId());
+                        }
                     }
+                    asnActionObj.setBillCode(getBisEnterStock.getItemNum());
                     AsnAction newAsnAction = null;
                     for (int i = 0; i < sukList.length; i++) {
                         skuObj = skuInfoService.get(sukList[i]);
@@ -457,10 +485,22 @@ public class ASNService extends BaseService<BisAsn, String> {
                             newAsnAction.setStatus("1");
                             newAsnAction.setClientId(obj.getStockIn());
                             newAsnAction.setJfClientId(getBisEnterStock.getStockOrgId());
+                            //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                            if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                                newAsnAction.setJfClientId(transferObj.getReceiverOrgId());//收货方结算单位id
+                            }
                             newAsnAction.setClientDay(asnActionObj.getClientDay());
                             newAsnAction.setChargeStaDate(asnActionObj.getChargeStaDate());
                             newAsnAction.setEnterId(asnActionObj.getEnterId());
+                            //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                            if ("1".equals(obj.getMark())) {
+                                newAsnAction.setTransferId(obj.getTransferId());
+                            }
                             newAsnAction.setFeePlanId(getBisEnterStock.getFeeId());
+                            //20260417 优化修改A转给B，B进行分拣，需要入库为A再货转给B的逻辑
+                            if (obj.getTransferId()!=null && obj.getTransferId().trim().length() > 0) {
+                                newAsnAction.setFeePlanId(transferObj.getFeeId());
+                            }
                             newAsnAction.setBillCode(getBisEnterStock.getItemNum());
                             newAsnAction.setSku(skuObj.getSkuId());
                             newAsnAction.setCargoName(skuObj.getCargoName());
@@ -632,7 +672,8 @@ public class ASNService extends BaseService<BisAsn, String> {
 	
 	/**
      * @param getObj
-     * @param crExpense
+     * @param tray
+     * @param userName
      * @return
      * @Description 回库操作时，重新生成一遍出入库费
      * @author PYL

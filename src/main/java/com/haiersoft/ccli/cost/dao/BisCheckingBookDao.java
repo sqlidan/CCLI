@@ -585,8 +585,8 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append(" 	SELECT   ");
 		sb.append(" 	 SB.LINK_ID,  ");
 		sb.append(" 	 SB.BILL_NUM, ");
-		sb.append(" 	 LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM, ");
-		sb.append(" 	 LISTAGG (INFO.LOT_NUM, ',') WITHIN GROUP (ORDER BY INFO.LOT_NUM) AS LOT_NUM, ");
+		sb.append(" 	 (SELECT (LISTAGG (CTN_NUM, ',') WITHIN GROUP (ORDER BY CTN_NUM)) FROM BIS_ENTER_STOCK_INFO WHERE ITEM_NUM = sb.BILL_NUM) AS CTN_NUM, ");
+		sb.append(" 	 (SELECT (LISTAGG (LOT_NUM, ',') WITHIN GROUP (ORDER BY LOT_NUM)) FROM BIS_ENTER_STOCK_INFO WHERE ITEM_NUM = sb.BILL_NUM) AS LOT_NUM, ");
 		sb.append(" 	 SB.crk_sign, ");
 		sb.append(" 	(   ");
 		sb.append(" 	 CASE  ");
@@ -615,7 +615,6 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sb.append("  FROM  ");
 		sb.append(" 	bis_standing_book sb    ");
 		sb.append("  LEFT JOIN BASE_EXPENSE_CATEGORY_INFO ci ON sb.fee_code = ci. CODE ");
-		sb.append("  LEFT JOIN BIS_ENTER_STOCK_INFO INFO ON sb.BILL_NUM = INFO.ITEM_NUM ");
 		sb.append("  WHERE reconcile_num =:code AND reconcile_sign = '1'  AND EXAMINE_SIGN = 1  ");
 		sb.append("  AND nvl(sb.CHARGE_SIGN,0) = 0 ");
 		sb.append("  GROUP BY                ");

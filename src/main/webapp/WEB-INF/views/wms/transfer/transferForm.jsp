@@ -193,6 +193,11 @@
 					<span class="toolbar-item dialog-tool-separator"></span>
 					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-basket-put" plain="true" data-options="disabled:false" onclick="into()">EXCEL导入</a>
 					<span class="toolbar-item dialog-tool-separator"></span>
+				<shiro:hasPermission name="bis:asn:print">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true" onclick="printCard()">打印垛卡</a>
+					<span class="toolbar-item dialog-tool-separator"></span>
+				</shiro:hasPermission>
+
 	    	</div>
 			<table id="dg"></table>
 	    </div>
@@ -242,7 +247,7 @@ $(document).ready(function(){
 			pageList : [1000],
 			singleSelect:true,
 		    columns:[[    
-				{field:'STOCK_NAME',title:'存货方',sortable:false,width:250},    
+				{field:'STOCK_NAME',title:'存货方',sortable:false,width:250},
 		        {field:'BILL_NUM',title:'提单号',sortable:false,width:150},
 		        {field:'CTN_NUM',title:'箱号',sortable:false,width:150 },
 		        {field:'SKU_ID',title:'SKU',sortable:false,width:150},
@@ -1305,6 +1310,12 @@ function delTruck(){
 				}
 			}
 		});	
+}
+//打印跺卡
+function printCard(){
+	var row = dg.datagrid('getSelected');
+	if (rowIsNull(row)) return;
+	window.parent.mainpage.mainTabs.addModule('打印垛卡','${ctx}/bis/asn/printTransferCard/${obj.transferId}?billNum='+row.BILL_NUM+'&ctnNum='+row.CTN_NUM);
 }
 </script>
 </body>

@@ -50,6 +50,8 @@
 			<span class="toolbar-item dialog-tool-separator"></span>
 			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="startTransfer()">开始转非保税</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="pushData()">一键推送转口货物备案</a>
+			<span class="toolbar-item dialog-tool-separator"></span>
 
         </div>
 	<table id="dg"></table> 
@@ -144,6 +146,20 @@ function del(){
 		} 
 	});
 }
+//一键推送转口货物备案
+function pushData(){
+	parent.$.messager.confirm('提示', '您确定要一键推送转口货物备案数据吗？', function(data){
+		if (data){
+			$.ajax({
+				type:'get',
+				url:"${ctx}/PassPortApiController/push",
+				success: function(data){
+					successTip(data,dg);
+				}
+			});
+		}
+	});
+}
 //新增
 function add(){
 
@@ -233,8 +249,6 @@ function startTransfer() {
 		}]
 	});
 }
-
-
 
 function refresh(){
 	window.parent.mainpage.mainTabs.refCurrentTab();//刷新TAB
