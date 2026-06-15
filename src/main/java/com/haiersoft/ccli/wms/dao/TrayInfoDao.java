@@ -120,6 +120,154 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		SQLQuery sqlQuery=createSQLQuery(sb.toString(), parme);
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String,Object>> getSumByState(String contactNum,String cargoState){
+		HashMap<String,Object> parme=new HashMap<String,Object>();
+		StringBuffer sb=new StringBuffer();
+		sb.append(" SELECT                                             ");
+		sb.append(" 	T .CONTACT_NUM,                                ");
+		sb.append(" 	COUNT (T .CONTACT_NUM) AS TS,                  ");
+		sb.append(" 	SUM (T .sl) AS SL,                             ");
+		sb.append(" 	SUM (ROUND(T .mz, 4)) AS MZ,                   ");
+		sb.append(" 	SUM (ROUND(T .jz, 4)) AS JZ,                   ");
+		sb.append(" 	SUM (ROUND(T .zmz, 4)) AS ZMZ,                 ");
+		sb.append(" 	SUM (ROUND(T .zjz, 4)) AS ZJZ,                 ");
+		sb.append(" 	SUM (ROUND(T .jzkg, 4)) AS JZKG,               ");
+		sb.append(" 	SUM (ROUND(T .mzkg, 4)) AS MZKG                ");
+		sb.append(" FROM                                               ");
+		sb.append(" 	(                                              ");
+		sb.append(" 		SELECT                                     ");
+		sb.append(" 			T .CONTACT_NUM,                        ");
+		sb.append(" 			(                                       ");
+		sb.append(" 				T .ORIGINAL_PIECE - T .REMOVE_PIECE ");
+		sb.append(" 			) AS sl,                                ");
+		sb.append(" 			CASE T .UNITS                           ");
+		sb.append(" 		WHEN '2' THEN                               ");
+		sb.append(" 			(T .GROSS_SINGLE)                       ");
+		sb.append(" 		ELSE                                        ");
+		sb.append(" 			(T .GROSS_SINGLE / 1000)                ");
+		sb.append(" 		END AS mz,                                  ");
+		sb.append(" 		CASE T .UNITS                               ");
+		sb.append(" 	WHEN '2' THEN                                   ");
+		sb.append(" 		(T .NET_SINGLE)                             ");
+		sb.append(" 	ELSE                                            ");
+		sb.append(" 		(T .NET_SINGLE / 1000)                      ");
+		sb.append(" 	END AS jz,                                      ");
+		sb.append(" 	CASE T .UNITS                                   ");
+		sb.append(" WHEN '2' THEN                                       ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .GROSS_SINGLE)                           ");
+		sb.append(" ELSE                                                ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .GROSS_SINGLE / 1000)                    ");
+		sb.append(" END AS zmz,                                         ");
+		sb.append("  CASE T .UNITS                                      ");
+		sb.append(" WHEN '2' THEN                                       ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .NET_SINGLE)                             ");
+		sb.append(" ELSE                                                ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .NET_SINGLE / 1000)                      ");
+		sb.append(" END AS zjz,                                         ");
+		sb.append("  CASE T .UNITS                                      ");
+		sb.append(" WHEN '2' THEN                                       ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .NET_SINGLE * 1000)                      ");
+		sb.append(" ELSE                                                ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .NET_SINGLE)                             ");
+		sb.append(" END AS jzkg,                                        ");
+		sb.append("  CASE T .UNITS                                      ");
+		sb.append(" WHEN '2' THEN                                       ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .GROSS_SINGLE * 1000)                    ");
+		sb.append(" ELSE                                                ");
+		sb.append(" 	(                                               ");
+		sb.append(" 		T .ORIGINAL_PIECE - T .REMOVE_PIECE         ");
+		sb.append(" 	) * (T .GROSS_SINGLE)                           ");
+		sb.append(" END AS mzkg                                         ");
+		sb.append(" FROM                                                ");
+		sb.append(" 	BIS_TRAY_INFO T                                 ");
+		sb.append(" WHERE   T .CARGO_STATE = :cargoState                ");
+		if(contactNum!=null && !"".equals(contactNum)){
+	        sb.append(" AND	T .CONTACT_NUM =:contact_num                ");
+			parme.put("contact_num", contactNum);
+	    }
+		sb.append(" 	) T                                             ");
+		sb.append(" WHERE                                               ");
+		sb.append(" 	1 = 1                                           ");
+		sb.append(" GROUP BY                                            ");
+		sb.append(" 	T .CONTACT_NUM                                  ");
+		parme.put("cargoState", cargoState);
+		SQLQuery sqlQuery=createSQLQuery(sb.toString(), parme);
+		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+	}
+
+	public boolean hasOnlyUpShelfTray(String contactNum) {
+		if(contactNum==null || "".equals(contactNum)){
+			return false;
+		}
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("contactNum", contactNum);
+		String hasUpShelfSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and t.CARGO_STATE='01'";
+		String hasOtherSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE,'00') not in ('01','99')";
+		Object hasUpShelf = createSQLQuery(hasUpShelfSql, params).uniqueResult();
+		Object hasOther = createSQLQuery(hasOtherSql, params).uniqueResult();
+		int upShelfCount = hasUpShelf == null ? 0 : Integer.parseInt(hasUpShelf.toString());
+		int otherCount = hasOther == null ? 0 : Integer.parseInt(hasOther.toString());
+		return upShelfCount > 0 && otherCount == 0;
+	}
+
+	public boolean hasAllUpShelfTray(String contactNum) {
+		if(contactNum==null || "".equals(contactNum)){
+			return false;
+		}
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("contactNum", contactNum);
+		String hasTraySql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum";
+		String hasOtherSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE,'00') <> '01'";
+		Object hasTray = createSQLQuery(hasTraySql, params).uniqueResult();
+		Object hasOther = createSQLQuery(hasOtherSql, params).uniqueResult();
+		int trayCount = hasTray == null ? 0 : Integer.parseInt(hasTray.toString());
+		int otherCount = hasOther == null ? 0 : Integer.parseInt(hasOther.toString());
+		return trayCount > 0 && otherCount == 0;
+	}
+
+	public boolean hasOnlyUpShelfAsn(String contactNum) {
+		if(contactNum==null || "".equals(contactNum)){
+			return false;
+		}
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("contactNum", contactNum);
+		String hasAsnSql = "select count(1) from BIS_ASN t where t.LINK_ID=:contactNum";
+		String hasOtherSql = "select count(1) from BIS_ASN t where t.LINK_ID=:contactNum and nvl(t.ASN_STATE,'1') not in ('3','4')";
+		Object hasAsn = createSQLQuery(hasAsnSql, params).uniqueResult();
+		Object hasOther = createSQLQuery(hasOtherSql, params).uniqueResult();
+		int asnCount = hasAsn == null ? 0 : Integer.parseInt(hasAsn.toString());
+		int otherCount = hasOther == null ? 0 : Integer.parseInt(hasOther.toString());
+		return asnCount > 0 && otherCount == 0;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String,Object>> getUpShelfCtnNumList(String contactNum){
+		HashMap<String,Object> param=new HashMap<String,Object>();
+		StringBuffer sb=new StringBuffer();
+		sb.append(" SELECT DISTINCT T.CONTACT_NUM,T.CTN_NUM ");
+		sb.append(" FROM BIS_TRAY_INFO T ");
+		sb.append(" WHERE T.CARGO_STATE='01' ");
+		sb.append("   AND T.CONTACT_NUM=:contactNum ");
+		param.put("contactNum", contactNum);
+		SQLQuery sqlQuery=createSQLQuery(sb.toString(), param);
+		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+	}
 	/**
 	 * 按客户，提单，厢号，sKU,入库类型  分组获取库存数量
 	 * @param clientId //客户

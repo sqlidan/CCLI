@@ -560,11 +560,11 @@
 				feeId:feeId
 			},
 			success: function(data){
-			  //if(data=="success"){
+			  if($.trim(data)=="success"){
 			   window.parent.mainpage.mainTabs.addModule('费用', 'cost/standingBook/inList/' + linkId + "/" + itemNum + "/" + stockId+"/"+feeId);
-			  /* }else{
+			  }else{
 					parent.$.messager.show({ title : "提示",msg:data, position: "bottomRight" });
-			   } */
+			   }
 			}
 	   });
     }

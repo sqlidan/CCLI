@@ -1034,5 +1034,34 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         return getList;
     }
 
+    @SuppressWarnings("unchecked")
+    public List<BisEnterStock> findNeedAutoGenerateFeeEnterStocks(Date beginTime, Date endTime) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT t.* ");
+        sql.append("  FROM BIS_ENTER_STOCK t ");
+        sql.append(" WHERE t.DEL_FLAG = '0' ");
+        sql.append("   AND t.FEE_ID IS NOT NULL ");
+        sql.append("   AND TRIM(t.FEE_ID) IS NOT NULL ");
+        sql.append("   AND EXISTS ( ");
+        sql.append("         SELECT 1 ");
+        sql.append("           FROM BIS_TRAY_INFO tray ");
+        sql.append("          WHERE tray.CONTACT_NUM = t.LINK_ID ");
+        sql.append("            AND tray.CARGO_STATE = '01' ");
+        sql.append("            AND tray.UPDATE_TIME >= :beginTime ");
+        sql.append("            AND tray.UPDATE_TIME <= :endTime ");
+        sql.append("       ) ");
+        sql.append("   AND NOT EXISTS ( ");
+        sql.append("         SELECT 1 ");
+        sql.append("           FROM BIS_TRAY_INFO tray ");
+        sql.append("          WHERE tray.CONTACT_NUM = t.LINK_ID ");
+        sql.append("            AND NVL(tray.CARGO_STATE, '00') NOT IN ('01', '99') ");
+        sql.append("       ) ");
+        sql.append(" ORDER BY t.OPERATE_TIME ASC NULLS LAST ");
+        params.put("beginTime", beginTime);
+        params.put("endTime", endTime);
+        return createSQLQuery(sql.toString(), params).addEntity(BisEnterStock.class).list();
+    }
+
 
 }

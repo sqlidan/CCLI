@@ -192,4 +192,8 @@ public class TrayInfoService extends BaseService<TrayInfo, Integer> {
 		return trayInfoDao.updateTrayInfoforNewCtnNum(ctnNumNew,ctnNumOld,linkId); 
 	}
 
+	public boolean hasAllUpShelfTray(String contactNum) {
+		return trayInfoDao.hasAllUpShelfTray(contactNum);
+	}
+
 }

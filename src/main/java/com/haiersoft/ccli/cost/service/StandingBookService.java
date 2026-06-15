@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +145,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		Date now = new Date();//统一时间
 		//获得入库联系单对象如果费用完成的不需要引入新的费用
 		List<BisEnterStock> enterStockList = enterStockDao.find(Restrictions.and(Restrictions.eq("delFlag","0"),Restrictions.eq("linkId",linkId)));
-		if(null==enterStockList){
+		if(null==enterStockList || enterStockList.isEmpty()){
 			return "success";
 		}
 		BisEnterStock enterStock=enterStockList.get(0);
@@ -166,7 +167,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 				}
 			}
 			//获的库存计算量
-			List<Map<String,Object>> trayList=trayInfoDao.getSum(linkId);
+			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId,"01");
 			//获取箱数
 			List<Map<String,Object>> ctnList;
 			for(String id : ids){
@@ -541,11 +542,17 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 	 */
 	@Transactional(readOnly = false)
 	public String addInStandingSchemeBatch(String linkId, List<String> ids) throws Exception {
-		User user = UserUtil.getCurrentUser();//用户信息
+		String inputPersonId = "SYSTEM";
+		String inputPerson = "SYSTEM";
+		User userCtx = UserUtil.getCurrentUser();
+		if (userCtx != null) {
+			inputPersonId = userCtx.getId().toString();
+			inputPerson = userCtx.getName();
+		}
 		Date now = new Date();//统一时间
 		//获得入库联系单对象如果费用完成的不需要引入新的费用
 		List<BisEnterStock> enterStockList = enterStockDao.find(Restrictions.and(Restrictions.eq("delFlag","0"),Restrictions.eq("linkId",linkId)));
-		if(null==enterStockList){
+		if(null==enterStockList || enterStockList.isEmpty()){
 			return "success";
 		}
 		BisEnterStock enterStock=enterStockList.get(0);
@@ -557,6 +564,12 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		if("1".equals(enterStock.getIfBack())||null!=enterStock.getBackDate()){
 			return "success";
 		}
+		if(!trayInfoDao.hasOnlyUpShelfTray(linkId)){
+			return "success";
+		}
+//		if(!trayInfoDao.hasOnlyUpShelfAsn(linkId)){
+//			return "success";
+//		}
 		//获得客户信息
 		BaseClientInfo clientInfo = clientDao.find(Integer.parseInt(enterStock.getStockId()));
 		if(null != enterStock){
@@ -571,7 +584,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 			//获取箱数
 			List<Map<String,Object>> ctnList;
 			//获的库存计算量
-			List<Map<String,Object>> trayList=trayInfoDao.getSum(linkId);
+			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId,"01");
 			for(String id : ids){
 				//获得 费目对象
 				ExpenseScheme expenseScheme = expenseSchemeDao.find(id);
@@ -664,8 +677,8 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 							standingBook.setTaxRate(0D);
 							standingBook.setFillSign(0);
 							
-							standingBook.setInputPersonId(user.getId().toString());
-							standingBook.setInputPerson("SYSTEM");
+							standingBook.setInputPersonId(inputPersonId);
+							standingBook.setInputPerson(inputPerson);
 							standingBook.setInputDate(now);
 							
 							standingBook.setChargeDate(now);
@@ -719,6 +732,25 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 	}
 	
 	//生成分拣费(按SKU分拣的)
+	@Transactional(readOnly = false)
+	public int autoGeneratePendingInFees() throws Exception {
+		int processedCount = 0;
+		Date endTime = new Date();
+		Date beginTime = DateUtils.addMinute(endTime, -45);
+		List<BisEnterStock> enterStocks = enterStockService.findNeedAutoGenerateFeeEnterStocks(beginTime, endTime);
+		if (enterStocks == null || enterStocks.isEmpty()) {
+			return processedCount;
+		}
+		for (BisEnterStock enterStock : enterStocks) {
+			if (enterStock == null || StringUtils.isNull(enterStock.getLinkId()) || StringUtils.isNull(enterStock.getFeeId())) {
+				continue;
+			}
+			addInStandingSchemeBatch(enterStock.getLinkId(), Collections.singletonList(enterStock.getFeeId()));
+			processedCount++;
+		}
+		return processedCount;
+	}
+
 	private void fjFee(BisAsn getObj, ExpenseSchemeInfo exInfo, List<Map<String, Object>> numList,Date now,BisEnterStock enterStock) throws Exception {
 		User user = UserUtil.getCurrentUser();
 		String asn = getObj.getAsn();

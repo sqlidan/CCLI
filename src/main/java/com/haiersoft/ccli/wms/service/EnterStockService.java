@@ -191,5 +191,9 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 		return reString;
 	}
 
+	public List<BisEnterStock> findNeedAutoGenerateFeeEnterStocks(Date beginTime, Date endTime) {
+		return enterStockDao.findNeedAutoGenerateFeeEnterStocks(beginTime, endTime);
+	}
+
 
 }
