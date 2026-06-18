@@ -8,7 +8,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +50,7 @@ import com.haiersoft.ccli.common.utils.StringUtils;
 import com.haiersoft.ccli.common.utils.parameterReflect;
 import com.haiersoft.ccli.common.web.BaseController;
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
+import com.haiersoft.ccli.cost.entity.BisCheckingBookAuto;
 import com.haiersoft.ccli.cost.entity.BisPayInfo;
 import com.haiersoft.ccli.cost.entity.BisStandingBook;
 import com.haiersoft.ccli.cost.service.AsnActionLogService;
@@ -107,8 +110,115 @@ public class StandingBookController extends BaseController {
     public String queryList(HttpServletRequest request, Model model) {
         return "base/standingBookQuery";
     }
+
+    @RequestMapping(value = "auditlist", method = RequestMethod.GET)
+    public String auditList(HttpServletRequest request, Model model) {
+        Map<String, String> period = getDefaultCheckingPeriod();
+        model.addAttribute("defaultStartTime", period.get("startTime"));
+        model.addAttribute("defaultEndTime", period.get("endTime"));
+        return "base/standingBookAuditQuery";
+    }
+
+    @RequestMapping(value = "auditdetail/{codeNum}", method = RequestMethod.GET)
+    public String auditDetail(@PathVariable("codeNum") String codeNum, Model model) {
+        BisCheckingBookAuto obj = bisCheckingBookService.getAutoCheckingBookForView(codeNum);
+        model.addAttribute("obj", obj);
+        return "base/standingBookAuditDetail";
+    }
+
+    @RequiresPermissions("bis:checkbook:view")
+    @RequestMapping(value = "auditlistjson", method = RequestMethod.GET)
+    @ResponseBody
+    public Map<String, Object> getAuditJsonData(HttpServletRequest request) {
+        Page<BisCheckingBookAuto> page = getPage(request);
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("customID", request.getParameter("customID"));
+        params.put("codeNum", request.getParameter("codeNum"));
+        params.put("yearMonth", request.getParameter("yearMonth"));
+        params.put("isTrue", request.getParameter("isTrue"));
+        params.put("auditState", request.getParameter("auditState"));
+        String startTime = request.getParameter("startTime");
+        String endTime = request.getParameter("endTime");
+        if (!StringUtils.isNotBlank(startTime) || !StringUtils.isNotBlank(endTime)) {
+            Map<String, String> period = getDefaultCheckingPeriod();
+            if (!StringUtils.isNotBlank(startTime)) {
+                startTime = period.get("startTime");
+            }
+            if (!StringUtils.isNotBlank(endTime)) {
+                endTime = period.get("endTime");
+            }
+        }
+        params.put("startTime", startTime);
+        params.put("endTime", endTime);
+        page = bisCheckingBookService.getAutoCheckingBookPage(page, params);
+        return getEasyUIData(page);
+    }
+
+    @RequiresPermissions("bis:checkbook:view")
+    @RequestMapping(value = "auditdetailjson", method = RequestMethod.POST)
+    @ResponseBody
+    public List<Map<String, Object>> getAuditDetailJsonData(HttpServletRequest request) {
+        String codeNum = request.getParameter("codeNum");
+        String nType = request.getParameter("nType");
+        int type = 0;
+        if (nType != null && !"".equals(nType)) {
+            type = Integer.parseInt(nType);
+        }
+        List<Map<String, Object>> getList = bisCheckingBookService.getAutoCheckingBookInfoList(codeNum, type);
+        if (getList == null) {
+            getList = new ArrayList<Map<String, Object>>();
+        }
+        return getList;
+    }
+
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "approveAuto/{codeNum}", method = RequestMethod.POST)
+    @ResponseBody
+    public String approveAuto(@PathVariable("codeNum") String codeNum) {
+        return bisCheckingBookService.approveAutoCheckingBook(codeNum);
+    }
+
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "rejectAuto/{codeNum}", method = RequestMethod.POST)
+    @ResponseBody
+    public String rejectAuto(@PathVariable("codeNum") String codeNum) {
+        return bisCheckingBookService.rejectAutoCheckingBook(codeNum);
+    }
     
     //月费目汇总表页面调整
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "approveAutoBatch", method = RequestMethod.POST)
+    @ResponseBody
+    public String approveAutoBatch(@RequestParam("codeNums") String codeNums) {
+        return bisCheckingBookService.approveAutoCheckingBooks(codeNums);
+    }
+
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "deleteAutoBatch", method = RequestMethod.POST)
+    @ResponseBody
+    public String deleteAutoBatch(@RequestParam("codeNums") String codeNums) {
+        return bisCheckingBookService.deleteAutoCheckingBooks(codeNums);
+    }
+
+    private Map<String, String> getDefaultCheckingPeriod() {
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        if (start.get(Calendar.DAY_OF_MONTH) >= 26) {
+            start.set(Calendar.DAY_OF_MONTH, 26);
+            end.add(Calendar.MONTH, 1);
+            end.set(Calendar.DAY_OF_MONTH, 25);
+        } else {
+            start.add(Calendar.MONTH, -1);
+            start.set(Calendar.DAY_OF_MONTH, 26);
+            end.set(Calendar.DAY_OF_MONTH, 25);
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Map<String, String> period = new HashMap<String, String>();
+        period.put("startTime", format.format(start.getTime()));
+        period.put("endTime", format.format(end.getTime()));
+        return period;
+    }
+
     @RequestMapping(value = "summonthlist", method = RequestMethod.GET)
     public String summonthList(HttpServletRequest request, Model model) {
         return "base/standingBookSumMonthQuery";

@@ -1,15 +1,24 @@
 package com.haiersoft.ccli.cost.dao;
 
+import java.math.BigDecimal;
+import java.sql.Clob;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
+import org.hibernate.type.StandardBasicTypes;
 import org.springframework.stereotype.Repository;
 
 import com.haiersoft.ccli.common.persistence.HibernateDao;
+import com.haiersoft.ccli.common.persistence.Page;
+import com.haiersoft.ccli.cost.entity.BisCheckingBookAuto;
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -1680,5 +1689,343 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			statementNo = statementNoObj.toString();
 		}
 		return  statementNo;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<BisCheckingBookAuto> getCurrentMonthAutoCheckingBooks() {
+		String yearMonth = new SimpleDateFormat("yyyy-MM").format(new Date());
+		StringBuffer sql = new StringBuffer();
+		sql.append(" select book.STANDING_NUM as STANDINGNUM, ");
+		sql.append(" book.CUSTOMS_NUM as CUSTOMSNUM, ");
+		sql.append(" book.CUSTOMS_NAME as CUSTOMSNAME ");
+		sql.append(" from BIS_STANDING_BOOK book ");
+		sql.append(" where book.INPUT_DATE >= trunc(sysdate, 'MM') ");
+		sql.append(" and book.INPUT_DATE < add_months(trunc(sysdate, 'MM'), 1) ");
+		sql.append(" and book.IF_RECEIVE = '1' ");
+		sql.append(" and (book.RECONCILE_NUM is null or book.RECONCILE_NUM = '') ");
+		sql.append(" order by nvl(book.CUSTOMS_NUM, 'UNKNOWN'), book.STANDING_NUM ");
+		SQLQuery query = createSQLQuery(sql.toString());
+		query.addScalar("STANDINGNUM", StandardBasicTypes.INTEGER);
+		query.addScalar("CUSTOMSNUM", StandardBasicTypes.STRING);
+		query.addScalar("CUSTOMSNAME", StandardBasicTypes.STRING);
+		List<Object[]> standingBooks = query.list();
+		Map<String, BisCheckingBookAuto> groups = new LinkedHashMap<String, BisCheckingBookAuto>();
+		for (Object[] standingBook : standingBooks) {
+			if (standingBook == null || standingBook[0] == null) {
+				continue;
+			}
+			Integer standingNum = (Integer) standingBook[0];
+			String customsNum = (String) standingBook[1];
+			String customsName = (String) standingBook[2];
+			String customId = StringUtils.hasText(customsNum) ? customsNum : "UNKNOWN";
+			BisCheckingBookAuto autoCheckingBook = groups.get(customId);
+			if (autoCheckingBook == null) {
+				autoCheckingBook = new BisCheckingBookAuto();
+				autoCheckingBook.setCustomID(customId);
+				autoCheckingBook.setCustom(StringUtils.hasText(customsName) ? customsName : "UNKNOWN");
+				autoCheckingBook.setYearMonth(yearMonth);
+				autoCheckingBook.setIsTrue(1);
+				autoCheckingBook.setRemark("月度自动生成");
+				autoCheckingBook.setOperator("system");
+				autoCheckingBook.setOperateTime(new Date());
+				autoCheckingBook.setJsfs("Y");
+				autoCheckingBook.setAuditState(0);
+				autoCheckingBook.setStandingNumList("");
+				groups.put(customId, autoCheckingBook);
+			}
+			if (StringUtils.hasText(autoCheckingBook.getStandingNumList())) {
+				autoCheckingBook.setStandingNumList(autoCheckingBook.getStandingNumList() + "," + standingNum);
+			} else {
+				autoCheckingBook.setStandingNumList(String.valueOf(standingNum));
+			}
+		}
+		return new ArrayList<BisCheckingBookAuto>(groups.values());
+	}
+
+	@SuppressWarnings("unchecked")
+	public Page<BisCheckingBookAuto> getAutoCheckingBookPage(Page<BisCheckingBookAuto> page, Map<String, Object> params) {
+		StringBuffer sql = new StringBuffer();
+		sql.append(" select auto.* ");
+		sql.append(" from BIS_CHEKING_BOOK_AUTO auto ");
+		sql.append(" where 1 = 1 ");
+		Map<String, Object> queryParams = new HashMap<String, Object>();
+		String customID = getStringValue(params.get("customID"));
+		String codeNum = getStringValue(params.get("codeNum"));
+		String yearMonth = getStringValue(params.get("yearMonth"));
+		String isTrue = getStringValue(params.get("isTrue"));
+		String auditState = getStringValue(params.get("auditState"));
+		String startTime = getStringValue(params.get("startTime"));
+		String endTime = getStringValue(params.get("endTime"));
+		if (StringUtils.hasText(customID)) {
+			sql.append(" and auto.CUSTOMEID = :customID ");
+			queryParams.put("customID", customID);
+		}
+		if (StringUtils.hasText(codeNum)) {
+			sql.append(" and auto.CODENUM like :codeNum ");
+			queryParams.put("codeNum", "%" + codeNum + "%");
+		}
+		if (StringUtils.hasText(yearMonth)) {
+			sql.append(" and auto.YEARMONTH = :yearMonth ");
+			queryParams.put("yearMonth", yearMonth);
+		}
+		if (StringUtils.hasText(isTrue)) {
+			sql.append(" and auto.ISTRUE = :isTrue ");
+			queryParams.put("isTrue", Integer.valueOf(isTrue));
+		}
+		if (StringUtils.hasText(auditState)) {
+			sql.append(" and nvl(auto.AUDIT_STATE, 0) = :auditState ");
+			queryParams.put("auditState", Integer.valueOf(auditState));
+		}
+		if (StringUtils.hasText(startTime)) {
+			sql.append(" and auto.CRTIME >= to_date(:startTime, 'yyyy-mm-dd') ");
+			queryParams.put("startTime", startTime);
+		}
+		if (StringUtils.hasText(endTime)) {
+			sql.append(" and auto.CRTIME < to_date(:endTime, 'yyyy-mm-dd') + 1 ");
+			queryParams.put("endTime", endTime);
+		}
+		sql.append(" order by auto.CRTIME desc ");
+		SQLQuery sqlQuery = createSQLQuery(sql.toString(), queryParams);
+		if (page.isAutoCount()) {
+			page.setTotalCount(countSqlResult(sql.toString(), queryParams));
+		}
+		sqlQuery.setFirstResult(page.getFirst() - 1);
+		sqlQuery.setMaxResults(page.getPageSize());
+		page.setResult(sqlQuery.addEntity(BisCheckingBookAuto.class).list());
+		return page;
+	}
+
+	public BisCheckingBookAuto getAutoCheckingBookForView(String codeNum) {
+		return getAutoCheckingBook(codeNum);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Map<String, Object>> getAutoCheckingBookInfoList(String codeNum, int ntype) {
+		if (!StringUtils.hasText(codeNum) || ntype <= 0) {
+			return new ArrayList<Map<String, Object>>();
+		}
+		BisCheckingBookAuto autoCheckingBook = getAutoCheckingBook(codeNum);
+		if (autoCheckingBook == null) {
+			return new ArrayList<Map<String, Object>>();
+		}
+		String standingNumList = autoCheckingBook.getStandingNumList();
+		if (!StringUtils.hasText(standingNumList)) {
+			return new ArrayList<Map<String, Object>>();
+		}
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("ntype", ntype);
+		StringBuffer sql = new StringBuffer("select * from( ");
+		sql.append(" select sum(nvl(SHOULD_RMB,0)) as RMB, ");
+		sql.append(" t.link_id, t.bill_num, t.FEE_CODE, min(t.fee_name) as fee_name, ");
+		sql.append(" min(CUSTOMS_NAME) as CUSTOMS_NAME, min(CURRENCY) as CURRENCY, ");
+		sql.append(" BILL_DATE, EXCHANGE_RATE, PAY_SIGN, ");
+		sql.append(" min(to_char(t.standing_num)) as ids ");
+		sql.append(" from BIS_STANDING_BOOK t ");
+		sql.append(" where t.EXAMINE_SIGN = 1 ");
+		sql.append(" and t.IF_RECEIVE = '1' ");
+		sql.append(" and t.CRK_SIGN = :ntype ");
+		appendStandingNumCondition(sql, params, standingNumList);
+		sql.append(" group by t.link_id, t.bill_num, t.FEE_CODE, PRICE, BILL_DATE, EXCHANGE_RATE, PAY_SIGN ");
+		sql.append(" ) a where a.RMB is not null ");
+		sql.append(" order by bill_num, link_id ");
+		return createSQLQuery(sql.toString(), params).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+	}
+
+	public int insertCurrentMonthAutoCheckingBook(String codeNum, BisCheckingBookAuto autoCheckingBook) {
+		if (autoCheckingBook == null) {
+			return 0;
+		}
+		autoCheckingBook.setCodeNum(codeNum);
+		if (!StringUtils.hasText(autoCheckingBook.getCodeNum())
+				|| !StringUtils.hasText(autoCheckingBook.getStandingNumList())
+				|| countAutoCheckingBookByYearMonth(autoCheckingBook.getYearMonth(), autoCheckingBook.getCustomID()) > 0) {
+			return 0;
+		}
+		return insertAutoCheckingBook(autoCheckingBook);
+	}
+
+	private int countAutoCheckingBookByYearMonth(String yearMonth, String customId) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("yearMonth", yearMonth);
+		params.put("customeId", customId);
+		Object result = createSQLQuery("select count(1) from BIS_CHEKING_BOOK_AUTO where YEARMONTH = :yearMonth and CUSTOMEID = :customeId", params).uniqueResult();
+		if (result instanceof BigDecimal) {
+			return ((BigDecimal) result).intValue();
+		}
+		return result == null ? 0 : Integer.parseInt(result.toString());
+	}
+
+	private int insertAutoCheckingBook(BisCheckingBookAuto autoCheckingBook) {
+		StringBuffer sql = new StringBuffer();
+		sql.append(" insert into BIS_CHEKING_BOOK_AUTO ( ");
+		sql.append(" CODENUM, ISTRUE, CUSTOME, CUSTOMEID, YEARMONTH, REMARK, ");
+		sql.append(" CRUSER, CRTIME, UPTIME, UPUSER, SRC_CUST_CODE, SRC_CUST_NAME, ");
+		sql.append(" RESULT, JSFS, INVOICECODE, INVOICENUM, MIDGROUPSTATIC, STATEMENT_NO, AUDIT_STATE, STANDING_NUM_LIST ");
+		sql.append(" ) values ( ");
+		sql.append(" :codeNum, :isTrue, :custome, :customeId, :yearMonth, :remark, ");
+		sql.append(" :cruser, sysdate, null, null, null, null, ");
+		sql.append(" null, :jsfs, null, null, null, null, 0, :standingNumList ");
+		sql.append(" ) ");
+		SQLQuery sqlQuery = getSession().createSQLQuery(sql.toString());
+		sqlQuery.setParameter("codeNum", autoCheckingBook.getCodeNum(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("isTrue", autoCheckingBook.getIsTrue(), StandardBasicTypes.INTEGER);
+		sqlQuery.setParameter("custome", autoCheckingBook.getCustom(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("customeId", autoCheckingBook.getCustomID(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("yearMonth", autoCheckingBook.getYearMonth(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("remark", autoCheckingBook.getRemark(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("cruser", autoCheckingBook.getOperator(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("jsfs", autoCheckingBook.getJsfs(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("standingNumList", autoCheckingBook.getStandingNumList(), StandardBasicTypes.TEXT);
+		return sqlQuery.executeUpdate();
+	}
+
+	public String approveAutoCheckingBook(String codeNum) {
+		if (!StringUtils.hasText(codeNum) || countCheckingBook(codeNum) > 0) {
+			return "error";
+		}
+		BisCheckingBookAuto autoCheckingBook = getAutoCheckingBook(codeNum);
+		if (autoCheckingBook == null) {
+			return "error";
+		}
+		int count = insertCheckingBookFromAuto(autoCheckingBook);
+		if (count != 1) {
+			return "error";
+		}
+		updateStandingBookReconcileInfo(codeNum, autoCheckingBook.getStandingNumList());
+		updateAutoCheckingBookAuditState(codeNum, 1);
+		return "success";
+	}
+
+	public String rejectAutoCheckingBook(String codeNum) {
+		if (!StringUtils.hasText(codeNum)) {
+			return "error";
+		}
+		deleteAutoCheckingBook(codeNum);
+		return "success";
+	}
+
+	private int countCheckingBook(String codeNum) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("codeNum", codeNum);
+		Object result = createSQLQuery("select count(1) from BIS_CHEKING_BOOK where CODENUM = :codeNum", params).uniqueResult();
+		if (result instanceof BigDecimal) {
+			return ((BigDecimal) result).intValue();
+		}
+		return result == null ? 0 : Integer.parseInt(result.toString());
+	}
+
+	private BisCheckingBookAuto getAutoCheckingBook(String codeNum) {
+		if (!StringUtils.hasText(codeNum)) {
+			return null;
+		}
+		return (BisCheckingBookAuto) getSession().get(BisCheckingBookAuto.class, codeNum);
+	}
+
+	private int insertCheckingBookFromAuto(BisCheckingBookAuto autoCheckingBook) {
+		StringBuffer sql = new StringBuffer();
+		sql.append(" insert into BIS_CHEKING_BOOK ( ");
+		sql.append(" CODENUM, ISTRUE, CUSTOME, CUSTOMEID, YEARMONTH, REMARK, ");
+		sql.append(" CRUSER, CRTIME, UPTIME, UPUSER, SRC_CUST_CODE, SRC_CUST_NAME, ");
+		sql.append(" RESULT, JSFS, INVOICECODE, INVOICENUM, MIDGROUPSTATIC, STATEMENT_NO ");
+		sql.append(" ) values ( ");
+		sql.append(" :codeNum, :isTrue, :custome, :customeId, :yearMonth, :remark, ");
+		sql.append(" :cruser, :crtime, :uptime, :upuser, :srcCustCode, :srcCustName, ");
+		sql.append(" :result, :jsfs, :invoiceCode, :invoiceNum, :midGroupStatic, :statementNo ");
+		sql.append(" ) ");
+		SQLQuery sqlQuery = getSession().createSQLQuery(sql.toString());
+		sqlQuery.setParameter("codeNum", autoCheckingBook.getCodeNum(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("isTrue", autoCheckingBook.getIsTrue(), StandardBasicTypes.INTEGER);
+		sqlQuery.setParameter("custome", autoCheckingBook.getCustom(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("customeId", autoCheckingBook.getCustomID(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("yearMonth", autoCheckingBook.getYearMonth(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("remark", autoCheckingBook.getRemark(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("cruser", autoCheckingBook.getOperator(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("crtime", autoCheckingBook.getOperateTime(), StandardBasicTypes.TIMESTAMP);
+		sqlQuery.setParameter("uptime", autoCheckingBook.getUpdateTime(), StandardBasicTypes.TIMESTAMP);
+		sqlQuery.setParameter("upuser", autoCheckingBook.getUpdateOperator(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("srcCustCode", autoCheckingBook.getSrcCustCode(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("srcCustName", autoCheckingBook.getSrcCustName(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("result", autoCheckingBook.getResult(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("jsfs", autoCheckingBook.getJsfs(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("invoiceCode", autoCheckingBook.getInvoiceCode(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("invoiceNum", autoCheckingBook.getInvoiceNum(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("midGroupStatic", autoCheckingBook.getMidGroupStatic(), StandardBasicTypes.STRING);
+		sqlQuery.setParameter("statementNo", autoCheckingBook.getStatementNo(), StandardBasicTypes.STRING);
+		return sqlQuery.executeUpdate();
+	}
+
+	private void updateStandingBookReconcileInfo(String codeNum, String standingNumList) {
+		if (!StringUtils.hasText(standingNumList)) {
+			return;
+		}
+		String[] standingNums = standingNumList.split(",");
+		for (String standingNum : standingNums) {
+			if (!StringUtils.hasText(standingNum)) {
+				continue;
+			}
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("codeNum", codeNum);
+			params.put("standingNum", standingNum.trim());
+			String sql = "update BIS_STANDING_BOOK set RECONCILE_NUM = :codeNum, RECONCILE_SIGN = '1' where STANDING_NUM = :standingNum";
+			createSQLQuery(sql, params).executeUpdate();
+		}
+	}
+
+	private void appendStandingNumCondition(StringBuffer sql, Map<String, Object> params, String standingNumList) {
+		String[] standingNums = standingNumList.split(",");
+		sql.append(" and ( ");
+		int validCount = 0;
+		for (int i = 0; i < standingNums.length; i++) {
+			String standingNum = standingNums[i] == null ? "" : standingNums[i].trim();
+			if (!StringUtils.hasText(standingNum)) {
+				continue;
+			}
+			if (validCount % 900 == 0) {
+				if (validCount > 0) {
+					sql.append(") or ");
+				}
+				sql.append("t.STANDING_NUM in (");
+			} else {
+				sql.append(",");
+			}
+			String paramName = "standingNum" + validCount;
+			sql.append(":").append(paramName);
+			params.put(paramName, standingNum);
+			validCount++;
+		}
+		if (validCount == 0) {
+			sql.append("1 = 0");
+		} else {
+			sql.append(")");
+		}
+		sql.append(" ) ");
+	}
+
+	private void deleteAutoCheckingBook(String codeNum) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("codeNum", codeNum);
+		createSQLQuery("delete from BIS_CHEKING_BOOK_AUTO where CODENUM = :codeNum", params).executeUpdate();
+	}
+
+	private void updateAutoCheckingBookAuditState(String codeNum, Integer auditState) {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("codeNum", codeNum);
+		params.put("auditState", auditState);
+		createSQLQuery("update BIS_CHEKING_BOOK_AUTO set AUDIT_STATE = :auditState, UPTIME = sysdate where CODENUM = :codeNum", params).executeUpdate();
+	}
+
+	private String getStringValue(Object value) {
+		if (value == null) {
+			return "";
+		}
+		if (value instanceof Clob) {
+			try {
+				Clob clob = (Clob) value;
+				return clob.getSubString(1, (int) clob.length());
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return value.toString();
 	}
 }

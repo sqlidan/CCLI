@@ -7,13 +7,17 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
+import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.service.BaseService;
 import com.haiersoft.ccli.common.utils.BigDecimalUtil;
 import com.haiersoft.ccli.common.utils.DateUtils;
 import com.haiersoft.ccli.common.utils.HttpGo;
 import com.haiersoft.ccli.common.utils.PropertiesUtil;
 import com.haiersoft.ccli.common.utils.StringUtils;
+import com.haiersoft.ccli.cost.entity.BisCheckingBookAuto;
 import com.haiersoft.ccli.cost.dao.BisCheckingBookDao;
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
 import com.haiersoft.ccli.system.entity.User;
@@ -33,6 +37,96 @@ public class BisCheckingBookService extends BaseService<BisCheckingBook, String>
     public HibernateDao<BisCheckingBook, String> getEntityDao() {
         return bisCheckingBookDao;
     }
+
+    @Transactional(readOnly = false)
+    public int insertCurrentMonthAutoCheckingBook() {
+        List<BisCheckingBookAuto> groups = bisCheckingBookDao.getCurrentMonthAutoCheckingBooks();
+        int count = 0;
+        for (BisCheckingBookAuto group : groups) {
+            count += bisCheckingBookDao.insertCurrentMonthAutoCheckingBook(getKeyCode(), group);
+        }
+        return count;
+    }
+
+    public Page<BisCheckingBookAuto> getAutoCheckingBookPage(Page<BisCheckingBookAuto> page, Map<String, Object> params) {
+        return bisCheckingBookDao.getAutoCheckingBookPage(page, params);
+    }
+
+    public BisCheckingBookAuto getAutoCheckingBookForView(String codeNum) {
+        return bisCheckingBookDao.getAutoCheckingBookForView(codeNum);
+    }
+
+    public List<Map<String, Object>> getAutoCheckingBookInfoList(String codeNum, int nType) {
+        return bisCheckingBookDao.getAutoCheckingBookInfoList(codeNum, nType);
+    }
+
+    @Transactional(readOnly = false)
+    public String approveAutoCheckingBook(String codeNum) {
+        try {
+            String result = bisCheckingBookDao.approveAutoCheckingBook(codeNum);
+            if (!"success".equals(result)) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            }
+            return result;
+        } catch (RuntimeException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return "error";
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public String rejectAutoCheckingBook(String codeNum) {
+        return bisCheckingBookDao.rejectAutoCheckingBook(codeNum);
+    }
+
+    @Transactional(readOnly = false)
+    public String approveAutoCheckingBooks(String codeNums) {
+        try {
+            String[] codeNumArray = getCodeNumArray(codeNums);
+            if (codeNumArray.length == 0) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                return "error";
+            }
+            for (String codeNum : codeNumArray) {
+                String result = bisCheckingBookDao.approveAutoCheckingBook(codeNum);
+                if (!"success".equals(result)) {
+                    TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                    return "error";
+                }
+            }
+            return "success";
+        } catch (RuntimeException e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return "error";
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public String deleteAutoCheckingBooks(String codeNums) {
+        String[] codeNumArray = getCodeNumArray(codeNums);
+        if (codeNumArray.length == 0) {
+            return "error";
+        }
+        for (String codeNum : codeNumArray) {
+            bisCheckingBookDao.rejectAutoCheckingBook(codeNum);
+        }
+        return "success";
+    }
+
+    private String[] getCodeNumArray(String codeNums) {
+        if (codeNums == null || "".equals(codeNums.trim())) {
+            return new String[0];
+        }
+        String[] sourceArray = codeNums.split(",");
+        List<String> codeNumList = new java.util.ArrayList<String>();
+        for (String codeNum : sourceArray) {
+            if (codeNum != null && !"".equals(codeNum.trim())) {
+                codeNumList.add(codeNum.trim());
+            }
+        }
+        return codeNumList.toArray(new String[codeNumList.size()]);
+    }
+
     /**
      * 撤销发票信息
      * @param codeNum
@@ -400,7 +494,12 @@ public class BisCheckingBookService extends BaseService<BisCheckingBook, String>
     
     public String getKeyCode() {
         StringBuilder retKey = new StringBuilder("DZ-");
-        User user = UserUtil.getCurrentUser();
+        User user = null;
+        try {
+            user = UserUtil.getCurrentUser();
+        } catch (RuntimeException e) {
+            user = null;
+        }
         if (user != null) {
             retKey.append(user.getUserCode());
         } else {
