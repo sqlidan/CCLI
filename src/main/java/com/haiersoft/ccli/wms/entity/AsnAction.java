@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * @date 2016年3月4日 下午4:01:12
  */
 @Entity
-@Table(name = "BIS_ASN_ACTION")
+@Table(name = "	BIS_ASN_ACTION")
 @DynamicUpdate
 @DynamicInsert
 public class AsnAction implements Serializable {
