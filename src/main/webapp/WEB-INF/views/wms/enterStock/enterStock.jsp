@@ -13,7 +13,7 @@
         <form id="searchFrom" action="">
             <input type="text" id="bgdh" name="bgdh" class="easyui-validatebox"
                    data-options="width:100,prompt: '报关单号'"/>
-                   
+
             <input type="text" id="searchItemNum" name="searchItemNum" class="easyui-validatebox"
                    data-options="width:100,prompt: '提单号'"/>
 
@@ -69,16 +69,16 @@
 
             <input type="text" id="operator" name="operator" class="easyui-validatebox"
                    data-options="width:100,prompt: '操作人员'"/>
-           
+
              <input type="text" id="searchCunNum" name="searchCunNum" class="easyui-validatebox"
                    data-options="width:100,prompt: '箱号'"/>
-                   
+
             <input type="text" id="searchStrTime" name="searchStrTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"
                    data-options="width:150,prompt: '入库日期'"/>
-                   
+
             - <input type="text" id="searchEndTime" name="searchEndTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"
                      data-options="width:150,prompt: '入库日期'"/>
-                     
+
             <input type="text" id="searchDxStrTime" name="searchDxStrTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"
                    data-options="width:150,prompt: '倒箱日期'"/>
             - <input type="text" id="searchDxEndTime" name="searchDxEndTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"
@@ -86,7 +86,7 @@
 
             <input type="text" id="searchRemark" name="searchRemark" class="easyui-validatebox"
                    data-options="width:200,prompt: '备注'"/>
-                     
+
             <span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
         </form>
@@ -153,7 +153,7 @@
                onclick="sendbsl()">BSL报文发送</a>
             <span class="toolbar-item dialog-tool-separator"></span>
         </shiro:hasPermission>
-       
+
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-add" plain="true"
                onclick="appr()">申请单申请</a>
             <span class="toolbar-item dialog-tool-separator"></span>
@@ -214,7 +214,7 @@
                 {field: 'itemNum', title: '提单号', sortable: true, width: 150},
                 {field: 'hscode', title: 'HS编码', sortable: true, width: 150},
                 {field: 'vesselName', title: '箱号', sortable: true, width: 200},
-                {field: 'cargoName', title: '品名', sortable: true, width: 150},
+                {field: 'cargoName', title: '品名', sortable: true, width: 150, tooltip: true},
                 {field: 'piece', title: '箱数(合计)', sortable: true, width: 125},
                 {field: 'feeId', title: '费用方案ID',hidden: true},
                 {field: 'feePlan', title: '费用方案', sortable: true, width: 200},
@@ -277,7 +277,7 @@
                 {field: 'operateTime', title: '创建时间', sortable: true, width: 150},
                 {field: 'temperature', title: '储存温度', sortable: true, width: 100},
                 {field: 'sortingSpecial', title: '特殊要求', sortable: true, width: 150},
-                
+
                 {
                     field: 'planFeeState', title: '计划费用状态', sortable: true,
                     formatter: function (value, row, index) {
@@ -430,7 +430,7 @@
                             parent.$.messager.show({title: "提示", msg: "审核成功！", position: "bottomRight"});
                         }
                     });
-                	
+
                 }else{
                 	//提示是否修改
                 	parent.$.messager.confirm('提示', '审核后将按照新ASN计费客户结算费用,确认要继续？', function (data) {
@@ -596,7 +596,7 @@
     function report() {
         window.parent.mainpage.mainTabs.addModule('入库报告书', '/ccli/wms/enterStock/toreport');
     }
-    
+
     //发送BSL报文  liuyu
     function sendbsl() {
     	 var row = dg.datagrid('getSelected');
@@ -639,26 +639,26 @@
     function testAlert(){
     	alert("alert");
     }
-    
+
   //分类监管 申请单
     function appr() {
     	var row = dg.datagrid('getSelected');
     	if(rowIsNull(row)) return;
-    	d=$("#dlg").dialog({   
-    	    title: '申请单申请',    
-    	    width: 560,    
-    	    height: 380,    
+    	d=$("#dlg").dialog({
+    	    title: '申请单申请',
+    	    width: 560,
+    	    height: 380,
     	    href:'${ctx}/wms/enterStock/appr/'+row.linkId,
     	    modal:true,
     	    buttons:[{
     			text:'确认',
-    			handler:function(){    			
-    				$("#mainform").submit(); 
-    			
+    			handler:function(){
+    				$("#mainform").submit();
+
     			}
     		},{
     			text:'重置',
-    			handler:function(){    				
+    			handler:function(){
     				resetForm();
     			}
     		},{

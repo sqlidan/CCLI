@@ -15,7 +15,7 @@
 		  			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-sign-up" plain="true" data-options="disabled:false" onclick="add()">引入方案</a>
 					<span class="toolbar-item dialog-tool-separator"></span>
 				</c:when>
-		</c:choose> 
+		</c:choose>
 	  	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" data-options="disabled:false" onclick="del()">删除</a>
 	  	<span class="toolbar-item dialog-tool-separator"></span>
         	<c:choose>
@@ -38,7 +38,7 @@
         			<span class="toolbar-item dialog-tool-separator"></span>
 	   			</c:otherwise>
 			</c:choose>
-		<shiro:hasPermission name="wms:outStockFee:okPass">	
+		<shiro:hasPermission name="wms:outStockFee:okPass">
 		    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-standard-user-edit" plain="true" onclick="isOK()">审核</a>
 		    <span class="toolbar-item dialog-tool-separator"></span>
 	    </shiro:hasPermission>
@@ -62,14 +62,14 @@
 <!-- 	   	<span class="toolbar-item dialog-tool-separator"></span> -->
 <!-- 	   	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-current-work" plain="true" onclick="">清库差异调整</a> -->
 <!-- 	   	<span class="toolbar-item dialog-tool-separator"></span> -->
-	   	
+
 	   	<div style="float:right; text-align:right">
 	   		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-finished" plain="true" data-options="disabled:false" onclick="showContract()">最新合同</a>
 			<span class="toolbar-item dialog-tool-separator"></span>
-	   		<input id="editDate" name="editDate" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 100"  readonly /> 
+	   		<input id="editDate" name="editDate" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width: 100"  readonly />
 	   		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-hamburg-full-time" plain="true" onclick="updateDate()">统一账单日期</a>
 	   	</div>
- 	</div>  	
+ 	</div>
 	<input type="hidden" id="stockId" name="stockId" value="${stockId }"/>
 	<input type="hidden" id="settleOrgId" name="settleOrgId" value="${stockId }"/>
 	<input type="hidden" id="userId" name="userId" value="${userId }"/>
@@ -77,7 +77,7 @@
 		<tr>
 			<td>出库联系单号</td>
 			<td>
-				<input id="linkId" name="linkId" class="easyui-validatebox" data-options="width: 200" value="${linkId }" style="background-color:#EBEBE4" readonly/> 
+				<input id="linkId" name="linkId" class="easyui-validatebox" data-options="width: 200" value="${linkId }" style="background-color:#EBEBE4" readonly/>
 			</td>
 			<td></td>
 			<td></td>
@@ -87,33 +87,33 @@
 		<tr>
 			<td>应收合计（RMB）</td>
 			<td>
-				<input id="yingShou" name="yingShou" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/> 
+				<input id="yingShou" name="yingShou" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/>
 			</td>
 			<td>应付合计（RMB）</td>
 			<td>
-				<input id="yingFu" name="yingFu" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/> 
+				<input id="yingFu" name="yingFu" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/>
 			</td>
 			<td>利润（RMB）</td>
 			<td>
-				<input id="lirui" name="lirui" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/> 
+				<input id="lirui" name="lirui" class="easyui-validatebox" data-options="width: 200" value="0.00" style="background-color:#EBEBE4" readonly/>
 			</td>
 		</tr>
 	</table>
-</div> 
+</div>
 
 <div data-options="region:'center'">
 	<div class="easyui-accordion" data-options="multiple:true">
 		<div id="open1" title="应收明细" style="height: 320px; width:auto; " data-options="collapsed:false">
 			<div id="tb1">
 			</div>
-			<table id="dg1"></table> 
+			<table id="dg1"></table>
 			<div id="dlg1"></div>
 		</div>
 		<div id="open2" title="应付明细" style="height: 320px; width: auto; " data-options="collapsed:false">
 			<div id="tb2">
 			</div>
-			<table id="dg2"></table> 
-			<div id="dlg2"></div> 
+			<table id="dg2"></table>
+			<div id="dlg2"></div>
 		</div>
 	</div>
 </div>
@@ -129,13 +129,13 @@ var d2;
 var editRow1 = undefined;
 var editRow2 = undefined;
 
-$(function(){   
+$(function(){
 	sunCost();
-	
+
 	var linkId =  $('#linkId').val();
-	dg1 = $('#dg1').datagrid({    
+	dg1 = $('#dg1').datagrid({
 		method: "get",
-	    url: '${ctx}/cost/standingBook/getInData?filter_EQS_linkId='+linkId+"&filter_EQI_ifReceive=1", 
+	    url: '${ctx}/cost/standingBook/getInData?filter_EQS_linkId='+linkId+"&filter_EQI_ifReceive=1",
 	    fit: true,
 		fitColumns: false,
 		border: false,
@@ -146,9 +146,9 @@ $(function(){
 		pageSize: 30,
 		pageList: [ 10, 20, 30, 40, 50 ],
 		singleSelect: false,
-	    columns:[[    
-			{field:'ck',checkbox:true},  
-	        {field:'standingNum', title:'standingNum', hidden:true},    
+	    columns:[[
+			{field:'ck',checkbox:true},
+	        {field:'standingNum', title:'standingNum', hidden:true},
 	        {field:'examineSign', title:'审核',align:'center', width:30,
 	        	formatter : function(value, row, index) {
 	         		if(value == 0){
@@ -157,8 +157,8 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}		
-	        },    
+	        	}
+	        },
 	        {field:'reconcileSign',title:'对账',align:'center', width:50,
 	        	formatter : function(value, row, index) {
 	         		if(value == 0){
@@ -167,7 +167,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'settleSign',title:'结算',align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -177,7 +177,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}		
+	        	}
 	        },
 	        {field:'chargeSign',title:'收款',align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -187,7 +187,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'paySign',title:'垫付',align:'center', width:50,
 	        	formatter: function(value, row, index) {
@@ -197,7 +197,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'asn',title:'ASN',  width:100, editor: "text"},
 	        {field: 'payNum', title: '业务付款单号',width: 100},
@@ -250,7 +250,7 @@ $(function(){
                     options: {
                     	onBeforeLoad: function(param){
                         	var row = $('#dg1').datagrid('getSelected');
-                            param.setid = row.customsNum;
+<%--                            param.setid = row.customsNum;--%>
                         },
                  	   	url: "${ctx}/base/client/getClientAll",
                  	    valueField: 'ids',
@@ -258,7 +258,7 @@ $(function(){
                         mode: 'remote',
                         method: 'GET'
 	        		}
-	        	}	
+	        	}
 	        },
 	        //{field:'sku',title:'SKU',  width:50},//gzq 20160628 不显示SKU
 	        {field:'num',title:'数量', width:50, editor:{type:'numberbox',options:{precision:4}}	},
@@ -294,7 +294,7 @@ $(function(){
 	        	    if(value == '201'){
 	 	        		return "阿尔及利亚第纳尔";
 	 	        	}
-	        	}		
+	        	}
 	        },
 	        {field:'exchangeRate',title:'汇率', width:100},
 	        {field:'taxRate',title:'税率', width:100, editor: "numberbox",
@@ -304,7 +304,7 @@ $(function(){
                     	data:[
                    	      {"id": "0", "text": "0"},
                    	      {"id": "6", "text": "6"},
-                   	      {"id": "11", "text":"11"}, 
+                   	      {"id": "11", "text":"11"},
                    	      {"id": "13", "text":"13"},
                    	      {"id": "17", "text":"17"}
                     	],
@@ -313,7 +313,7 @@ $(function(){
                         editable: false, //不允许手动输入
                         method: 'GET'
 	        		}
-	        	}	
+	        	}
 	        },
 	        {field:'billDate',title:'账单日期',  width:150, editor: "my97M"},
 	        {field:'fillSign',title:'冲补', align:'center', width:50,
@@ -324,7 +324,7 @@ $(function(){
 	       			if(value == 1){
 	        	      	return 'Y';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'shareSign',title:'分摊', align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -334,7 +334,7 @@ $(function(){
 	       			if(value == 1){
 	        	      	return 'Y';
 	        	    }
-	        	}	
+	        	}
 	        },
 	        {field:'remark',title:'备注',  width:150, editor: "text"},
 	        {field:'inputPersonId',title:'inputPersonId',hidden:true},
@@ -343,14 +343,14 @@ $(function(){
 	        {field:'updatePerson',title:'修改人', width:80},
 	        {field:'updateDate',title:'修改时间', width:80}
 	    ]],
-	    
+
 		rowStyler : function(rowIndex, rowData) {
-			//已审核的变色  
+			//已审核的变色
 			if (rowData.examineSign == "1") {
 				return 'background-color:#4BB64D';
 			}
 		},
-	    
+
 	    enableHeaderClickMenu: true,
 	    enableHeaderContextMenu: true,
 	    enableRowContextMenu: false,
@@ -363,7 +363,7 @@ $(function(){
 	    	sureUpd1(rowData);//1:应收
 	    }
 	});
-	
+
 	//添加工具栏
 	if("${finishFeeState}" == 0){
 	var pager1 = $('#dg1').datagrid().datagrid('getPager');
@@ -401,12 +401,12 @@ $(function(){
 				}
 			}
 		}]
-	});	
+	});
 	}
 	//应付费用调整
-	dg2 = $('#dg2').datagrid({    
+	dg2 = $('#dg2').datagrid({
 		method: "get",
-	    url: '${ctx}/cost/standingBook/getInData?filter_EQS_linkId='+linkId+"&filter_EQI_ifReceive=2", 
+	    url: '${ctx}/cost/standingBook/getInData?filter_EQS_linkId='+linkId+"&filter_EQI_ifReceive=2",
 	    fit: true,
 		fitColumns: false,
 		border: false,
@@ -417,9 +417,9 @@ $(function(){
 		pageSize: 30,
 		pageList: [ 10, 20, 30, 40, 50 ],
 		singleSelect: false,
-	    columns:[[    
-	  		{field:'ck',checkbox:true},  
-	        {field:'standingNum', title:'standingNum', hidden:true},    
+	    columns:[[
+	  		{field:'ck',checkbox:true},
+	        {field:'standingNum', title:'standingNum', hidden:true},
 	        {field:'examineSign', title:'审核',align:'center', width:30,
 	        	formatter : function(value, row, index) {
 	         		if(value == 0){
@@ -428,8 +428,8 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}		
-	        },    
+	        	}
+	        },
 	        {field:'reconcileSign',title:'对账',align:'center', width:50,
 	        	formatter : function(value, row, index) {
 	         		if(value == 0){
@@ -438,7 +438,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'settleSign',title:'结算',align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -448,7 +448,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}		
+	        	}
 	        },
 	        {field:'chargeSign',title:'收款',align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -458,7 +458,7 @@ $(function(){
 	       			if(value == 1){
 	       				return '<input type="checkbox" checked readonly disabled/>';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'paySign',title:'垫付',align:'center', width:50,
 	        	formatter : function(value, row, index) {
@@ -468,7 +468,7 @@ $(function(){
 	        		if(value == 1){
 	        			return "<input type='checkbox' onclick='deletePaySign("+row.standingNum + "," + row.examineSign+")' checked />";
 	        		}
-	        	}			
+	        	}
 	        },
 	        {field:'asn',title:'ASN', width:100, editor: "text"},
 	        {field: 'payNum', title: '业务付款单号',width: 100},
@@ -521,7 +521,7 @@ $(function(){
                     options: {
                     	onBeforeLoad: function(param){
                         	var row = $('#dg2').datagrid('getSelected');
-                            param.setid = row.customsNum;
+<%--                            param.setid = row.customsNum;--%>
                         },
                  	   	url: "${ctx}/base/client/getClientAll",
                  	    valueField: 'ids',
@@ -529,7 +529,7 @@ $(function(){
                         mode: 'remote',
                         method: 'GET'
 	        		}
-	        	}	
+	        	}
 	        },
 	        //{field:'sku',title:'SKU',  width:50},//gzq 20160628 不显示SKU
 	        {field:'num',title:'数量', width:50, editor:{type:'numberbox',options:{precision:4}}},
@@ -565,7 +565,7 @@ $(function(){
 	        	    if(value == '201'){
 	 	        		return "阿尔及利亚第纳尔";
 	 	        	}
-	        	}		
+	        	}
 	        },
 	        {field:'exchangeRate',title:'汇率',  width:100},
 	        {field:'taxRate',title:'税率', width:100, editor: "numberbox",
@@ -575,7 +575,7 @@ $(function(){
                     	data:[
                    	      {"id": "0", "text": "0"},
                    	      {"id": "6", "text": "6"},
-                   	      {"id": "11", "text":"11"}, 
+                   	      {"id": "11", "text":"11"},
                    	      {"id": "13", "text":"13"},
                    	      {"id": "17", "text":"17"}
                     	],
@@ -584,7 +584,7 @@ $(function(){
                         editable: false, //不允许手动输入
                         method: 'GET'
 	        		}
-	        	}	
+	        	}
 	        },
 	        {field:'billDate',title:'账单日期',  width:150, editor: "my97"},
 	        {field:'fillSign',title:'冲补', align:'center', width:50,
@@ -595,7 +595,7 @@ $(function(){
 	       			if(value == 1){
 	        	      	return 'Y';
 	        	    }
-	        	}			
+	        	}
 	        },
 	        {field:'shareSign',title:'分摊', align:'center',  width:50,
 	        	formatter : function(value, row, index) {
@@ -605,7 +605,7 @@ $(function(){
 	       			if(value == 1){
 	        	      	return 'Y';
 	        	    }
-	        	}	
+	        	}
 	        },
 	        {field:'remark',title:'备注', width:150, editor: "text"},
 	        {field:'inputPersonId',title:'inputPersonId', hidden:true},
@@ -632,7 +632,7 @@ $(function(){
 	    	sureUpd2(rowData);//2:应付
 	    }
 	});
-	
+
 	//添加工具栏
 	if("${finishFeeState}" == 0 && "${planFeeState}" == 0){
 	var pager2 = $('#dg2').datagrid().datagrid('getPager');
@@ -671,7 +671,7 @@ $(function(){
 				}
 			}
 		}]
-	});	
+	});
 	}
 });
 
@@ -702,7 +702,7 @@ function sureUpd1(rowData){
 					success: function(data){
 						if(data == 'success'){
 							parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight"});
-						} 
+						}
 						dg1.datagrid('reload');
 						sunCost();
 					}
@@ -743,7 +743,7 @@ function sureUpd2(rowData){
 					success: function(data){
 						if(data == 'success'){
 							parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight"});
-						} 
+						}
 						dg2.datagrid('reload');
 						sunCost();
 					}
@@ -772,7 +772,7 @@ function toPaySign(standingNum, examineSign){
 					success: function(data){
 						if(data == 'success'){
 							parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight"});
-						} 
+						}
 						dg1.datagrid('reload');
 						dg2.datagrid('reload');
 						sunCost();
@@ -829,7 +829,7 @@ function updateDate(){
 			success: function(data){
 				if(data == 'success'){
 					parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight"});
-				} 
+				}
 				dg1.datagrid('reload');
 				dg2.datagrid('reload');
 			}
@@ -858,10 +858,10 @@ function add() {
 	var stockId = $("#settleOrgId").val();
 	var linkId = $("#linkId").val();
 	var planFeeState = "${planFeeState}";
-	d1 = $("#dlg1").dialog({   
-	    title: '引入方案费目',    
-	    width: 1000,    
-	    height: 420,    
+	d1 = $("#dlg1").dialog({
+	    title: '引入方案费目',
+	    width: 1000,
+	    height: 420,
 	    href: '${ctx}/base/scheme/outEasySchemeList/'+ stockId + "/" + linkId + "/" + planFeeState,
 	    maximizable: true,
 	    modal: true
@@ -872,17 +872,17 @@ function add() {
 function openShare(){
 	var stockId = $("#stockId").val();
 	var linkId = $("#linkId").val();
-	d1 = $("#dlg1").dialog({   
-	    title: '费用分摊',    
-	    width: 1100,    
-	    height: 420,    
+	d1 = $("#dlg1").dialog({
+	    title: '费用分摊',
+	    width: 1100,
+	    height: 420,
 	    href: '${ctx}/base/share/costSharelist/' + linkId + "/" + stockId,
 	    maximizable: true,
 	    modal: true,
 	    buttons:[{
 			text:'分摊',
 			handler:function(){
-				$("#mainform3").submit(); 
+				$("#mainform3").submit();
 			}
 		},{
 			text:'撤销分摊',
@@ -919,10 +919,10 @@ function openShare(){
 function del(){
 	editRow1 = undefined;
 	editRow2 = undefined;
-	
+
 	var row1 = dg1.datagrid('getSelected');
 	var row2 = dg2.datagrid('getSelected');
-	
+
 	if(row1 == null && row2 == null){
 		parent.$.messager.show({ title : "提示",msg: "请选择行数据！", position: "bottomRight"});
 	}else{
@@ -936,7 +936,7 @@ function del(){
 						newIdsList.push(datas1[i].standingNum);
 					}
 				}
-				
+
 				var datas2 = dg2.datagrid('getSelections');
 				for(var i=0; i < datas2.length; i++){
 					if(datas2[i].examineSign != 1 && datas2[i].inputPersonId == userId){
@@ -950,8 +950,8 @@ function del(){
 					contentType: 'application/json;charset=utf-8',
 					url: "${ctx}/cost/standingBook/deleteStandingBookBatch",
 					success: function(data){
-						dg1.datagrid('reload');  
-						dg2.datagrid('reload');  
+						dg1.datagrid('reload');
+						dg2.datagrid('reload');
 					}
 				});
 			}
@@ -963,10 +963,10 @@ function del(){
 function isOK(){
 	editRow1 = undefined;
 	editRow2 = undefined;
-	
+
 	var row1 = dg1.datagrid('getSelected');
 	var row2 = dg2.datagrid('getSelected');
-	
+
 	if(row1 == null && row2 == null){
 		parent.$.messager.show({title : "提示",msg: "请选择行数据！", position: "bottomRight"});
 	}else{
@@ -979,14 +979,14 @@ function isOK(){
 						newIdsList.push(datas1[i].standingNum);
 					}
 				}
-				
+
 				var datas2 = dg2.datagrid('getSelections');
 				for(var i=0; i < datas2.length; i++){
 					if(datas2[i].examineSign != 1){
 						newIdsList.push(datas2[i].standingNum);
 					}
 				}
-				
+
 				$.ajax({
 					async: false,
 					type: 'POST',
@@ -995,8 +995,8 @@ function isOK(){
 					url: "${ctx}/cost/standingBook/isOkStandingBookBatch",
 					success: function(data){
 						parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight" });
-						dg1.datagrid('reload');  
-						dg2.datagrid('reload');  
+						dg1.datagrid('reload');
+						dg2.datagrid('reload');
 					}
 				});
 			}
@@ -1008,10 +1008,10 @@ function isOK(){
 function isNotOK(){
 	editRow1 = undefined;
 	editRow2 = undefined;
-	
+
 	var row1 = dg1.datagrid('getSelected');
 	var row2 = dg2.datagrid('getSelected');
-	
+
 	if(row1 == null && row2 == null){
 		parent.$.messager.show({title : "提示",msg: "请选择行数据！", position: "bottomRight"});
 	}else{
@@ -1024,7 +1024,7 @@ function isNotOK(){
 						newIdsList.push(datas1[i].standingNum);
 					}
 				}
-				
+
 				var datas2 = dg2.datagrid('getSelections');
 				for(var i=0; i < datas2.length; i++){
 					if(datas2[i].examineSign != 0 && datas2[i].reconcileSign != 1){
@@ -1039,8 +1039,8 @@ function isNotOK(){
 					url: "${ctx}/cost/standingBook/isNotOkStandingBookBatch",
 					success: function(data){
 						parent.$.messager.show({title: "提示", msg: "操作成功！", position: "bottomRight" });
-						dg1.datagrid('reload');  
-						dg2.datagrid('reload');  
+						dg1.datagrid('reload');
+						dg2.datagrid('reload');
 					}
 				});
 			}
@@ -1153,12 +1153,12 @@ function clearance(){
 				url:"${ctx}/cost/standingBook/clearance/"+'${linkId}',
 				success: function(data){
 					if(data=="success"){
-						dg1.datagrid('reload');  
-						dg2.datagrid('reload');  
+						dg1.datagrid('reload');
+						dg2.datagrid('reload');
 					}else if(data == "nocc"){
 						parent.$.messager.show({title: "提示", msg: "清库成功！仓储费计算失败，请手动执行仓储费计算！", position: "bottomRight" });
 					}else{
-						parent.$.messager.show({title: "提示", msg: "数据不存在！", position: "bottomRight" });					
+						parent.$.messager.show({title: "提示", msg: "数据不存在！", position: "bottomRight" });
 					}
 				}
 			});
