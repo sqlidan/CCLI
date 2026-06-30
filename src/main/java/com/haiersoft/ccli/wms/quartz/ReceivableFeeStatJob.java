@@ -1,6 +1,6 @@
 package com.haiersoft.ccli.wms.quartz;
 
-import com.haiersoft.ccli.cost.service.BisReceivableFeeStatService;
+import com.haiersoft.ccli.cost.service.finance.BisReceivableFeeStatService;
 import com.haiersoft.ccli.system.entity.ScheduleJob;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;

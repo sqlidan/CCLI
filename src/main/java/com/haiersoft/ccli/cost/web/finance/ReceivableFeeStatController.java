@@ -1,4 +1,4 @@
-package com.haiersoft.ccli.cost.web;
+package com.haiersoft.ccli.cost.web.finance;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.persistence.PropertyFilter;
 import com.haiersoft.ccli.common.web.BaseController;
-import com.haiersoft.ccli.cost.entity.BisReceivableFeeStat;
-import com.haiersoft.ccli.cost.service.BisReceivableFeeStatService;
+import com.haiersoft.ccli.cost.entity.finance.BisReceivableFeeStat;
+import com.haiersoft.ccli.cost.service.finance.BisReceivableFeeStatService;
 
 @Controller
 @RequestMapping("cost/receivableFeeStat")

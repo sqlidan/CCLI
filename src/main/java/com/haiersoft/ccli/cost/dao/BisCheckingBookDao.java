@@ -18,7 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.persistence.Page;
-import com.haiersoft.ccli.cost.entity.BisCheckingBookAuto;
+import com.haiersoft.ccli.cost.entity.finance.BisCheckingBookAuto;
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;

@@ -1,4 +1,4 @@
-package com.haiersoft.ccli.cost.dao;
+package com.haiersoft.ccli.cost.dao.finance;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,7 +14,7 @@ import org.hibernate.type.StandardBasicTypes;
 import org.springframework.stereotype.Repository;
 
 import com.haiersoft.ccli.common.persistence.HibernateDao;
-import com.haiersoft.ccli.cost.entity.BisReceivableFeeStat;
+import com.haiersoft.ccli.cost.entity.finance.BisReceivableFeeStat;
 
 @Repository
 public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, Long> {

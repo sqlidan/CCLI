@@ -1,4 +1,4 @@
-package com.haiersoft.ccli.cost.entity;
+package com.haiersoft.ccli.cost.entity.finance;
 
 import java.math.BigDecimal;
 import java.util.Date;

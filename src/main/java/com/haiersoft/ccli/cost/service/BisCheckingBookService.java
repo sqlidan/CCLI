@@ -17,7 +17,7 @@ import com.haiersoft.ccli.common.utils.DateUtils;
 import com.haiersoft.ccli.common.utils.HttpGo;
 import com.haiersoft.ccli.common.utils.PropertiesUtil;
 import com.haiersoft.ccli.common.utils.StringUtils;
-import com.haiersoft.ccli.cost.entity.BisCheckingBookAuto;
+import com.haiersoft.ccli.cost.entity.finance.BisCheckingBookAuto;
 import com.haiersoft.ccli.cost.dao.BisCheckingBookDao;
 import com.haiersoft.ccli.cost.entity.BisCheckingBook;
 import com.haiersoft.ccli.system.entity.User;

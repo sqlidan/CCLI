@@ -1,4 +1,4 @@
-package com.haiersoft.ccli.cost.service;
+package com.haiersoft.ccli.cost.service.finance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.haiersoft.ccli.common.persistence.HibernateDao;
 import com.haiersoft.ccli.common.service.BaseService;
-import com.haiersoft.ccli.cost.dao.BisReceivableFeeStatDao;
-import com.haiersoft.ccli.cost.entity.BisReceivableFeeStat;
+import com.haiersoft.ccli.cost.dao.finance.BisReceivableFeeStatDao;
+import com.haiersoft.ccli.cost.entity.finance.BisReceivableFeeStat;
 
 @Service
 public class BisReceivableFeeStatService extends BaseService<BisReceivableFeeStat, Long> {
