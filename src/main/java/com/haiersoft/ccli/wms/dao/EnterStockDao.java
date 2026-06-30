@@ -1,10 +1,12 @@
 package com.haiersoft.ccli.wms.dao;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.haiersoft.ccli.common.utils.DateUtils;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -67,7 +69,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("   ,info.PIECE AS piece                             ");
 		sb.append(" FROM                                                           ");
 		sb.append(" 	BIS_ENTER_STOCK st                                         ");
-		sb.append(" inner JOIN                                                      ");
+		sb.append(" LEFT JOIN                                                      ");
 		sb.append(" (                                                              ");
 		sb.append("   SELECT                                                       ");
 		sb.append("      INFO.LINK_ID,                                             ");
@@ -104,22 +106,28 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 //		sb.append("   ST.LINK_ID=INFOS.LINK_ID AND ST.ITEM_NUM=INFOS.ITEM_NUM        ");
 		sb.append(" where 1=1 and ST.DEL_FLAG='0'                                  ");
 
+        boolean flag2=false;
+
 		if (null!=obj.getBgdh()&& !"".equals(obj.getBgdh())) {//报关单号
+            flag2=true;
         	sb.append(" and ST.BGDH like:bgdh  ");
             parme.put("bgdh","%"+obj.getBgdh()+"%");
         }
 
 		if (null!=obj.getSearchItemNum()&& !"".equals(obj.getSearchItemNum())) {//提单号
+            flag2=true;
         	sb.append(" and ST.ITEM_NUM like:billnum  ");
             parme.put("billnum","%"+obj.getSearchItemNum()+"%");
         }
 
         if (null!=obj.getSearchStockIn()&& !"".equals(obj.getSearchStockIn())) {//--客户ID
+            flag2=true;
         	sb.append(" and ST.STOCK_ID=:sockid");
             parme.put("sockid",obj.getSearchStockIn());
         }
 
         if(null!=obj.getIfBack()&&!"".equals(obj.getIfBack())){
+            flag2=true;
         	if("1".equals(obj.getIfBack())){
 	        	sb.append(" AND ST.IF_BACK=:back");
 	        	parme.put("back",obj.getIfBack());
@@ -129,6 +137,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
 
         if(null!=obj.getIfBonded()&&!"".equals(obj.getIfBonded())){
+            flag2=true;
         	if("1".equals(obj.getIfBonded())){
 	        	sb.append(" AND ST.IF_BONDED=:bonded");
 	        	parme.put("bonded",obj.getIfBonded());
@@ -138,6 +147,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
 
         if(null!=obj.getIfToCustoms()&&!"".equals(obj.getIfToCustoms())){
+            flag2=true;
         	if("1".equals(obj.getIfToCustoms())){
 	        	sb.append(" AND ST.IF_TO_CUSTOMS=:customs");
 	        	parme.put("customs",obj.getIfToCustoms());
@@ -147,6 +157,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
 
         if(null!=obj.getIfToCiq()&&!"".equals(obj.getIfToCiq())){
+            flag2=true;
         	if("1".equals(obj.getIfToCiq())){
 	        	sb.append(" AND ST.IF_TO_CIQ=:ciq");
 	        	parme.put("ciq",obj.getIfToCiq());
@@ -156,6 +167,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
 
         if(null!=obj.getIfSorting()&&!"".equals(obj.getIfSorting())){
+            flag2=true;
         	if("1".equals(obj.getIfSorting())){
 	        	sb.append(" AND ST.IF_SORTING=:sorting");
 	        	parme.put("sorting",obj.getIfSorting());
@@ -165,53 +177,71 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
 
         if(null!=obj.getAuditingState()&&!"".equals(obj.getAuditingState())){
+            flag2=true;
         	sb.append(" AND ST.AUDITING_STATE=:state");
         	parme.put("state",obj.getAuditingState());
         }
 
         if(null!=obj.getSearchLinkId()&&!"".equals(obj.getSearchLinkId())){
+            flag2=true;
         	sb.append(" AND ST.LINK_ID=:linkId");
         	parme.put("linkId",obj.getSearchLinkId());
         }
 
         if(null!=obj.getOperator()&&!"".equals(obj.getOperator())){
+            flag2=true;
         	sb.append(" AND ST.OPERATOR=:operator");
         	parme.put("operator",obj.getOperator());
         }
 
         if(null!=obj.getSearchCunNum()&&!"".equals(obj.getSearchCunNum())){
+            flag2=true;
         	sb.append(" AND info.CTN_NUM LIKE:ctnNum");
         	parme.put("ctnNum","%"+obj.getSearchCunNum()+"%");
         }
+
+        if (obj.getSearchDxStrTime()!= null && !"".equals(obj.getSearchDxStrTime())) {//--倒箱开始日期
+            flag2=true;
+            sb.append(" and ST.BACKDATE>=to_date(:dxstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
+            parme.put("dxstrtime", obj.getSearchDxStrTime());
+        }
+
+        if (obj.getSearchDxEndTime()!= null && !"".equals(obj.getSearchDxEndTime())) {//--倒箱结束日期
+            flag2=true;
+            sb.append(" and ST.BACKDATE<to_date(:dxendtime,'yyyy-mm-dd hh24:mi:ss')");
+            parme.put("dxendtime", obj.getSearchDxEndTime());
+        }
+
+        if(null!=obj.getSearchRemark()&&!"".equals(obj.getSearchRemark())){
+            flag2=true;
+            sb.append(" AND ST.REMARK LIKE:remark");
+            parme.put("remark","%"+obj.getSearchRemark()+"%");
+        }
         boolean flag=false;
         if (obj.getSearchStrTime()!= null && !"".equals(obj.getSearchStrTime())) {//--入库日期
-        	flag=true;
-        	//sb.append(" and ST.ETA_WAREHOUSE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
+            flag=true;
+            //sb.append(" and ST.ETA_WAREHOUSE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
             //parme.put("searchstrtime", obj.getSearchStrTime());
         }
         if (obj.getSearchEndTime()!= null && !"".equals(obj.getSearchEndTime())) {//--入库日期
-        	flag=true;
-        	//sb.append(" and ST.ETA_WAREHOUSE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')");
+            flag=true;
+            //sb.append(" and ST.ETA_WAREHOUSE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')");
             //parme.put("searchendtime", obj.getSearchEndTime());
         }
 
         if(flag){
-           sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
-           parme.put("searchstrtime", obj.getSearchStrTime());
-           parme.put("searchendtime", obj.getSearchEndTime());
+            flag2=true;
+            sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
+            parme.put("searchstrtime", obj.getSearchStrTime());
+            parme.put("searchendtime", obj.getSearchEndTime());
         }
-
-        if (obj.getSearchDxStrTime()!= null && !"".equals(obj.getSearchDxStrTime())) {//--倒箱开始日期
-            sb.append(" and ST.BACKDATE>=to_date(:dxstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
-            parme.put("dxstrtime", obj.getSearchDxStrTime());
-        }
-        if (obj.getSearchDxEndTime()!= null && !"".equals(obj.getSearchDxEndTime())) {//--倒箱结束日期
-            sb.append(" and ST.BACKDATE<to_date(:dxendtime,'yyyy-mm-dd hh24:mi:ss')");
-            parme.put("dxendtime", obj.getSearchDxEndTime());
-        }
-        if(null!=obj.getSearchRemark()&&!"".equals(obj.getSearchRemark())){
-            sb.append(" AND ST.REMARK LIKE:remark");
-            parme.put("remark","%"+obj.getSearchRemark()+"%");
+        if (!flag2){
+            sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
+            LocalDate currentDate = LocalDate.now();
+            LocalDate dateAfter30Days = currentDate.minusDays(30);
+            java.util.Date startDate = java.util.Date.from(dateAfter30Days.atStartOfDay().toInstant(java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.LocalDateTime.now())));
+            parme.put("searchstrtime", DateUtils.formatDateTime(startDate));
+            parme.put("searchendtime", DateUtils.getDateTime());
         }
         sb.append(" ORDER BY ST.OPERATE_TIME DESC"                                  );
         Map<String, Object> paramType = new HashMap<>();

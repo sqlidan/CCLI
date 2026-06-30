@@ -2,6 +2,7 @@ package com.haiersoft.ccli.wms.service;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,31 +45,44 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 		for (int i = 0; i < pageResult.getResult().size(); i++) {
 			BisEnterStock bisEnterStock = pageResult.getResult().get(i);
 			String cargoName = bisEnterStock.getCargoName();
-			cargoName = cargoName.replaceAll("<E>","").replaceAll("</E>","");
-			String[] strAry1 = cargoName.split(",");
-			List<String> strList1 = java.util.Arrays.stream(strAry1)
-                .distinct() // 去重
-                .collect(Collectors.toList());
-			cargoName = strList1.stream().collect(Collectors.joining(","));
-			bisEnterStock.setCargoName(cargoName);
+			if(cargoName!=null && cargoName.trim().length() > 0){
+				cargoName = cargoName.replaceAll("<E>","").replaceAll("</E>","");
+				String[] strAry1 = cargoName.split(",");
+				List<String> strList1 = java.util.Arrays.stream(strAry1)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				cargoName = strList1.stream().collect(Collectors.joining(","));
+				bisEnterStock.setCargoName(cargoName);
+			}
+
 			String vesselName = bisEnterStock.getVesselName();
-			vesselName = vesselName.replaceAll("<E>","").replaceAll("</E>","");
-			String[] strAry2 = vesselName.split(",");
-			List<String> strList2 = java.util.Arrays.stream(strAry2)
-                .distinct() // 去重
-                .collect(Collectors.toList());
-			vesselName = strList2.stream().collect(Collectors.joining(","));
-			bisEnterStock.setVesselName(vesselName);
+			if(vesselName!=null && vesselName.trim().length() > 0) {
+				vesselName = vesselName.replaceAll("<E>", "").replaceAll("</E>", "");
+				String[] strAry2 = vesselName.split(",");
+				List<String> strList2 = java.util.Arrays.stream(strAry2)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				vesselName = strList2.stream().collect(Collectors.joining(","));
+				bisEnterStock.setVesselName(vesselName);
+			}
 			String hscode = bisEnterStock.getHscode();
-			hscode = hscode.replaceAll("<E>","").replaceAll("</E>","");
-			String[] strAry3 = hscode.split(",");
-			List<String> strList3 = java.util.Arrays.stream(strAry3)
-                .distinct() // 去重
-                .collect(Collectors.toList());
-			hscode = strList3.stream().collect(Collectors.joining(","));
-			bisEnterStock.setHscode(hscode);
+			if(hscode!=null && hscode.trim().length() > 0) {
+				hscode = hscode.replaceAll("<E>", "").replaceAll("</E>", "");
+				String[] strAry3 = hscode.split(",");
+				List<String> strList3 = java.util.Arrays.stream(strAry3)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				hscode = strList3.stream().collect(Collectors.joining(","));
+				bisEnterStock.setHscode(hscode);
+			}
 		}
 		 return pageResult;
+	}
+	public static void main(String[] args) {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate dateAfter30Days = currentDate.minusDays(30);
+		java.util.Date startDate = java.util.Date.from(dateAfter30Days.atStartOfDay().toInstant(java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.LocalDateTime.now())));
+		System.out.println(startDate);
 	}
 	public BisEnterStock exportCheckFeeData(String linkId) {
 		BisEnterStock bisEnterStock = enterStockDao.exportCheckFeeData(linkId);
