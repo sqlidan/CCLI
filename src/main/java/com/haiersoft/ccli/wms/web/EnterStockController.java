@@ -23,6 +23,7 @@ import javax.validation.Valid;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.haiersoft.ccli.cost.entity.BisStandingBook;
 import com.haiersoft.ccli.report.web.OCRUtils;
 import com.haiersoft.ccli.supervision.web.FTPUtils;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
@@ -93,7 +94,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @author pyl
+ * @author pyljson
  * @ClassName: EnterStockController
  * @Description: 入库总览Control1ler
  * @date 2016年3月1日 下午5:05:33
@@ -128,8 +129,8 @@ public class EnterStockController extends BaseController {
 	private AsnActionDao asnActionDao;
     @Autowired
 	private AsnActionService asnActionService;
-    
-    
+
+
     /**
      * 入库联系单总览默认页面
      */
@@ -154,8 +155,8 @@ public class EnterStockController extends BaseController {
         model.addAttribute("action", "create");
         return "wms/enterStock/enterStockManager";
     }
-    
-    
+
+
     /**
      * 入库联系单管理修改默认页面
      */
@@ -168,7 +169,7 @@ public class EnterStockController extends BaseController {
      */
     @RequestMapping(value = "managerUpdate", method = RequestMethod.GET)
     public String managerUpdate(HttpServletRequest request,Model model) {
-    	
+
     	String linkId = request.getParameter("linkId");
     	if(linkId!=null && !"".equals(linkId)){
     		BisEnterStock bisEnterStock = enterStockService.get(linkId);
@@ -182,7 +183,7 @@ public class EnterStockController extends BaseController {
     public String searchEnterStock(HttpServletRequest request,Model model) {
     	String itemNum = request.getParameter("itemNum");
     	String linkId = request.getParameter("linkId");
-    	
+
     	//todo
     	List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
         if(itemNum!=null && !"".equals(itemNum)){
@@ -198,7 +199,7 @@ public class EnterStockController extends BaseController {
         model.addAttribute("bisEnterStock", bs);
         return bs.getLinkId()!=null?bs.getLinkId():"";
     }
-    
+
     /**
      * 检查是否可以修改
      * @param request
@@ -212,7 +213,7 @@ public class EnterStockController extends BaseController {
     	List<Map<String,Object>> list = new ArrayList<>();
     	//根据llinkId取库存表不符合条件数量
     	list = trayInfoService.findTrayListForCheck(linkId);
-    	
+
     	if(list!=null && list.size()>0){
     		return "error0";//货物已出库或货转，不能修改当前入库联系单
     	}else{
@@ -224,9 +225,9 @@ public class EnterStockController extends BaseController {
     		}
     	}
     }
-    
-    
-    
+
+
+
     @RequestMapping(value = "getNewLinkId", method = RequestMethod.POST)
     @ResponseBody
     public String getNewLinkId() {
@@ -286,7 +287,7 @@ public class EnterStockController extends BaseController {
     	}
         return getEasyUIData(page);
     }
-    
+
     @RequestMapping(value = "getlist", method = RequestMethod.GET)
     @ResponseBody
     public List<Map<String, Object>> getData(HttpServletRequest request) {
@@ -479,8 +480,8 @@ public class EnterStockController extends BaseController {
         }
         return "success";
     }
-    
-    
+
+
     /**
      * 入库联系单修改 页面的保存功能
      * @param request
@@ -505,7 +506,7 @@ public class EnterStockController extends BaseController {
         //String itemNumOld = request.getParameter("itemNumS");//老提单号
         //String stockOrgIdOld = request.getParameter("stockOrgIdS");//老结算单位id
         //String stockOrgNameOld = request.getParameter("stockOrgIdSName");//老结算单位名称
-        
+
         if (state.equals("0")) {
             enterStock.setPlanFeeState("0");
             enterStock.setFinishFeeState("0");
@@ -540,56 +541,56 @@ public class EnterStockController extends BaseController {
 // 	    asnService.changeAsn(enterStock);
     }
 	///存储过程 根据
-    public String UpdEnterStockCascadeASNTrayInfoASNActionBylinkId(String linkId,String stockIdOld,String stockInOld,String stockId,String stockIn,String feeId,String itemNum,String stockOrgId,String username){    
- 		 String driver = PropertiesUtil.getPropertiesByName("jdbc.driver", "application"); 
- 		  Statement stmt = null;  
- 		  ResultSet rs = null;  
- 		  Connection conn = null; 
+    public String UpdEnterStockCascadeASNTrayInfoASNActionBylinkId(String linkId,String stockIdOld,String stockInOld,String stockId,String stockIn,String feeId,String itemNum,String stockOrgId,String username){
+ 		 String driver = PropertiesUtil.getPropertiesByName("jdbc.driver", "application");
+ 		  Statement stmt = null;
+ 		  ResultSet rs = null;
+ 		  Connection conn = null;
  		  String restate="0";//0失败 1成功
- 		  try {  
- 		      Class.forName(driver);   
+ 		  try {
+ 		      Class.forName(driver);
  		      conn = enterStockService.getConnect();
- 		      CallableStatement proc = null;  
- 		      proc = conn.prepareCall("{ call Pro_EnterStockCascade(?,?,?,?,?,?,?,?,?,?) }");  
- 		      proc.setString(1, linkId);  
+ 		      CallableStatement proc = null;
+ 		      proc = conn.prepareCall("{ call Pro_EnterStockCascade(?,?,?,?,?,?,?,?,?,?) }");
+ 		      proc.setString(1, linkId);
  		      proc.setString(2, stockIdOld);
  		      proc.setString(3, stockInOld);
- 		      proc.setString(4, stockId); 
- 		      proc.setString(5, stockIn); 
+ 		      proc.setString(4, stockId);
+ 		      proc.setString(5, stockIn);
  		      proc.setString(6, feeId);
  		      proc.setString(7, itemNum);
  		      proc.setString(8, stockOrgId);
  		      proc.setString(9, username);
- 		      proc.registerOutParameter(10, Types.INTEGER);  
- 		      proc.execute();  
- 		      restate = proc.getString(10);    
- 		   }  
+ 		      proc.registerOutParameter(10, Types.INTEGER);
+ 		      proc.execute();
+ 		      restate = proc.getString(10);
+ 		   }
  		   catch (SQLException ex2) {
- 			   //ex2.printStackTrace();  
- 		   }  
- 		   catch (Exception ex2) {  
- 			  // ex2.printStackTrace();  
- 		   }  
- 		   finally{  
- 		      try {  
- 		        if(rs != null){  
- 		          rs.close();  
- 		          if(stmt!=null){  
- 		            stmt.close();  
- 		          }  
- 		          if(conn!=null){  
- 		            conn.close();  
- 		          }  
- 		        }  
- 		      }  
- 		      catch (SQLException ex1) {  
- 		      }  
+ 			   //ex2.printStackTrace();
+ 		   }
+ 		   catch (Exception ex2) {
+ 			  // ex2.printStackTrace();
+ 		   }
+ 		   finally{
+ 		      try {
+ 		        if(rs != null){
+ 		          rs.close();
+ 		          if(stmt!=null){
+ 		            stmt.close();
+ 		          }
+ 		          if(conn!=null){
+ 		            conn.close();
+ 		          }
+ 		        }
+ 		      }
+ 		      catch (SQLException ex1) {
+ 		      }
  		  }
  		return restate;
- 	} 
-    
-    
-    
+ 	}
+
+
+
     /**
      * @return
      * @throws
@@ -655,6 +656,16 @@ public class EnterStockController extends BaseController {
         User user = UserUtil.getCurrentUser();
         BisEnterStock enterStock = enterStockService.get(linkId);
         if (enterStock != null && !"".equals(enterStock)) {
+            //BIS_STANDING_BOOK
+            //已产生费用的提单不允许删除的逻辑
+            Map<String,Object> params = new HashMap<String,Object>();
+            params.put("billNo",enterStock.getItemNum());
+            List<BisStandingBook> bisEnterStockList = new ArrayList<>();
+            bisEnterStockList = standingBookService.getList(params);
+            if (bisEnterStockList!=null && bisEnterStockList.size() > 0){
+                return "此入库联系单已产生费用，不允许删除";
+            }
+
             enterStock.setDelFlag("1");//删除
             enterStock.setOperator(user.getName());
             enterStock.setUpdateTime(new Date());
@@ -686,7 +697,7 @@ public class EnterStockController extends BaseController {
         enterStockService.update(enterStock);
         return "success";
     }
-    
+
     /**
      * @param linkId
      * @return
@@ -698,9 +709,9 @@ public class EnterStockController extends BaseController {
     @RequestMapping(value = "checkPassEnterStock/{linkId}")
     @ResponseBody
     public String checkPassEnterStock(@PathVariable("linkId") String linkId) {
-       
+
         BisEnterStock enterStock = enterStockService.get(linkId);
-        
+
         List<PropertyFilter> asnActionFilters = new ArrayList<PropertyFilter>();
 		asnActionFilters.add(new PropertyFilter("EQS_enterId", linkId));
 		List<AsnAction> asnActions = asnActionDao.find(asnActionFilters);//查询ASN区间表
@@ -713,7 +724,7 @@ public class EnterStockController extends BaseController {
 		}
         return "success";
     }
-    
+
     /**
      * @param linkId
      * @return
@@ -725,9 +736,9 @@ public class EnterStockController extends BaseController {
     @RequestMapping(value = "passEnterStockAndUpdateASNActions/{linkId}")
     @ResponseBody
     public String passEnterStockAndUpdateASNActions(@PathVariable("linkId") String linkId) {
-       
+
         BisEnterStock enterStock = enterStockService.get(linkId);
-        
+
         List<PropertyFilter> asnActionFilters = new ArrayList<PropertyFilter>();
 		asnActionFilters.add(new PropertyFilter("EQS_enterId", linkId));
 		List<AsnAction> asnActions = asnActionDao.find(asnActionFilters);//查询ASN区间表
@@ -741,8 +752,8 @@ public class EnterStockController extends BaseController {
 		}
         return "success";
     }
-    
-    
+
+
     /**
      * @param linkId
      * @return
@@ -996,7 +1007,7 @@ public class EnterStockController extends BaseController {
         parameterReflect.reflectParameter(enterStock, request);// 转换对应实体类参数
 
         List<PropertyFilter> filters = PropertyFilter.buildFromHttpRequest(request);
-        
+
         List<BisEnterStock> enterStockList = enterStockService.search(filters);
 
         ExportParams params = new ExportParams("入库联系单", "入库联系单Sheet", ExcelType.XSSF);
@@ -1086,7 +1097,7 @@ public class EnterStockController extends BaseController {
                             	String sss = transferHtml(str,str);
                             	excelUtil.setCellStrValue(starRows + i, 3, sss);
                             }else{
-                            	excelUtil.setCellStrValue(starRows + i, 3, "");	
+                            	excelUtil.setCellStrValue(starRows + i, 3, "");
                             }
                             //excelUtil.setCellStrValue(starRows + i, 3, getMap.get("CARGO_NAME") != null ? getMap.get("CARGO_NAME").toString() : "");
 //            	        	if(0==i){
@@ -1398,7 +1409,7 @@ public class EnterStockController extends BaseController {
         }
     }
 
-    
+
     @RequestMapping(value = "jsonEnterReport", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> getJsonData(@Valid @ModelAttribute @RequestBody BisEnterStock obj,HttpServletRequest request) {
@@ -1406,7 +1417,7 @@ public class EnterStockController extends BaseController {
     	page = inStockReportService.getEnterStockStocks(page, obj.getNtype(), obj.getSearchItemNum(), obj.getSearchCunNum(), obj.getSearchStockIn(), obj.getSearchLinkId(), obj.getSearchSKUNum(), obj.getSearchStrTime(), obj.getSearchEndTime(),obj.getIfBonded());
     	return getEasyUIData(page);
     }
-    
+
     /**
     *转换html特殊符号。
     * @param content 需要转换的html特殊符号
@@ -1414,7 +1425,7 @@ public class EnterStockController extends BaseController {
     * @return 转化后实际的符号
     */
     public static String transferHtml(String content, String defaultName) {
-    if(content==null) return defaultName; 
+    if(content==null) return defaultName;
     String html = content;
     html = StringUtils.replace(html, "&quot;", "\"");
     html = StringUtils.replace(html, "&lt;", "<");
@@ -1427,7 +1438,7 @@ public class EnterStockController extends BaseController {
     }
 	/**
 	 * 添加跳转
-	 * 
+	 *
 	 * @param model
 	 */
 	@RequestMapping(value = "sendbsl", method = RequestMethod.GET)
@@ -1440,7 +1451,7 @@ public class EnterStockController extends BaseController {
 	    }
 		return "wms/enterStock/sendbslinfo";
 	}
-		
+
 	public static String formatString(String str, int length, String slot){
 		StringBuffer sb = new StringBuffer();
 		sb.append(str);
@@ -1467,12 +1478,12 @@ public class EnterStockController extends BaseController {
 		}else {
 			//bisEnterStock.setVesselName(res.get(0).get("vesselName").toString());
 			//  enterStockService.update(bisEnterStock);
-			
+
 			  return res.get(0).get("vesselName").toString();
-		}      
-		
+		}
+
 	}
-	
+
 	/**
 	 * 修改入库联系单明细
 	 *
@@ -1498,7 +1509,7 @@ public class EnterStockController extends BaseController {
 			String title ="LL_BSL"+nowdate+".bsl";
 			String  filePath = "D:/supervision/" + "BSL"+nowdate+  ".bsl";
 
-		    
+
 			for (Map<String, Object> hashMap : list) {
 
 //	           	 CargoInfo cargo = this.get(CargoInfo.class, Restrictions.eq("containerNum", site.getContainerNum()));
@@ -1528,8 +1539,8 @@ public class EnterStockController extends BaseController {
 				if (bisEnterStock.getVoyageNum()==null){
 					return "error";
 				}else{
-					buffData.append(formatString(bisEnterStock.getVoyageNum(),6," "));
-					bisEnterStock2.setVoyageNum(formatString(bisEnterStock.getVoyageNum(),6," "));
+					buffData.append(formatString(bisEnterStock.getVoyageNum(),12," "));
+					bisEnterStock2.setVoyageNum(formatString(bisEnterStock.getVoyageNum(),12," "));
 				//	buffData.append("   ");
 				}
 				//箱号
@@ -1542,7 +1553,7 @@ public class EnterStockController extends BaseController {
 
 					}else{
 
-						buffData.append(formatString(ctNum,12," "));		
+						buffData.append(formatString(ctNum,12," "));
 					}
 				}
 				//提单号
@@ -1569,7 +1580,7 @@ public class EnterStockController extends BaseController {
 
 
 			}
-			
+
 			bisEnterStock2.setIsSend(("1"));
 			bisEnterStock2.setChineseName(bisEnterStock.getChineseName());
 			enterStockService.update(bisEnterStock2);
@@ -1614,7 +1625,7 @@ public class EnterStockController extends BaseController {
 
 		//	SupervisionController task=new SupervisionController();
 //		    uploadFile(ftpHost,ftpUserName, ftpPassword, ftpPort, ftpPath, title, in);
-		  
+
 		return "success";
 	}
 
@@ -1749,16 +1760,16 @@ public class EnterStockController extends BaseController {
 		}
 		return ftpClient;
 	}
-	
+
 	/**
 	 * 分类监管 申请单 申请
 	 */
     @RequestMapping(value = "appr/{linkId}", method = RequestMethod.GET)
     public String apprForm(HttpServletRequest request,Model model, @PathVariable("linkId") String linkId) {
         BisEnterStock bisEnterStock = enterStockService.get(linkId);
-        model.addAttribute("bisEnterStock", bisEnterStock);       
+        model.addAttribute("bisEnterStock", bisEnterStock);
         List<BisEnterStockInfo> oldList = enterStockInfoService.getList(linkId);
-       
+
         model.addAttribute("bisEnterStockInfo", JSON.toJSONString(oldList));
         return "wms/enterStock/apprForm";
     }

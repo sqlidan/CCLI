@@ -1,10 +1,12 @@
 package com.haiersoft.ccli.wms.dao;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.haiersoft.ccli.common.utils.DateUtils;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
@@ -62,7 +64,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("   ST.IF_WRAP AS ifWrap,                                        ");
 		sb.append("   ST.IF_BAGGING AS ifBagging,                                  ");
 		sb.append("   ST.IF_WITH_WOODEN AS ifWithWooden,                           ");
-		sb.append("   ST.IF_MAC_ADMIT AS ifMacAdmit,INFOS.HS_CODE as hscode ,st.IS_SEND as isSend                             ");
+		sb.append("   ST.IF_MAC_ADMIT AS ifMacAdmit,info.HS_CODE as hscode ,st.IS_SEND as isSend                             ");
 		sb.append("   ,info.CARGO_NAME AS cargoName                            ");
 		sb.append("   ,info.PIECE AS piece                             ");
 		sb.append(" FROM                                                           ");
@@ -72,49 +74,60 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		sb.append("   SELECT                                                       ");
 		sb.append("      INFO.LINK_ID,                                             ");
 		sb.append("      INFO.ITEM_NUM,                                            ");
-		sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
-		sb.append("      SUM(INFO.PIECE) as PIECE,                                            ");
-		sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM   ");
+//		sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
+//		sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM,   ");
+//        sb.append("      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE,   ");
+        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CARGO_NAME, ',') ORDER BY CARGO_NAME).GETCLOBVAL(),',') AS CARGO_NAME,   ");
+        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CTN_NUM, ',') ORDER BY CTN_NUM).GETCLOBVAL(),',') AS CTN_NUM,   ");
+        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, HS_CODE, ',') ORDER BY HS_CODE).GETCLOBVAL(),',') AS HS_CODE,   ");
+        sb.append("      SUM(INFO.PIECE) as PIECE                                            ");
 		sb.append("   FROM                                                         ");
-		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE) info        ");
+		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,HS_CODE,PIECE " +
+                " FROM BIS_ENTER_STOCK_INFO   " +
+                " GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,HS_CODE,PIECE) info        ");
 		sb.append("   GROUP BY                                                     ");
 		sb.append("      INFO.LINK_ID,                                             ");
 		sb.append("      INFO.ITEM_NUM                                       ");
 		sb.append(" ) info                                                         ");
-		sb.append(" ON                                                             ");
-		sb.append("   ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM        ");
-		sb.append(" LEFT JOIN                                                      ");
-		sb.append(" (                                                              ");
-		sb.append("   SELECT                                                       ");
-		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM,                                            ");
-		sb.append("      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE   ");
-		sb.append("   FROM                                                         ");
-		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM, HS_CODE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,HS_CODE) info        ");
-		sb.append("   GROUP BY                                                     ");
-		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM                                        ");
-		sb.append(" ) INFOS                                                         ");
-		sb.append(" ON                                                             ");
-		sb.append("   ST.LINK_ID=INFOS.LINK_ID AND ST.ITEM_NUM=INFOS.ITEM_NUM        ");
+		sb.append(" ON  ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM      ");
+//		sb.append(" LEFT JOIN                                                      ");
+//		sb.append(" (                                                              ");
+//		sb.append("   SELECT                                                       ");
+//		sb.append("      INFO.LINK_ID,                                             ");
+//		sb.append("      INFO.ITEM_NUM,                                            ");
+//		sb.append("      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE   ");
+//		sb.append("   FROM                                                         ");
+//		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM, HS_CODE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,HS_CODE) info        ");
+//		sb.append("   GROUP BY                                                     ");
+//		sb.append("      INFO.LINK_ID,                                             ");
+//		sb.append("      INFO.ITEM_NUM                                        ");
+//		sb.append(" ) INFOS                                                         ");
+//		sb.append(" ON                                                             ");
+//		sb.append("   ST.LINK_ID=INFOS.LINK_ID AND ST.ITEM_NUM=INFOS.ITEM_NUM        ");
 		sb.append(" where 1=1 and ST.DEL_FLAG='0'                                  ");
 
+        boolean flag2=false;
+
 		if (null!=obj.getBgdh()&& !"".equals(obj.getBgdh())) {//报关单号
+            flag2=true;
         	sb.append(" and ST.BGDH like:bgdh  ");
             parme.put("bgdh","%"+obj.getBgdh()+"%");
         }
-		
+
 		if (null!=obj.getSearchItemNum()&& !"".equals(obj.getSearchItemNum())) {//提单号
+            flag2=true;
         	sb.append(" and ST.ITEM_NUM like:billnum  ");
             parme.put("billnum","%"+obj.getSearchItemNum()+"%");
         }
-		
+
         if (null!=obj.getSearchStockIn()&& !"".equals(obj.getSearchStockIn())) {//--客户ID
+            flag2=true;
         	sb.append(" and ST.STOCK_ID=:sockid");
             parme.put("sockid",obj.getSearchStockIn());
         }
-        
+
         if(null!=obj.getIfBack()&&!"".equals(obj.getIfBack())){
+            flag2=true;
         	if("1".equals(obj.getIfBack())){
 	        	sb.append(" AND ST.IF_BACK=:back");
 	        	parme.put("back",obj.getIfBack());
@@ -122,8 +135,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         		sb.append(" AND (ST.IF_BACK='0' or ST.IF_BACK is NULL) ");
         	}
         }
-        
+
         if(null!=obj.getIfBonded()&&!"".equals(obj.getIfBonded())){
+            flag2=true;
         	if("1".equals(obj.getIfBonded())){
 	        	sb.append(" AND ST.IF_BONDED=:bonded");
 	        	parme.put("bonded",obj.getIfBonded());
@@ -131,8 +145,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         		sb.append(" AND (ST.IF_BONDED='0' or ST.IF_BONDED is NULL) ");
         	}
         }
-        
+
         if(null!=obj.getIfToCustoms()&&!"".equals(obj.getIfToCustoms())){
+            flag2=true;
         	if("1".equals(obj.getIfToCustoms())){
 	        	sb.append(" AND ST.IF_TO_CUSTOMS=:customs");
 	        	parme.put("customs",obj.getIfToCustoms());
@@ -140,8 +155,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         		sb.append(" AND (ST.IF_TO_CUSTOMS='0' or ST.IF_TO_CUSTOMS is NULL) ");
         	}
         }
-        
+
         if(null!=obj.getIfToCiq()&&!"".equals(obj.getIfToCiq())){
+            flag2=true;
         	if("1".equals(obj.getIfToCiq())){
 	        	sb.append(" AND ST.IF_TO_CIQ=:ciq");
 	        	parme.put("ciq",obj.getIfToCiq());
@@ -149,8 +165,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         		sb.append(" AND (ST.IF_TO_CIQ='0' or ST.IF_TO_CIQ is NULL) ");
         	}
         }
-        
+
         if(null!=obj.getIfSorting()&&!"".equals(obj.getIfSorting())){
+            flag2=true;
         	if("1".equals(obj.getIfSorting())){
 	        	sb.append(" AND ST.IF_SORTING=:sorting");
 	        	parme.put("sorting",obj.getIfSorting());
@@ -158,57 +175,75 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         		sb.append(" AND (ST.IF_SORTING='0' or ST.IF_SORTING is NULL) ");
         	}
         }
-        
+
         if(null!=obj.getAuditingState()&&!"".equals(obj.getAuditingState())){
+            flag2=true;
         	sb.append(" AND ST.AUDITING_STATE=:state");
         	parme.put("state",obj.getAuditingState());
         }
-        
+
         if(null!=obj.getSearchLinkId()&&!"".equals(obj.getSearchLinkId())){
+            flag2=true;
         	sb.append(" AND ST.LINK_ID=:linkId");
         	parme.put("linkId",obj.getSearchLinkId());
         }
-        
+
         if(null!=obj.getOperator()&&!"".equals(obj.getOperator())){
+            flag2=true;
         	sb.append(" AND ST.OPERATOR=:operator");
         	parme.put("operator",obj.getOperator());
         }
-        
+
         if(null!=obj.getSearchCunNum()&&!"".equals(obj.getSearchCunNum())){
+            flag2=true;
         	sb.append(" AND info.CTN_NUM LIKE:ctnNum");
         	parme.put("ctnNum","%"+obj.getSearchCunNum()+"%");
         }
-        boolean flag=false;
-        if (obj.getSearchStrTime()!= null && !"".equals(obj.getSearchStrTime())) {//--入库日期
-        	flag=true;
-        	//sb.append(" and ST.ETA_WAREHOUSE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
-            //parme.put("searchstrtime", obj.getSearchStrTime());
-        }
-        if (obj.getSearchEndTime()!= null && !"".equals(obj.getSearchEndTime())) {//--入库日期
-        	flag=true;
-        	//sb.append(" and ST.ETA_WAREHOUSE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')");
-            //parme.put("searchendtime", obj.getSearchEndTime());
-        }
-        
-        if(flag){
-           sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
-           parme.put("searchstrtime", obj.getSearchStrTime());
-           parme.put("searchendtime", obj.getSearchEndTime());
-        }
-        
+
         if (obj.getSearchDxStrTime()!= null && !"".equals(obj.getSearchDxStrTime())) {//--倒箱开始日期
+            flag2=true;
             sb.append(" and ST.BACKDATE>=to_date(:dxstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
             parme.put("dxstrtime", obj.getSearchDxStrTime());
         }
+
         if (obj.getSearchDxEndTime()!= null && !"".equals(obj.getSearchDxEndTime())) {//--倒箱结束日期
+            flag2=true;
             sb.append(" and ST.BACKDATE<to_date(:dxendtime,'yyyy-mm-dd hh24:mi:ss')");
             parme.put("dxendtime", obj.getSearchDxEndTime());
         }
+
         if(null!=obj.getSearchRemark()&&!"".equals(obj.getSearchRemark())){
+            flag2=true;
             sb.append(" AND ST.REMARK LIKE:remark");
             parme.put("remark","%"+obj.getSearchRemark()+"%");
         }
-        sb.append(" ORDER BY ST.OPERATE_TIME DESC"                                  );       
+        boolean flag=false;
+        if (obj.getSearchStrTime()!= null && !"".equals(obj.getSearchStrTime())) {//--入库日期
+            flag=true;
+            //sb.append(" and ST.ETA_WAREHOUSE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss')  ");
+            //parme.put("searchstrtime", obj.getSearchStrTime());
+        }
+        if (obj.getSearchEndTime()!= null && !"".equals(obj.getSearchEndTime())) {//--入库日期
+            flag=true;
+            //sb.append(" and ST.ETA_WAREHOUSE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')");
+            //parme.put("searchendtime", obj.getSearchEndTime());
+        }
+
+        if(flag){
+            flag2=true;
+            sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
+            parme.put("searchstrtime", obj.getSearchStrTime());
+            parme.put("searchendtime", obj.getSearchEndTime());
+        }
+        if (!flag2){
+            sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
+            LocalDate currentDate = LocalDate.now();
+            LocalDate dateAfter30Days = currentDate.minusDays(30);
+            java.util.Date startDate = java.util.Date.from(dateAfter30Days.atStartOfDay().toInstant(java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.LocalDateTime.now())));
+            parme.put("searchstrtime", DateUtils.formatDateTime(startDate));
+            parme.put("searchendtime", DateUtils.getDateTime());
+        }
+        sb.append(" ORDER BY ST.OPERATE_TIME DESC"                                  );
         Map<String, Object> paramType = new HashMap<>();
         paramType.put("linkId",String.class);//入库联系单号
         paramType.put("itemNum",String.class);//提单号
@@ -266,9 +301,11 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sb.append("   SELECT                                                       ");
         sb.append("      INFO.LINK_ID,                                             ");
         sb.append("      INFO.ITEM_NUM,                                            ");
-        sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
+//        sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
+//        sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM   ");
+        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CARGO_NAME, ',') ORDER BY CARGO_NAME).GETCLOBVAL(),',') AS CARGO_NAME,   ");
+        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CTN_NUM, ',') ORDER BY CTN_NUM).GETCLOBVAL(),',') AS CTN_NUM,   ");
         sb.append("      SUM(INFO.PIECE) as PIECE,                                            ");
-        sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM   ");
         sb.append("   FROM                                                         ");
         sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,PIECE) info        ");
         sb.append("   GROUP BY                                                     ");
@@ -292,7 +329,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         }
         return bisEnterStock;
     }
-	
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Map<String, Object>> findList(Page page, String value) {
         StringBuffer sb = new StringBuffer();
@@ -886,23 +923,23 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 		 	   }
 		 	   if(null!=voyageNum&&!"".equals(voyageNum)){
 		 		  sql.append(" and  jkhc = '"+voyageNum.trim()+"'");
-		 	   }	 	   
+		 	   }
 		 	//  sql.append("  order by code   ");
 				SQLQuery sqlQuery2=this.getSession().createSQLQuery(sql.toString());
 				List<Object[]> datas = (List<Object[]>)sqlQuery2.list();
 				for (Object[] ob:datas){
-					
+
 					HashMap data = new HashMap();
 					data.put("vesselName",ob[0].toString()!= null ? ob[0].toString() : "" );
-		        	
-					
+
+
 					getList.add(data);
 				}
 		 	 //  Query query= createQuery(sql.toString());
 		 	 //  List<Object[]> list=query.list();
 		 	   return getList;
 
-		
+
 		}
 
 

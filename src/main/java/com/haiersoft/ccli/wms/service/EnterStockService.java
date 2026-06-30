@@ -2,10 +2,10 @@ package com.haiersoft.ccli.wms.service;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ import com.haiersoft.ccli.system.entity.User;
 import com.haiersoft.ccli.system.utils.UserUtil;
 
 /**
- * 
+ *
  * @author pyl
  * @ClassName: EnterStockService
  * @Description: 入库联系单Service
@@ -31,20 +31,78 @@ import com.haiersoft.ccli.system.utils.UserUtil;
 @Service
 @Transactional(readOnly = true)
 public class EnterStockService extends BaseService<BisEnterStock, String> {
-	
+
 	@Autowired
 	private EnterStockDao enterStockDao;
-	
+
 	@Override
 	public HibernateDao<BisEnterStock, String> getEntityDao() {
 		return enterStockDao;
 	}
-	
+
 	public Page<BisEnterStock> getEnterStocks(Page<BisEnterStock> page,BisEnterStock obj) {
-		 return enterStockDao.getEnterStocks(page,obj);
+		 Page<BisEnterStock> pageResult = enterStockDao.getEnterStocks(page,obj);
+		for (int i = 0; i < pageResult.getResult().size(); i++) {
+			BisEnterStock bisEnterStock = pageResult.getResult().get(i);
+			String cargoName = bisEnterStock.getCargoName();
+			if(cargoName!=null && cargoName.trim().length() > 0){
+				cargoName = cargoName.replaceAll("<E>","").replaceAll("</E>","");
+				String[] strAry1 = cargoName.split(",");
+				List<String> strList1 = java.util.Arrays.stream(strAry1)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				cargoName = strList1.stream().collect(Collectors.joining(","));
+				bisEnterStock.setCargoName(cargoName);
+			}
+
+			String vesselName = bisEnterStock.getVesselName();
+			if(vesselName!=null && vesselName.trim().length() > 0) {
+				vesselName = vesselName.replaceAll("<E>", "").replaceAll("</E>", "");
+				String[] strAry2 = vesselName.split(",");
+				List<String> strList2 = java.util.Arrays.stream(strAry2)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				vesselName = strList2.stream().collect(Collectors.joining(","));
+				bisEnterStock.setVesselName(vesselName);
+			}
+			String hscode = bisEnterStock.getHscode();
+			if(hscode!=null && hscode.trim().length() > 0) {
+				hscode = hscode.replaceAll("<E>", "").replaceAll("</E>", "");
+				String[] strAry3 = hscode.split(",");
+				List<String> strList3 = java.util.Arrays.stream(strAry3)
+						.distinct() // 去重
+						.collect(Collectors.toList());
+				hscode = strList3.stream().collect(Collectors.joining(","));
+				bisEnterStock.setHscode(hscode);
+			}
+		}
+		 return pageResult;
+	}
+	public static void main(String[] args) {
+		LocalDate currentDate = LocalDate.now();
+		LocalDate dateAfter30Days = currentDate.minusDays(30);
+		java.util.Date startDate = java.util.Date.from(dateAfter30Days.atStartOfDay().toInstant(java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.LocalDateTime.now())));
+		System.out.println(startDate);
 	}
 	public BisEnterStock exportCheckFeeData(String linkId) {
-		return enterStockDao.exportCheckFeeData(linkId);
+		BisEnterStock bisEnterStock = enterStockDao.exportCheckFeeData(linkId);
+		String cargoName = bisEnterStock.getCargoName();
+		cargoName = cargoName.replaceAll("<E>","").replaceAll("</E>","");
+		String[] strAry1 = cargoName.split(",");
+		List<String> strList1 = java.util.Arrays.stream(strAry1)
+				.distinct() // 去重
+				.collect(Collectors.toList());
+		cargoName = strList1.stream().collect(Collectors.joining(","));
+		bisEnterStock.setCargoName(cargoName);
+		String vesselName = bisEnterStock.getVesselName();
+		vesselName = vesselName.replaceAll("<E>","").replaceAll("</E>","");
+		String[] strAry2 = vesselName.split(",");
+		List<String> strList2 = java.util.Arrays.stream(strAry2)
+				.distinct() // 去重
+				.collect(Collectors.toList());
+		vesselName = strList2.stream().collect(Collectors.joining(","));
+		bisEnterStock.setVesselName(vesselName);
+		return bisEnterStock;
 	}
 	/**
 	 * 按条件查询入库联系单和货转联系单集合
@@ -58,17 +116,17 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	public  List<Map<String,Object>>  findList(Page page,String linkNum,String billNum,String transNum,String ctnNum){
 		return enterStockDao.findList(page,linkNum, billNum, transNum, ctnNum);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public  List<Map<String,Object>>  findList(Page page,String value){
 		return enterStockDao.findList(page,value);
 	}
-	
+
 	public Page<BisEnterStock> getStocks(Page<BisEnterStock> page,BisEnterStock obj) {
 		return enterStockDao.getStocks(page, obj);
 	}
 	/**
-	 * 
+	 *
 	 * @author pyl
 	 * @Description: 获得入库联系单ID
 	 * @date 2016年3月5日 下午12:08:24
@@ -91,9 +149,9 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 		String linkId = "E" + userCode + StringUtils.timeToString();
 		return linkId;
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @author pyl
 	 * @Description: 根据提单号获得对应的入库联系单号(模糊查询)
 	 * @date 2016年3月5日 下午12:08:24
@@ -115,7 +173,7 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	public List<BisEnterStock> getEnterStockByBillNumNotLike(String billNum) {
 		return enterStockDao.find(Restrictions.eq("delFlag","0"),Restrictions.eq("itemNum", billNum));
 	}
-	
+
 	/**
 	 * 入库报告书--普通客户
 	 * @param itemNum 提单号
@@ -161,7 +219,7 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	public List<BisEnterStock> findEnterList(Map<String,Object> params) {
 		return enterStockDao.findBy(params);
 	}
-	
+
 	public Date getFirstTime(String rkTime) throws ParseException {
     	Date date=null;
 		if(!StringUtils.isNull(rkTime)){
@@ -179,7 +237,7 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	public BisEnterStock getEnterStock(String billNum){
 		return enterStockDao.getEnterStock(billNum);
 	}
-	
+
 	//获得数据库连接
 	public Connection getConnect() throws SQLException{
 		return enterStockDao.getConnection();
