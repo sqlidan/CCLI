@@ -33,78 +33,105 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 	public Page<BisEnterStock> getEnterStocks(Page<BisEnterStock> page,BisEnterStock obj) {
 		StringBuffer sb = new StringBuffer();
         HashMap<String, Object> parme = new HashMap<String, Object>();
-		sb.append(" SELECT                                                         ");
-		sb.append("   ST.LINK_ID AS linkId,                                        ");
-		sb.append("   ST.ITEM_NUM AS itemNum,                                      ");
-		sb.append("   info.CTN_NUM AS vesselName,                                  ");
-		sb.append("   st.FEE_ID AS feeId,                                          ");
-		sb.append("   ST.FEE_PLAN AS feePlan,                                      ");
-		sb.append("   ST.STOCK_ID AS stockId,                                      ");
-		sb.append("   ST.STOCK_IN AS stockIn,                                      ");
-		sb.append("   ST.AUDITING_STATE AS auditingState,                          ");
-		sb.append("   ST.REMARK AS remark,                                         ");
-		sb.append("   ST.IF_BACK AS ifBack,                                        ");
-		sb.append("   ST.BACKDATE AS backDate,                                     ");
-		sb.append("   ST.RK_TIME AS rkTime,                                        ");
-		sb.append("   ST.CTN_TYPE_SIZE AS ctnTypeSize,                             ");
-		sb.append("   ST.IF_BONDED AS ifBonded,                                    ");
-		sb.append("   ST.IF_SORTING AS ifSorting,                                  ");
-		sb.append("   ST.IF_TO_CUSTOMS AS ifToCustoms,                             ");
-		sb.append("   ST.CUSTOMS_COMPANY AS customsCompany,                        ");
-		sb.append("   ST.IF_TO_CIQ AS ifToCiq,                                     ");
-		sb.append("   ST.CIQ_COMPANY AS ciqCompany,                                ");
-		sb.append("   ST.OPERATOR AS operator,                                     ");
-		sb.append("   ST.OPERATE_TIME AS operateTime,                              ");
-		sb.append("   ST.TEMPERATURE AS temperature,                               ");
-		sb.append("   ST.SORTING_SPECIAL AS sortingSpecial,                        ");
-		sb.append("   ST.PLAN_FEE_STATE AS planFeeState,                           ");
-		sb.append("   ST.FINISH_FEE_STATE AS finishFeeState,                       ");
-		sb.append("   ST.ETA_WAREHOUSE AS etaWarehouse,                            ");
-		sb.append("   ST.WAREHOUSE AS warehouse,                                   ");
-		sb.append("   ST.IF_WRAP AS ifWrap,                                        ");
-		sb.append("   ST.IF_BAGGING AS ifBagging,                                  ");
-		sb.append("   ST.IF_WITH_WOODEN AS ifWithWooden,                           ");
-		sb.append("   ST.IF_MAC_ADMIT AS ifMacAdmit,info.HS_CODE as hscode ,st.IS_SEND as isSend                             ");
-		sb.append("   ,info.CARGO_NAME AS cargoName                            ");
-		sb.append("   ,info.PIECE AS piece                             ");
-		sb.append(" FROM                                                           ");
-		sb.append(" 	BIS_ENTER_STOCK st                                         ");
-		sb.append(" LEFT JOIN                                                      ");
-		sb.append(" (                                                              ");
-		sb.append("   SELECT                                                       ");
-		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM,                                            ");
-//		sb.append("      LISTAGG (INFO.CARGO_NAME, ',') WITHIN GROUP (ORDER BY INFO.CARGO_NAME) AS CARGO_NAME,                                            ");
-//		sb.append("      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM,   ");
-//        sb.append("      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE,   ");
-        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CARGO_NAME, ',') ORDER BY CARGO_NAME).GETCLOBVAL(),',') AS CARGO_NAME,   ");
-        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, CTN_NUM, ',') ORDER BY CTN_NUM).GETCLOBVAL(),',') AS CTN_NUM,   ");
-        sb.append("      RTRIM(XMLAGG(XMLELEMENT(e, HS_CODE, ',') ORDER BY HS_CODE).GETCLOBVAL(),',') AS HS_CODE,   ");
-        sb.append("      SUM(INFO.PIECE) as PIECE                                            ");
-		sb.append("   FROM                                                         ");
-		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,HS_CODE,PIECE " +
-                " FROM BIS_ENTER_STOCK_INFO   " +
-                " GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM,CARGO_NAME,HS_CODE,PIECE) info        ");
-		sb.append("   GROUP BY                                                     ");
-		sb.append("      INFO.LINK_ID,                                             ");
-		sb.append("      INFO.ITEM_NUM                                       ");
-		sb.append(" ) info                                                         ");
-		sb.append(" ON  ST.LINK_ID=INFO.LINK_ID AND ST.ITEM_NUM=INFO.ITEM_NUM      ");
-//		sb.append(" LEFT JOIN                                                      ");
-//		sb.append(" (                                                              ");
-//		sb.append("   SELECT                                                       ");
-//		sb.append("      INFO.LINK_ID,                                             ");
-//		sb.append("      INFO.ITEM_NUM,                                            ");
-//		sb.append("      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE   ");
-//		sb.append("   FROM                                                         ");
-//		sb.append("      (SELECT DISTINCT LINK_ID,ITEM_NUM, HS_CODE FROM BIS_ENTER_STOCK_INFO   GROUP BY  LINK_ID,ITEM_NUM,HS_CODE) info        ");
-//		sb.append("   GROUP BY                                                     ");
-//		sb.append("      INFO.LINK_ID,                                             ");
-//		sb.append("      INFO.ITEM_NUM                                        ");
-//		sb.append(" ) INFOS                                                         ");
-//		sb.append(" ON                                                             ");
-//		sb.append("   ST.LINK_ID=INFOS.LINK_ID AND ST.ITEM_NUM=INFOS.ITEM_NUM        ");
-		sb.append(" where 1=1 and ST.DEL_FLAG='0'                                  ");
+		sb.append(" SELECT                                                         " +
+                "   ST.LINK_ID AS linkId,                                        " +
+                "   ST.ITEM_NUM AS itemNum,                                      " +
+                "   st.FEE_ID AS feeId,                                          " +
+                "   ST.FEE_PLAN AS feePlan,                                      " +
+                "   ST.STOCK_ID AS stockId,                                      " +
+                "   ST.STOCK_IN AS stockIn,                                      " +
+                "   ST.AUDITING_STATE AS auditingState,                          " +
+                "   ST.REMARK AS remark,                                         " +
+                "   ST.IF_BACK AS ifBack,                                        " +
+                "   ST.BACKDATE AS backDate,                                     " +
+                "   ST.RK_TIME AS rkTime,                                        " +
+                "   ST.CTN_TYPE_SIZE AS ctnTypeSize,                             " +
+                "   ST.IF_BONDED AS ifBonded,                                    " +
+                "   ST.IF_SORTING AS ifSorting,                                  " +
+                "   ST.IF_TO_CUSTOMS AS ifToCustoms,                             " +
+                "   ST.CUSTOMS_COMPANY AS customsCompany,                        " +
+                "   ST.IF_TO_CIQ AS ifToCiq,                                     " +
+                "   ST.CIQ_COMPANY AS ciqCompany,                                " +
+                "   ST.OPERATOR AS operator,                                     " +
+                "   ST.OPERATE_TIME AS operateTime,                              " +
+                "   ST.TEMPERATURE AS temperature,                               " +
+                "   ST.SORTING_SPECIAL AS sortingSpecial,                        " +
+                "   ST.PLAN_FEE_STATE AS planFeeState,                           " +
+                "   ST.FINISH_FEE_STATE AS finishFeeState,                       " +
+                "   ST.ETA_WAREHOUSE AS etaWarehouse,                            " +
+                "   ST.WAREHOUSE AS warehouse,                                   " +
+                "   ST.IF_WRAP AS ifWrap,                                        " +
+                "   ST.IF_BAGGING AS ifBagging,                                  " +
+                "   ST.IF_WITH_WOODEN AS ifWithWooden,                           " +
+                "   ST.IF_MAC_ADMIT AS ifMacAdmit," +
+                "   st.IS_SEND as isSend  ," +
+                "   info1.CTN_NUM AS vesselName,            " +
+                "   info2.CARGO_NAME AS cargoName  ,  " +
+                "   info3.HS_CODE as hscode ," +
+                "   info4.PIECE AS piece                             " +
+                "  FROM                                                           " +
+                "  BIS_ENTER_STOCK st                                         " +
+                " LEFT JOIN                                                      " +
+                " (                                                              " +
+                "   SELECT                                                       " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM," +
+                "      LISTAGG (INFO.CTN_NUM, ',') WITHIN GROUP (ORDER BY INFO.CTN_NUM) AS CTN_NUM                                           " +
+                "   FROM                                                         " +
+                "      (SELECT DISTINCT LINK_ID,ITEM_NUM,CTN_NUM " +
+                "                 FROM BIS_ENTER_STOCK_INFO   " +
+                "                 GROUP BY  LINK_ID,ITEM_NUM,CTN_NUM) info        " +
+                "   GROUP BY                                                     " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM                                  " +
+                " ) info1                                                         " +
+                " ON  ST.LINK_ID=info1.LINK_ID AND ST.ITEM_NUM=info1.ITEM_NUM    " +
+                " LEFT JOIN                                                      " +
+                " (                                                              " +
+                "   SELECT                                                       " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM," +
+                "  RTRIM(XMLAGG(XMLELEMENT(e, CARGO_NAME, ',') ORDER BY CARGO_NAME).GETCLOBVAL(),',') AS CARGO_NAME                                           " +
+                "   FROM                                                         " +
+                "      (SELECT DISTINCT LINK_ID,ITEM_NUM,CARGO_NAME " +
+                "                 FROM BIS_ENTER_STOCK_INFO   " +
+                "                 GROUP BY  LINK_ID,ITEM_NUM,CARGO_NAME) info        " +
+                "   GROUP BY                                                     " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM                                   " +
+                " ) info2                                                         " +
+                " ON  ST.LINK_ID=info2.LINK_ID AND ST.ITEM_NUM=info2.ITEM_NUM " +
+                " LEFT JOIN                                                      " +
+                " (                                                              " +
+                "   SELECT                                                       " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM," +
+                "      LISTAGG (INFO.HS_CODE, ',') WITHIN GROUP (ORDER BY INFO.HS_CODE) AS HS_CODE                                           " +
+                "   FROM                                                         " +
+                "      (SELECT DISTINCT LINK_ID,ITEM_NUM,HS_CODE " +
+                "                 FROM BIS_ENTER_STOCK_INFO   " +
+                "                 GROUP BY  LINK_ID,ITEM_NUM,HS_CODE) info        " +
+                "   GROUP BY                                                     " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM                                                                       " +
+                " ) info3                                                        " +
+                " ON  ST.LINK_ID=info3.LINK_ID AND ST.ITEM_NUM=info3.ITEM_NUM " +
+                " LEFT JOIN                                                      " +
+                " (                                                              " +
+                "   SELECT                                                       " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM," +
+                "      SUM(INFO.PIECE) as PIECE                                           " +
+                "   FROM                                                         " +
+                "      (SELECT DISTINCT LINK_ID,ITEM_NUM,SUM(PIECE) as PIECE " +
+                "                 FROM BIS_ENTER_STOCK_INFO   " +
+                "                 GROUP BY  LINK_ID,ITEM_NUM) info        " +
+                "   GROUP BY                                                     " +
+                "      INFO.LINK_ID,                                             " +
+                "      INFO.ITEM_NUM                                  " +
+                " ) info4                                                       " +
+                " ON  ST.LINK_ID=info4.LINK_ID AND ST.ITEM_NUM=info4.ITEM_NUM " +
+                " where 1=1 and ST.DEL_FLAG='0'     ");
 
         boolean flag2=false;
 
@@ -196,7 +223,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
 
         if(null!=obj.getSearchCunNum()&&!"".equals(obj.getSearchCunNum())){
             flag2=true;
-        	sb.append(" AND info.CTN_NUM LIKE:ctnNum");
+        	sb.append(" AND info1.CTN_NUM LIKE:ctnNum");
         	parme.put("ctnNum","%"+obj.getSearchCunNum()+"%");
         }
 
