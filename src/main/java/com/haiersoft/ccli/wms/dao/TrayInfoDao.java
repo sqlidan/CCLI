@@ -122,7 +122,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Map<String,Object>> getSumByState(String contactNum,String cargoState){
+	public List<Map<String,Object>> getSumByState(String contactNum){
 		HashMap<String,Object> parme=new HashMap<String,Object>();
 		StringBuffer sb=new StringBuffer();
 		sb.append(" SELECT                                             ");
@@ -196,7 +196,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		sb.append(" END AS mzkg                                         ");
 		sb.append(" FROM                                                ");
 		sb.append(" 	BIS_TRAY_INFO T                                 ");
-		sb.append(" WHERE   T .CARGO_STATE = :cargoState                ");
+		sb.append(" WHERE   nvl(T .CARGO_STATE, '00') <> '00'           ");
 		if(contactNum!=null && !"".equals(contactNum)){
 	        sb.append(" AND	T .CONTACT_NUM =:contact_num                ");
 			parme.put("contact_num", contactNum);
@@ -206,7 +206,6 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		sb.append(" 	1 = 1                                           ");
 		sb.append(" GROUP BY                                            ");
 		sb.append(" 	T .CONTACT_NUM                                  ");
-		parme.put("cargoState", cargoState);
 		SQLQuery sqlQuery=createSQLQuery(sb.toString(), parme);
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
@@ -217,13 +216,13 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		}
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("contactNum", contactNum);
-		String hasUpShelfSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and t.CARGO_STATE='01'";
-		String hasOtherSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE,'00') not in ('01','99')";
-		Object hasUpShelf = createSQLQuery(hasUpShelfSql, params).uniqueResult();
-		Object hasOther = createSQLQuery(hasOtherSql, params).uniqueResult();
-		int upShelfCount = hasUpShelf == null ? 0 : Integer.parseInt(hasUpShelf.toString());
-		int otherCount = hasOther == null ? 0 : Integer.parseInt(hasOther.toString());
-		return upShelfCount > 0 && otherCount == 0;
+		String totalSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum";
+		String notInitSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE,'00') <> '00'";
+		Object total = createSQLQuery(totalSql, params).uniqueResult();
+		Object notInit = createSQLQuery(notInitSql, params).uniqueResult();
+		int totalCount = total == null ? 0 : Integer.parseInt(total.toString());
+		int notInitCount = notInit == null ? 0 : Integer.parseInt(notInit.toString());
+		return totalCount > 0 && totalCount == notInitCount;
 	}
 
 	public boolean hasAllUpShelfTray(String contactNum) {
@@ -241,20 +240,6 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		return trayCount > 0 && otherCount == 0;
 	}
 
-	public boolean hasOnlyUpShelfAsn(String contactNum) {
-		if(contactNum==null || "".equals(contactNum)){
-			return false;
-		}
-		Map<String,Object> params = new HashMap<String,Object>();
-		params.put("contactNum", contactNum);
-		String hasAsnSql = "select count(1) from BIS_ASN t where t.LINK_ID=:contactNum";
-		String hasOtherSql = "select count(1) from BIS_ASN t where t.LINK_ID=:contactNum and nvl(t.ASN_STATE,'1') not in ('3','4')";
-		Object hasAsn = createSQLQuery(hasAsnSql, params).uniqueResult();
-		Object hasOther = createSQLQuery(hasOtherSql, params).uniqueResult();
-		int asnCount = hasAsn == null ? 0 : Integer.parseInt(hasAsn.toString());
-		int otherCount = hasOther == null ? 0 : Integer.parseInt(hasOther.toString());
-		return asnCount > 0 && otherCount == 0;
-	}
 
 	@SuppressWarnings("unchecked")
 	public List<Map<String,Object>> getUpShelfCtnNumList(String contactNum){

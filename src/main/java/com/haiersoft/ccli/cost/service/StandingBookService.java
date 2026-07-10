@@ -153,6 +153,10 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		if("1".equals(enterStock.getFinishFeeState())){
 			return "success";
 		}
+		//校验托盘数量是否一致
+		if(!trayInfoDao.hasOnlyUpShelfTray(linkId)){
+			return "success";
+		}
 		//获得客户信息
 		BaseClientInfo clientInfo = clientDao.find(Integer.parseInt(enterStock.getStockId()));
 		if(null != enterStock){
@@ -167,7 +171,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 				}
 			}
 			//获的库存计算量
-			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId,"01");
+			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId);
 			//获取箱数
 			List<Map<String,Object>> ctnList;
 			for(String id : ids){
@@ -564,12 +568,10 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		if("1".equals(enterStock.getIfBack())||null!=enterStock.getBackDate()){
 			return "success";
 		}
+		//校验托盘数量是否一致
 		if(!trayInfoDao.hasOnlyUpShelfTray(linkId)){
 			return "success";
 		}
-//		if(!trayInfoDao.hasOnlyUpShelfAsn(linkId)){
-//			return "success";
-//		}
 		//获得客户信息
 		BaseClientInfo clientInfo = clientDao.find(Integer.parseInt(enterStock.getStockId()));
 		if(null != enterStock){
@@ -584,7 +586,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 			//获取箱数
 			List<Map<String,Object>> ctnList;
 			//获的库存计算量
-			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId,"01");
+			List<Map<String,Object>> trayList=trayInfoDao.getSumByState(linkId);
 			for(String id : ids){
 				//获得 费目对象
 				ExpenseScheme expenseScheme = expenseSchemeDao.find(id);
