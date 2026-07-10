@@ -263,7 +263,7 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
             parme.put("searchendtime", obj.getSearchEndTime());
         }
         if (!flag2){
-            sb.append(" and ST.LINK_ID in (SELECT LINK_ID FROM BIS_ASN where 1=1 and INBOUND_DATE>=to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and INBOUND_DATE<to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss')  GROUP BY LINK_ID) ");
+            sb.append(" and ST.OPERATE_TIME >= to_date(:searchstrtime,'yyyy-mm-dd hh24:mi:ss') and ST.OPERATE_TIME < to_date(:searchendtime,'yyyy-mm-dd hh24:mi:ss') ");
             LocalDate currentDate = LocalDate.now();
             LocalDate dateAfter30Days = currentDate.minusDays(30);
             java.util.Date startDate = java.util.Date.from(dateAfter30Days.atStartOfDay().toInstant(java.time.ZoneOffset.systemDefault().getRules().getOffset(java.time.LocalDateTime.now())));
