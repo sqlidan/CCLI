@@ -738,9 +738,9 @@ public class StandingBookController extends BaseController {
     public String saveCwCost(HttpServletRequest request) throws Exception{
     	String linkId=request.getParameter("linkId");
     	String feeId=request.getParameter("feeId");
-    	if(!trayInfoService.hasAllUpShelfTray(linkId)){
-    		return "当前联系单存在未上架库存，不能进行费用操作！";
-    	}
+//    	if(!trayInfoService.hasAllUpShelfTray(linkId)){
+//    		return "当前联系单存在未上架库存，不能进行费用操作！";
+//    	}
     	BisEnterStock obj = enterStockService.get(linkId);//入库联系单id
     	List<String> feeIds=new ArrayList<String>();
         feeIds.add(feeId);
