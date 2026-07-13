@@ -153,8 +153,9 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		if("1".equals(enterStock.getFinishFeeState())){
 			return "success";
 		}
-		//校验托盘数量是否一致
-		if(!trayInfoDao.hasOnlyUpShelfTray(linkId)){
+		//查验或倒箱业务允许部分上架，不校验托盘数量是否一致
+		boolean skipTrayQuantityCheck = "1".equals(enterStock.getIfCheck()) || "1".equals(enterStock.getIfBack());
+		if(!skipTrayQuantityCheck && !trayInfoDao.hasOnlyUpShelfTray(linkId)){
 			return "success";
 		}
 		//获得客户信息
@@ -568,8 +569,9 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		if("1".equals(enterStock.getIfBack())||null!=enterStock.getBackDate()){
 			return "success";
 		}
-		//校验托盘数量是否一致
-		if(!trayInfoDao.hasOnlyUpShelfTray(linkId)){
+		//查验或倒箱业务允许部分上架，不校验托盘数量是否一致
+		boolean skipTrayQuantityCheck = "1".equals(enterStock.getIfCheck()) || "1".equals(enterStock.getIfBack());
+		if(!skipTrayQuantityCheck && !trayInfoDao.hasOnlyUpShelfTray(linkId)){
 			return "success";
 		}
 		//获得客户信息
