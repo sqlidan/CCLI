@@ -11,7 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.haiersoft.ccli.cost.web.CheckingBookContorller;
 import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,6 +66,8 @@ import com.haiersoft.ccli.wms.service.EnterStockService;
 @Service
 @Transactional(readOnly = true)
 public class StandingBookService extends BaseService<BisStandingBook, Integer> {
+	private static final Logger logger = LoggerFactory.getLogger(StandingBookService.class);
+
 	@Autowired
 	private TaxRateService taxRateService;//汇率
 	@Autowired
@@ -549,7 +554,12 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 	public String addInStandingSchemeBatch(String linkId, List<String> ids) throws Exception {
 		String inputPersonId = "SYSTEM";
 		String inputPerson = "SYSTEM";
-		User userCtx = UserUtil.getCurrentUser();
+		User userCtx = null;
+		try {
+			userCtx = UserUtil.getCurrentUser();
+		} catch (Exception e) {
+			logger.error("addInStandingSchemeBatch: 定时任务调用获取不到用户信息");
+		}
 		if (userCtx != null) {
 			inputPersonId = userCtx.getId().toString();
 			inputPerson = userCtx.getName();

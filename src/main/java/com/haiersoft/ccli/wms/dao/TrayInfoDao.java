@@ -196,7 +196,7 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		sb.append(" END AS mzkg                                         ");
 		sb.append(" FROM                                                ");
 		sb.append(" 	BIS_TRAY_INFO T                                 ");
-		sb.append(" WHERE   nvl(T .CARGO_STATE, '00') <> '00'           ");
+		sb.append(" WHERE T.CARGO_STATE NOT IN ('00', '99')             ");
 		if(contactNum!=null && !"".equals(contactNum)){
 	        sb.append(" AND	T .CONTACT_NUM =:contact_num                ");
 			parme.put("contact_num", contactNum);
