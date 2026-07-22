@@ -210,14 +210,19 @@ public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
 		return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
 
+	/**
+	 * 校验托盘数量是否全部为已上架
+	 * @param contactNum
+	 * @return
+	 */
 	public boolean hasOnlyUpShelfTray(String contactNum) {
 		if(contactNum==null || "".equals(contactNum)){
 			return false;
 		}
 		Map<String,Object> params = new HashMap<String,Object>();
 		params.put("contactNum", contactNum);
-		String totalSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum";
-		String notInitSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE,'00') <> '00'";
+		String totalSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE, '00') <> '99'";
+		String notInitSql = "select count(1) from BIS_TRAY_INFO t where t.CONTACT_NUM=:contactNum and nvl(t.CARGO_STATE, '00') NOT IN ('00', '99')";
 		Object total = createSQLQuery(totalSql, params).uniqueResult();
 		Object notInit = createSQLQuery(notInitSql, params).uniqueResult();
 		int totalCount = total == null ? 0 : Integer.parseInt(total.toString());

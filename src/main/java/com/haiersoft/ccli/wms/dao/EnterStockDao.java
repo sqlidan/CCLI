@@ -1098,6 +1098,9 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         return getList;
     }
 
+    /**
+     * 图盘状态发送变动的入库联系单
+     */
     @SuppressWarnings("unchecked")
     public List<BisEnterStock> findNeedAutoGenerateFeeEnterStocks(Date beginTime, Date endTime) {
         Map<String, Object> params = new HashMap<String, Object>();
@@ -1111,15 +1114,8 @@ public class EnterStockDao extends HibernateDao<BisEnterStock, String> {
         sql.append("         SELECT 1 ");
         sql.append("           FROM BIS_TRAY_INFO tray ");
         sql.append("          WHERE tray.CONTACT_NUM = t.LINK_ID ");
-        sql.append("            AND tray.CARGO_STATE = '01' ");
         sql.append("            AND tray.UPDATE_TIME >= :beginTime ");
-        sql.append("            AND tray.UPDATE_TIME <= :endTime ");
-        sql.append("       ) ");
-        sql.append("   AND NOT EXISTS ( ");
-        sql.append("         SELECT 1 ");
-        sql.append("           FROM BIS_TRAY_INFO tray ");
-        sql.append("          WHERE tray.CONTACT_NUM = t.LINK_ID ");
-        sql.append("            AND NVL(tray.CARGO_STATE, '00') NOT IN ('01', '99') ");
+        sql.append("            AND tray.UPDATE_TIME < :endTime ");
         sql.append("       ) ");
         sql.append(" ORDER BY t.OPERATE_TIME ASC NULLS LAST ");
         params.put("beginTime", beginTime);

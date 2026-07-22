@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -552,18 +553,23 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 	 */
 	@Transactional(readOnly = false)
 	public String addInStandingSchemeBatch(String linkId, List<String> ids) throws Exception {
-		String inputPersonId = "SYSTEM";
-		String inputPerson = "SYSTEM";
-		User userCtx = null;
-		try {
-			userCtx = UserUtil.getCurrentUser();
-		} catch (Exception e) {
-			logger.error("addInStandingSchemeBatch: 定时任务调用获取不到用户信息");
-		}
-		if (userCtx != null) {
-			inputPersonId = userCtx.getId().toString();
-			inputPerson = userCtx.getName();
-		}
+		User user = UserUtil.getCurrentUser();
+		return addInStandingSchemeBatchInternal(linkId, ids, user.getId().toString(), user.getName(), false);
+	}
+
+	/**
+	 * 定时任务自动引入入库费用，并将新增费用明细置为已审核。
+	 * @param linkId 入库联系单号
+	 * @param ids 费用方案编号集合
+	 * @return 处理结果
+	 * @throws Exception
+	 */
+	@Transactional(readOnly = false)
+	public String addInStandingSchemeBatchForAutoJob(String linkId, List<String> ids) throws Exception {
+		return addInStandingSchemeBatchInternal(linkId, ids, "SYSTEM", "SYSTEM", true);
+	}
+
+	private String addInStandingSchemeBatchInternal(String linkId, List<String> ids, String inputPersonId, String inputPerson, boolean autoAudit) throws Exception {
 		Date now = new Date();//统一时间
 		//获得入库联系单对象如果费用完成的不需要引入新的费用
 		List<BisEnterStock> enterStockList = enterStockDao.find(Restrictions.and(Restrictions.eq("delFlag","0"),Restrictions.eq("linkId",linkId)));
@@ -698,7 +704,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 							standingBook.setChargeDate(now);
 							standingBook.setCostDate(now);
 							
-							standingBook.setExamineSign(0);
+							setAutoAuditInfo(standingBook, autoAudit, now);
 							standingBook.setShareSign(0);
 							standingBook.setReconcileSign(0);
 							standingBook.setSettleSign(0);
@@ -744,14 +750,37 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 		}
 		return "success";
 	}
+
+	private void setAutoAuditInfo(BisStandingBook standingBook, boolean autoAudit, Date now) {
+		if (autoAudit) {
+			standingBook.setExamineSign(1);
+			standingBook.setExaminePerson("SYSTEM");
+			standingBook.setExamineDate(now);
+		} else {
+			standingBook.setExamineSign(0);
+		}
+	}
 	
-	//生成分拣费(按SKU分拣的)
+	/**
+	 为昨天完成上架的入库商品生成待处理的入库费用。
+	 查询范围为[昨天00:00:00，今天00:00:00)。
+	 *
+	 * @return number of processed enter stocks
+	 * @throws Exception when fee generation fails
+	 */
 	@Transactional(readOnly = false)
 	public int autoGeneratePendingInFees() throws Exception {
 		int processedCount = 0;
-		Date endTime = new Date();
-		Date beginTime = DateUtils.addMinute(endTime, -45);
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		Date endTime = calendar.getTime();
+		calendar.add(Calendar.DAY_OF_MONTH, -1);
+		Date beginTime = calendar.getTime();
 		List<BisEnterStock> enterStocks = enterStockService.findNeedAutoGenerateFeeEnterStocks(beginTime, endTime);
+		logger.info("符合条件的入库联系单数量 [{}]", enterStocks == null ? 0 : enterStocks.size());
 		if (enterStocks == null || enterStocks.isEmpty()) {
 			return processedCount;
 		}
@@ -759,7 +788,7 @@ public class StandingBookService extends BaseService<BisStandingBook, Integer> {
 			if (enterStock == null || StringUtils.isNull(enterStock.getLinkId()) || StringUtils.isNull(enterStock.getFeeId())) {
 				continue;
 			}
-			addInStandingSchemeBatch(enterStock.getLinkId(), Collections.singletonList(enterStock.getFeeId()));
+			addInStandingSchemeBatchForAutoJob(enterStock.getLinkId(), Collections.singletonList(enterStock.getFeeId()));
 			processedCount++;
 		}
 		return processedCount;
