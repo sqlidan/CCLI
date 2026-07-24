@@ -6,60 +6,109 @@
     <%@ include file="/WEB-INF/views/include/easyui.jsp" %>
 </head>
 <body class="easyui-layout" style="font-family:'Microsoft YaHei'">
-<div data-options="region:'north',split:true,border:false" style="height:145px">
-    <div class="easyui-layout" data-options="fit:true">
-        <div class="datagrid-toolbar" data-options="region:'north',split:false,border:false" style="height:auto;">
-            <shiro:hasPermission name="bis:checkbook:update">
-                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="approvePass()">审批通过</a>
-            </shiro:hasPermission>
+<form id="autoDetailForm" action="${ctx}/cost/standingBook/saveAutoDetail" method="post">
+    <div data-options="region:'north',split:true,border:false" style="height:145px">
+        <div class="easyui-layout" data-options="fit:true">
+            <div class="datagrid-toolbar" data-options="region:'north',split:false,border:false" style="height:auto;">
+                <shiro:hasPermission name="bis:checkbook:update">
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="saveAutoDetail()">保存</a>
+                    <span class="toolbar-item dialog-tool-separator"></span>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addInfo()">添加</a>
+                    <span class="toolbar-item dialog-tool-separator"></span>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delInfo()">删除</a>
+                </shiro:hasPermission>
+            </div>
+            <div data-options="region:'center',split:false,border:false" style="padding:8px 10px 0 10px;">
+                <table>
+                    <tr>
+                        <td style="width:70px;">是否确认：</td>
+                        <td>
+                            <select id="isTrue" name="isTrue" class="easyui-combobox" data-options="width:150,required:'required'">
+                                <option value="1">是</option>
+                                <option value="2">否</option>
+                            </select>
+                        </td>
+                        <td style="width:70px;">结算方式：</td>
+                        <td>
+                            <select id="jsfs" name="jsfs" class="easyui-combobox"
+                                    data-options="width:150,required:'required',valueField:'id',textField:'text',data:[{id:'Y',text:'月结'},{id:'X',text:'现结'}]"></select>
+                        </td>
+                        <td style="width:80px;">对账单号：</td>
+                        <td><input id="codeNum" name="codeNum" class="easyui-validatebox" readonly="readonly" data-options="width:150" value="${obj.codeNum}"/></td>
+                        <td style="width:70px;">账单客户：</td>
+                        <td>
+                            <input class="easyui-validatebox" readonly="readonly" data-options="width:180" value="${obj.custom}"/>
+                            <select id="customID" name="customID" style="display:none;"></select>
+                        </td>
+                        <td style="width:70px;">账单年月：</td>
+                        <td><input class="easyui-validatebox" readonly="readonly" data-options="width:100" value="${obj.yearMonth}"/></td>
+                    </tr>
+                    <tr style="height:5px;"></tr>
+                    <tr>
+                        <td>制单人：</td>
+                        <td><input class="easyui-validatebox" readonly="readonly" data-options="width:150" value="${obj.operator}"/></td>
+                        <td>备注：</td>
+                        <td colspan="7"><textarea id="remark" name="remark" rows="2" cols="110" style="font-size:12px;font-family:'Microsoft YaHei'">${obj.remark}</textarea></td>
+                    </tr>
+                </table>
+            </div>
         </div>
-        <div data-options="region:'center',split:false,border:false" style="padding:8px 10px 0 10px;">
-            <table>
-                <tr>
-                    <td style="width:70px;">是否确认：</td>
-                    <td><input id="isTrueText" class="easyui-validatebox" readonly="readonly" data-options="width:150"/></td>
-                    <td style="width:70px;">结算方式：</td>
-                    <td><input id="jsfsText" class="easyui-validatebox" readonly="readonly" data-options="width:150"/></td>
-                    <td style="width:80px;">对账单号：</td>
-                    <td><input id="codeNum" class="easyui-validatebox" readonly="readonly" data-options="width:150" value="${obj.codeNum}"/></td>
-                    <td style="width:70px;">账单客户：</td>
-                    <td><input class="easyui-validatebox" readonly="readonly" data-options="width:180" value="${obj.custom}"/></td>
-                    <td style="width:70px;">账单年月：</td>
-                    <td><input class="easyui-validatebox" readonly="readonly" data-options="width:100" value="${obj.yearMonth}"/></td>
-                </tr>
-                <tr style="height:5px;"></tr>
-                <tr>
-                    <td>制单人：</td>
-                    <td><input class="easyui-validatebox" readonly="readonly" data-options="width:150" value="${obj.operator}"/></td>
-                    <td>备注：</td>
-                    <td colspan="7"><textarea rows="2" cols="110" readonly="readonly" style="font-size:12px;font-family:'Microsoft YaHei'">${obj.remark}</textarea></td>
-                </tr>
-            </table>
+    </div>
+    <div data-options="region:'center',split:true,border:false">
+        <div id="zdiv1" class="easyui-panel" data-options="title:'入库列表',height:100">
+            <table id="dg1"></table>
+        </div>
+        <div style="height:5px;"></div>
+        <div id="zdiv2" class="easyui-panel" data-options="title:'出库列表',height:100">
+            <table id="dg2"></table>
+        </div>
+        <div style="height:5px;"></div>
+        <div id="zdiv3" class="easyui-panel" data-options="title:'货转列表',height:100">
+            <table id="dg3"></table>
         </div>
     </div>
-</div>
-<div data-options="region:'center',split:true,border:false">
-    <div id="zdiv1" class="easyui-panel" data-options="title:'入库列表',height:100">
-        <table id="dg1"></table>
-    </div>
-    <div style="height:5px;"></div>
-    <div id="zdiv2" class="easyui-panel" data-options="title:'出库列表',height:100">
-        <table id="dg2"></table>
-    </div>
-    <div style="height:5px;"></div>
-    <div id="zdiv3" class="easyui-panel" data-options="title:'货转列表',height:100">
-        <table id="dg3"></table>
-    </div>
-</div>
+    <div id="dlg"></div>
+</form>
 <script type="text/javascript">
 var codeNum = '${obj.codeNum}';
+var d;
+
 $(document).ready(function () {
-    $("#isTrueText").val('${obj.isTrue}' == '1' ? '是' : '否');
-    $("#jsfsText").val('${obj.jsfs}' == 'Y' ? '月结' : ('${obj.jsfs}' == 'X' ? '现结' : ''));
+    $("#isTrue").combobox("setValue", "${obj.isTrue}");
+    $("#jsfs").combobox("setValue", "${obj.jsfs}");
+    $("#customID").combobox({
+        method: "GET",
+        url: "${ctx}/base/client/getClientAll?tim=1&setid=${obj.customID}",
+        valueField: 'ids',
+        textField: 'clientName',
+        mode: 'remote',
+        onLoadSuccess: function () {
+            if ("${obj.customID}" != "") {
+                $("#customID").combobox("select", Number("${obj.customID}"));
+            }
+        }
+    });
     inTInfo("dg1", 1);
     inTInfo("dg2", 2);
     inTInfo("dg3", 3);
+    $("#autoDetailForm").form({
+        onSubmit: function () {
+            return $(this).form("validate");
+        },
+        success: function (data) {
+            if ("success" == data) {
+                parent.$.easyui.messager.show({title: "操作提示", msg: "保存成功", position: "bottomRight"});
+                refreshAuditList();
+            } else {
+                parent.$.messager.alert("提示", "保存失败，请检查当前数据状态。");
+            }
+        }
+    });
 });
+
+function saveAutoDetail() {
+    $("#autoDetailForm").submit();
+}
 
 function inTInfo(sTableid, nType) {
     $('#' + sTableid).datagrid({
@@ -72,6 +121,7 @@ function inTInfo(sTableid, nType) {
         pagination: false,
         rownumbers: true,
         columns: [[
+            {field: 'chekbox', title: '选择', checkbox: true, sortable: false, width: 50},
             {field: 'LINK_ID', title: '联系单', sortable: false, width: 100},
             {field: 'BILL_NUM', title: '提单号', sortable: false, width: 100},
             {field: 'CUSTOMS_NAME', title: '委托单位', sortable: false, width: 100},
@@ -169,34 +219,85 @@ function mergeGroup(sTableid, startIndex, rowSpan, money) {
     }
 }
 
-function approvePass() {
-    submitAudit('approveAuto', '确认审批通过当前对账单？', '审批通过成功。');
+function addInfo() {
+    d = $("#dlg").dialog({
+        title: '对账单管理添加明细',
+        width: 1000,
+        height: 500,
+        href: '${ctx}/cost/standingBook/addInfo/${obj.codeNum}',
+        maximizable: true,
+        modal: true,
+        buttons: [{
+            text: '确认',
+            handler: function () {
+                var ids1 = getTabCheckIds("sdg1");
+                var ids2 = getTabCheckIds("sdg2");
+                var ids3 = getTabCheckIds("sdg3");
+                postAddAutoInfo(ids1, ids2, ids3);
+            }
+        }, {
+            text: '取消',
+            handler: function () {
+                d.panel('close');
+            }
+        }]
+    });
 }
 
-function submitAudit(action, message, successMessage) {
-    if (codeNum == null || codeNum == "") {
-        parent.$.messager.alert('提示', '未找到待审批对账单。');
-        return;
-    }
-    parent.$.messager.confirm('提示', message, function (data) {
+function postAddAutoInfo(ids1, ids2, ids3) {
+    $.post('${ctx}/cost/standingBook/postaddAutoInfo', {
+        code: codeNum,
+        ids1: ids1,
+        ids2: ids2,
+        ids3: ids3
+    }, function (data) {
+        if (data != null && "success" == data.endStr) {
+            d.panel('close');
+            reloadDetails();
+        } else {
+            parent.$.messager.alert("提示", "添加失败，请检查选择的明细。");
+        }
+    }, "json");
+}
+
+function delInfo() {
+    parent.$.messager.confirm('提示', '确认删除选中的对账单明细？', function (data) {
         if (data) {
-            $.ajax({
-                type: 'post',
-                url: "${ctx}/cost/standingBook/" + action + "/" + codeNum,
-                success: function (data) {
-                    if ("success" == data) {
-                        parent.$.easyui.messager.show({title: "操作提示", msg: successMessage, position: "bottomRight"});
-                        refreshAuditList();
-                        window.parent.mainpage.mainTabs.closeCurrentTab();
-                    } else {
-                        parent.$.messager.alert('提示', '审批处理失败，请检查当前数据状态。');
-                        refreshAuditList();
-                        window.parent.mainpage.mainTabs.closeCurrentTab();
-                    }
+            $.post('${ctx}/cost/standingBook/postdelAutoInfo', {
+                code: codeNum,
+                ids1: getTabCheckIds("dg1"),
+                ids2: getTabCheckIds("dg2"),
+                ids3: getTabCheckIds("dg3")
+            }, function (data) {
+                if (data != null && "success" == data.endStr) {
+                    reloadDetails();
+                } else {
+                    parent.$.messager.alert("提示", "删除失败，请先勾选要删除的明细。");
                 }
-            });
+            }, "json");
         }
     });
+}
+
+function getTabCheckIds(tabId) {
+    var reIds = "";
+    var rows = $("#" + tabId).datagrid('getChecked');
+    if (rows != null && rows.length > 0) {
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i]["IDS"] == null || rows[i]["IDS"] == "") {
+                continue;
+            }
+            reIds = reIds == "" ? rows[i]["IDS"] : reIds + "," + rows[i]["IDS"];
+        }
+    }
+    return reIds;
+}
+
+function reloadDetails() {
+    inTInfo("dg1", 1);
+    inTInfo("dg2", 2);
+    inTInfo("dg3", 3);
+    refreshAuditList();
 }
 
 function refreshAuditList() {

@@ -1799,6 +1799,9 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		return getAutoCheckingBook(codeNum);
 	}
 
+	/**
+	 * 审批对账单明细查询，分组规则与应收对账单新增明细保持一致。
+	 */
 	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> getAutoCheckingBookInfoList(String codeNum, int ntype) {
 		if (!StringUtils.hasText(codeNum) || ntype <= 0) {
@@ -1819,14 +1822,42 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		sql.append(" t.link_id, t.bill_num, t.FEE_CODE, min(t.fee_name) as fee_name, ");
 		sql.append(" min(CUSTOMS_NAME) as CUSTOMS_NAME, min(CURRENCY) as CURRENCY, ");
 		sql.append(" BILL_DATE, EXCHANGE_RATE, PAY_SIGN, ");
-		sql.append(" min(to_char(t.standing_num)) as ids ");
+		sql.append(" listagg(t.standing_num, ',') WITHIN GROUP (order by t.standing_num) as ids ");
 		sql.append(" from BIS_STANDING_BOOK t ");
 		sql.append(" where t.EXAMINE_SIGN = 1 ");
 		sql.append(" and t.IF_RECEIVE = '1' ");
 		sql.append(" and t.CRK_SIGN = :ntype ");
 		appendStandingNumCondition(sql, params, standingNumList);
 		sql.append(" group by t.link_id, t.bill_num, t.FEE_CODE, PRICE, BILL_DATE, EXCHANGE_RATE, PAY_SIGN ");
-		sql.append(" ) a where a.RMB is not null ");
+		sql.append(" ) a where a.RMB > 0 ");
+		sql.append(" order by bill_num, link_id ");
+		return createSQLQuery(sql.toString(), params).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Map<String, Object>> getAutoCheckingBookGroupInfoList(BisCheckingBookAuto autoCheckingBook, int ntype) {
+		if (autoCheckingBook == null || ntype <= 0 || !StringUtils.hasText(autoCheckingBook.getCustomID())) {
+			return new ArrayList<Map<String, Object>>();
+		}
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("ntype", ntype);
+		params.put("dz", autoCheckingBook.getCodeNum());
+		params.put("custom", autoCheckingBook.getCustomID());
+		StringBuffer sql = new StringBuffer("select * from( ");
+		sql.append(" select sum(nvl(SHOULD_RMB,0)) as RMB, ");
+		sql.append(" t.link_id, t.bill_num, t.FEE_CODE, min(t.fee_name) as fee_name, ");
+		sql.append(" min(CUSTOMS_NAME) as CUSTOMS_NAME, min(CURRENCY) as CURRENCY, ");
+		sql.append(" BILL_DATE, EXCHANGE_RATE, PAY_SIGN, ");
+		sql.append(" listagg(t.standing_num, ',') WITHIN GROUP (order by t.standing_num) as ids ");
+		sql.append(" from BIS_STANDING_BOOK t ");
+		sql.append(" where t.EXAMINE_SIGN = 1 ");
+		sql.append(" and t.IF_RECEIVE = '1' ");
+		sql.append(" and t.CRK_SIGN = :ntype ");
+		sql.append(" and (t.RECONCILE_SIGN != 1 or t.RECONCILE_SIGN is null) ");
+		sql.append(" and (t.RECONCILE_NUM != :dz or t.RECONCILE_NUM is null) ");
+		sql.append(" and t.CUSTOMS_NUM = :custom ");
+		sql.append(" group by t.link_id, t.bill_num, t.FEE_CODE, PRICE, BILL_DATE, EXCHANGE_RATE, PAY_SIGN ");
+		sql.append(" ) a where a.RMB > 0 ");
 		sql.append(" order by bill_num, link_id ");
 		return createSQLQuery(sql.toString(), params).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
 	}
@@ -1836,6 +1867,7 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			return 0;
 		}
 		autoCheckingBook.setCodeNum(codeNum);
+		autoCheckingBook.setStandingNumList(getAutoStandingNumList(autoCheckingBook));
 		if (!StringUtils.hasText(autoCheckingBook.getCodeNum())
 				|| !StringUtils.hasText(autoCheckingBook.getStandingNumList())
 				|| countAutoCheckingBookByYearMonth(autoCheckingBook.getYearMonth(), autoCheckingBook.getCustomID()) > 0) {
@@ -1894,6 +1926,60 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 		updateStandingBookReconcileInfo(codeNum, autoCheckingBook.getStandingNumList());
 		updateAutoCheckingBookAuditState(codeNum, 1);
 		return "success";
+	}
+
+	public String saveAutoCheckingBookDetail(BisCheckingBookAuto autoCheckingBook) {
+		if (autoCheckingBook == null || !StringUtils.hasText(autoCheckingBook.getCodeNum())) {
+			return "error";
+		}
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("codeNum", autoCheckingBook.getCodeNum());
+		params.put("isTrue", autoCheckingBook.getIsTrue());
+		params.put("jsfs", autoCheckingBook.getJsfs());
+		params.put("remark", autoCheckingBook.getRemark());
+		String sql = "update BIS_CHEKING_BOOK_AUTO set ISTRUE = :isTrue, JSFS = :jsfs, REMARK = :remark, UPTIME = sysdate where CODENUM = :codeNum";
+		return createSQLQuery(sql, params).executeUpdate() == 1 ? "success" : "error";
+	}
+
+	public Map<String, Object> addAutoCheckingBookInfo(String codeNum, String ids) {
+		Map<String, Object> retMap = new HashMap<String, Object>();
+		retMap.put("endStr", "error");
+		BisCheckingBookAuto autoCheckingBook = getAutoCheckingBook(codeNum);
+		if (autoCheckingBook == null || !StringUtils.hasText(ids)) {
+			return retMap;
+		}
+		String standingNumList = mergeStandingNumList(autoCheckingBook.getStandingNumList(), ids);
+		if (updateAutoCheckingBookStandingNumList(codeNum, standingNumList)) {
+			retMap.put("endStr", "success");
+		}
+		return retMap;
+	}
+
+	public Map<String, Object> deleteAutoCheckingBookInfo(String codeNum, String ids) {
+		Map<String, Object> retMap = new HashMap<String, Object>();
+		retMap.put("endStr", "error");
+		BisCheckingBookAuto autoCheckingBook = getAutoCheckingBook(codeNum);
+		if (autoCheckingBook == null || !StringUtils.hasText(ids)) {
+			return retMap;
+		}
+		String standingNumList = removeStandingNumList(autoCheckingBook.getStandingNumList(), ids);
+		if (updateAutoCheckingBookStandingNumList(codeNum, standingNumList)) {
+			retMap.put("endStr", "success");
+		}
+		return retMap;
+	}
+
+	/**
+	 * 更新待审批对账单已关联的费用明细编号。
+	 * 使用原生 SQL 仅更新目标字段，避免 Hibernate 更新实体时按 CLOB 方式绑定，
+	 * 与旧版 Oracle JDBC 驱动不兼容而报错。
+	 */
+	private boolean updateAutoCheckingBookStandingNumList(String codeNum, String standingNumList) {
+		String sql = "update BIS_CHEKING_BOOK_AUTO set STANDING_NUM_LIST = :standingNumList, UPTIME = sysdate where CODENUM = :codeNum";
+		SQLQuery sqlQuery = getSession().createSQLQuery(sql);
+		sqlQuery.setParameter("standingNumList", standingNumList, StandardBasicTypes.STRING);
+		sqlQuery.setParameter("codeNum", codeNum, StandardBasicTypes.STRING);
+		return sqlQuery.executeUpdate() == 1;
 	}
 
 	public String rejectAutoCheckingBook(String codeNum) {
@@ -1969,6 +2055,80 @@ public class BisCheckingBookDao  extends HibernateDao<BisCheckingBook, String> {
 			String sql = "update BIS_STANDING_BOOK set RECONCILE_NUM = :codeNum, RECONCILE_SIGN = '1' where STANDING_NUM = :standingNum";
 			createSQLQuery(sql, params).executeUpdate();
 		}
+	}
+
+	private String getAutoStandingNumList(BisCheckingBookAuto autoCheckingBook) {
+		List<String> standingNums = new ArrayList<String>();
+		for (int ntype = 1; ntype <= 3; ntype++) {
+			List<Map<String, Object>> groupedList = getAutoCheckingBookGroupInfoList(autoCheckingBook, ntype);
+			for (Map<String, Object> item : groupedList) {
+				Object ids = item.get("IDS");
+				if (ids == null) {
+					ids = item.get("ids");
+				}
+				if (ids == null || !StringUtils.hasText(ids.toString())) {
+					continue;
+				}
+				String[] splitIds = ids.toString().split(",");
+				for (String splitId : splitIds) {
+					if (StringUtils.hasText(splitId)) {
+						standingNums.add(splitId.trim());
+					}
+				}
+			}
+		}
+		StringBuilder standingNumList = new StringBuilder();
+		for (String standingNum : standingNums) {
+			if (standingNumList.length() > 0) {
+				standingNumList.append(",");
+			}
+			standingNumList.append(standingNum);
+		}
+		return standingNumList.toString();
+	}
+
+	private String mergeStandingNumList(String oldStandingNumList, String newStandingNumList) {
+		List<String> standingNums = new ArrayList<String>();
+		appendStandingNums(standingNums, oldStandingNumList);
+		appendStandingNums(standingNums, newStandingNumList);
+		return joinStandingNums(standingNums);
+	}
+
+	private String removeStandingNumList(String oldStandingNumList, String deleteStandingNumList) {
+		List<String> standingNums = new ArrayList<String>();
+		List<String> deleteStandingNums = new ArrayList<String>();
+		appendStandingNums(standingNums, oldStandingNumList);
+		appendStandingNums(deleteStandingNums, deleteStandingNumList);
+		for (String deleteStandingNum : deleteStandingNums) {
+			standingNums.remove(deleteStandingNum);
+		}
+		return joinStandingNums(standingNums);
+	}
+
+	private void appendStandingNums(List<String> standingNums, String standingNumList) {
+		if (!StringUtils.hasText(standingNumList)) {
+			return;
+		}
+		String[] splitIds = standingNumList.split(",");
+		for (String splitId : splitIds) {
+			if (StringUtils.hasText(splitId)) {
+				String standingNum = splitId.trim();
+				if (!standingNums.contains(standingNum)) {
+					standingNums.add(standingNum);
+				}
+			}
+		}
+	}
+
+	private String joinStandingNums(List<String> standingNums) {
+		StringBuilder standingNumList = new StringBuilder();
+		for (String standingNum : standingNums) {
+			if (standingNumList.length() > 0) {
+				standingNumList.append(",");
+			}
+			standingNumList.append(standingNum);
+		}
+		return standingNumList.toString();
 	}
 
 	private void appendStandingNumCondition(StringBuffer sql, Map<String, Object> params, String standingNumList) {

@@ -169,6 +169,43 @@ public class StandingBookController extends BaseController {
         return getList;
     }
 
+    /**
+     * 审批对账单-对账单明细页面保存表头信息。
+     * 页面：standingBookAuditDetail.jsp，保存是否确认、结算方式、备注等待审批主表信息。
+     */
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "saveAutoDetail", method = RequestMethod.POST)
+    @ResponseBody
+    public String saveAutoDetail(BisCheckingBookAuto obj) {
+        return bisCheckingBookService.saveAutoCheckingBookDetail(obj);
+    }
+
+    /**
+     * 审批对账单-对账单明细页面添加费用明细。
+     * 页面：standingBookAuditDetail.jsp，弹出应收对账单添加明细页面后，将勾选的入库、出库、货转明细追加到待审批对账单。
+     */
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "postaddAutoInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> postAddAutoInfo(HttpServletRequest request) {
+        String codeNum = request.getParameter("code");
+        String ids = joinRequestIds(request);
+        return bisCheckingBookService.addAutoCheckingBookInfo(codeNum, ids);
+    }
+
+    /**
+     * 审批对账单-对账单明细页面删除费用明细。
+     * 页面：standingBookAuditDetail.jsp，将当前待审批对账单中勾选的入库、出库、货转明细移除。
+     */
+    @RequiresPermissions("bis:checkbook:update")
+    @RequestMapping(value = "postdelAutoInfo", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> postDelAutoInfo(HttpServletRequest request) {
+        String codeNum = request.getParameter("code");
+        String ids = joinRequestIds(request);
+        return bisCheckingBookService.deleteAutoCheckingBookInfo(codeNum, ids);
+    }
+
     @RequiresPermissions("bis:checkbook:update")
     @RequestMapping(value = "approveAuto/{codeNum}", method = RequestMethod.POST)
     @ResponseBody
@@ -196,6 +233,34 @@ public class StandingBookController extends BaseController {
     @ResponseBody
     public String deleteAutoBatch(@RequestParam("codeNums") String codeNums) {
         return bisCheckingBookService.deleteAutoCheckingBooks(codeNums);
+    }
+
+    /**
+     * 合并对账单明细三个分组页签提交的明细ID。
+     * ids1、ids2、ids3分别对应入库、出库、货转列表。
+     */
+    private String joinRequestIds(HttpServletRequest request) {
+        String ids1 = request.getParameter("ids1") != null && !"".equals(request.getParameter("ids1")) ? request.getParameter("ids1") : "";
+        String ids2 = request.getParameter("ids2") != null && !"".equals(request.getParameter("ids2")) ? request.getParameter("ids2") : "";
+        String ids3 = request.getParameter("ids3") != null && !"".equals(request.getParameter("ids3")) ? request.getParameter("ids3") : "";
+        StringBuilder ids = new StringBuilder();
+        appendRequestIds(ids, ids1);
+        appendRequestIds(ids, ids2);
+        appendRequestIds(ids, ids3);
+        return ids.toString();
+    }
+
+    /**
+     * 追加单个分组页签的明细ID，多个分组之间用逗号拼接。
+     */
+    private void appendRequestIds(StringBuilder ids, String value) {
+        if (value == null || "".equals(value)) {
+            return;
+        }
+        if (ids.length() > 0) {
+            ids.append(",");
+        }
+        ids.append(value);
     }
 
     private Map<String, String> getDefaultCheckingPeriod() {

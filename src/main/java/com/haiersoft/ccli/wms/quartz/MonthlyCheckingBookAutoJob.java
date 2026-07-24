@@ -18,6 +18,11 @@ public class MonthlyCheckingBookAutoJob implements Job {
     @Autowired
     private BisCheckingBookService bisCheckingBookService;
 
+    /**
+     * 生成账单主表
+     * @param context
+     * @throws JobExecutionException
+     */
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         ScheduleJob scheduleJob = (ScheduleJob) context.getMergedJobDataMap().get("scheduleJob");

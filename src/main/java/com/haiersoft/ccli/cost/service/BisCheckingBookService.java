@@ -61,6 +61,21 @@ public class BisCheckingBookService extends BaseService<BisCheckingBook, String>
     }
 
     @Transactional(readOnly = false)
+    public String saveAutoCheckingBookDetail(BisCheckingBookAuto autoCheckingBook) {
+        return bisCheckingBookDao.saveAutoCheckingBookDetail(autoCheckingBook);
+    }
+
+    @Transactional(readOnly = false)
+    public Map<String, Object> addAutoCheckingBookInfo(String codeNum, String ids) {
+        return bisCheckingBookDao.addAutoCheckingBookInfo(codeNum, ids);
+    }
+
+    @Transactional(readOnly = false)
+    public Map<String, Object> deleteAutoCheckingBookInfo(String codeNum, String ids) {
+        return bisCheckingBookDao.deleteAutoCheckingBookInfo(codeNum, ids);
+    }
+
+    @Transactional(readOnly = false)
     public String approveAutoCheckingBook(String codeNum) {
         try {
             String result = bisCheckingBookDao.approveAutoCheckingBook(codeNum);
