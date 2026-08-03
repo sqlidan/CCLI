@@ -8,8 +8,10 @@
 <body>
 <div id="tb" style="padding:5px;height:auto">
     <form id="searchFrom" action="">
-        <input type="text" name="filter_LIKES_customerName" class="easyui-validatebox" data-options="width:160,prompt:'客户名称'"/>
-        <input type="text" name="filter_EQS_accountPeriod" class="easyui-validatebox" data-options="width:120,prompt:'账期 yyyy-MM'"/>
+        <select class="easyui-combobox" id="customerName" name="filter_EQS_customerName" data-options="width:180,prompt:'客户名称'">
+            <option value=""></option>
+        </select>
+        <input id="accountPeriod" name="filter_EQS_accountPeriod" type="text" class="easyui-my97" datefmt="yyyy-MM" data-options="width:120,prompt:'账期'"/>
         <input type="text" name="filter_LIKES_feeName" class="easyui-validatebox" data-options="width:150,prompt:'费目'"/>
         <input type="text" name="filter_GED_statDate" class="easyui-my97" datefmt="yyyy-MM-dd" data-options="width:150,prompt:'统计日期开始'"/>
         -
@@ -33,7 +35,7 @@ $(function(){
         method: "get",
         url: '${ctx}/cost/receivableFeeStat/json',
         fit: true,
-        fitColumns: false,
+        fitColumns: true,
         border: false,
         sortName: 'statDate',
         sortOrder: 'desc',
@@ -54,9 +56,9 @@ $(function(){
             {field:'amount', title:'金额', sortable:true, width:120, align:'right',
                 formatter:function(value) {
                     if (value == null || value === '') {
-                        return '0.0000';
+                        return '0.00';
                     }
-                    return Number(value).toFixed(4);
+                    return Number(value).toFixed(2);
                 }
             }
         ]],
@@ -64,6 +66,14 @@ $(function(){
         enableHeaderContextMenu: true,
         enableRowContextMenu: false,
         toolbar:'#tb'
+    });
+
+    $('#customerName').combobox({
+        method: 'GET',
+        url: '${ctx}/base/client/getClientAll?tim=1',
+        valueField: 'clientName',
+        textField: 'clientName',
+        mode: 'remote'
     });
 });
 
@@ -73,8 +83,15 @@ function cx(){
 }
 
 function exportExcel() {
+    var statDateStart = $("input[name='filter_GED_statDate']").val();
+    var statDateEnd = $("input[name='filter_LED_statDate']").val();
+    if (statDateStart == '' || statDateEnd == '') {
+        parent.$.easyui.messager.alert("请选择统计日期开始和结束后再导出！");
+        return;
+    }
     var url = "${ctx}/cost/receivableFeeStat/export";
-    $("#searchFrom").attr("action", url).submit();
+    var queryString = $("#searchFrom").serialize();
+    window.location.href = url + (queryString == '' ? '' : '?' + queryString);
 }
 </script>
 </body>

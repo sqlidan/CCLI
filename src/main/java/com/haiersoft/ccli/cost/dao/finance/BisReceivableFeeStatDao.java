@@ -50,18 +50,19 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
     }
 
     /**
-     * 保留原非堆存费查询口径：BIS_STANDING_BOOK 关联费目表，仅把查询结果交给 Java 插入。
+     * 查询非堆存应收费用，按客户和费目代码汇总。
+     * 同一统计日期内，同一客户的同一费目只生成一条统计记录。
      */
     @SuppressWarnings("unchecked")
     private List<BisReceivableFeeStat> queryNonStorageFeeStats(Date statDate, Date nextDate) {
         StringBuffer sql = new StringBuffer();
         sql.append(" select ");
-        sql.append(" nvl(book.CUSTOMS_NAME, 'UNKNOWN') as customerName, ");
+        sql.append(" min(nvl(book.CUSTOMS_NAME, 'UNKNOWN')) as customerName, ");
         sql.append(" :accountPeriod as accountPeriod, ");
         sql.append(" :statDate as statDate, ");
         sql.append(" book.FEE_CODE as feeCode, ");
-        sql.append(" nvl(fc.NAME_C, book.FEE_NAME) as feeName, ");
-        sql.append(" nvl(book.SHOULD_RMB, 0) as amount ");
+        sql.append(" min(nvl(fc.NAME_C, book.FEE_NAME)) as feeName, ");
+        sql.append(" sum(nvl(book.SHOULD_RMB, 0)) as amount ");
         sql.append(" from BIS_STANDING_BOOK book ");
         sql.append(" left join BASE_EXPENSE_CATEGORY_INFO fc on fc.CODE = book.FEE_CODE ");
         sql.append(" where book.IF_RECEIVE = '1' ");
@@ -69,7 +70,8 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
         sql.append(" and nvl(fc.FEE_TYPE, 0) <> 2 ");
         sql.append(" and book.INPUT_DATE >= :statDate ");
         sql.append(" and book.INPUT_DATE < :nextDate ");
-        sql.append(" and nvl(book.SHOULD_RMB, 0) <> 0 ");
+        sql.append(" group by nvl(book.CUSTOMS_NUM, 'UNKNOWN'), book.FEE_CODE ");
+        sql.append(" having sum(nvl(book.SHOULD_RMB, 0)) > 0 ");
 
         SQLQuery query = createReceivableFeeStatQuery(sql.toString());
         query.setString("accountPeriod", buildAccountPeriod(statDate));
@@ -82,17 +84,19 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
     }
 
     /**
-     * 保留原堆存费查询口径：BIS_ASN_ACTION 关联费用方案、费目、汇率、客户表，仅把查询结果交给 Java 插入。
+     * 查询堆存应收费用，保留按箱、毛重、净重的原计费公式，按客户和费目代码汇总。
+     * 堆存费尚未生成台账时，从 BIS_ASN_ACTION 取得客户、费用方案及计费数量。
      */
     @SuppressWarnings("unchecked")
     private List<BisReceivableFeeStat> queryStorageFeeStats(Date statDate, Date nextDate) {
         StringBuffer sql = new StringBuffer();
         sql.append(" select ");
-        sql.append(" nvl(client.CLIENT_NAME, 'UNKNOWN') as customerName, ");
+        sql.append(" min(nvl(client.CLIENT_NAME, 'UNKNOWN')) as customerName, ");
         sql.append(" :accountPeriod as accountPeriod, ");
         sql.append(" :statDate as statDate, ");
         sql.append(" scheme.FEE_CODE as feeCode, ");
-        sql.append(" nvl(fc.NAME_C, scheme.FEE_NAME) as feeName, ");
+        sql.append(" min(nvl(fc.NAME_C, scheme.FEE_NAME)) as feeName, ");
+        sql.append(" sum( ");
         sql.append(" ( ");
         sql.append("   case ");
         sql.append("     when scheme.BILLING = '1' then nvl(scheme.UNIT, 0) * nvl(action.NUM, 0) ");
@@ -100,6 +104,7 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
         sql.append("     when scheme.BILLING = '3' then nvl(scheme.UNIT, 0) * nvl(action.NET_WEIGHT, 0) / 1000 ");
         sql.append("     else 0 ");
         sql.append("   end * nvl(tax.EXCHANGE_RATE, 1) ");
+        sql.append(" ) ");
         sql.append(" ) as amount ");
         sql.append(" from BIS_ASN_ACTION action ");
         sql.append(" inner join BASE_EXPENSE_SCHEME_INFO scheme on scheme.SCHEME_NUM = action.FEE_PLAN_ID ");
@@ -114,14 +119,15 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
         sql.append(" and scheme.FEE_CODE is not null ");
         sql.append(" and action.CHARGE_STA_DATE < :nextDate ");
         sql.append(" and (action.CHARGE_END_DATE is null or action.CHARGE_END_DATE >= :statDate) ");
-        sql.append(" and ( ");
-        sql.append("   case ");
+        sql.append(" group by nvl(to_char(action.JFCLIENT_ID), 'UNKNOWN'), scheme.FEE_CODE ");
+        sql.append(" having sum( ");
+        sql.append("   (case ");
         sql.append("     when scheme.BILLING = '1' then nvl(scheme.UNIT, 0) * nvl(action.NUM, 0) ");
         sql.append("     when scheme.BILLING = '2' then nvl(scheme.UNIT, 0) * nvl(action.GROSS_WEIGHT, 0) / 1000 ");
         sql.append("     when scheme.BILLING = '3' then nvl(scheme.UNIT, 0) * nvl(action.NET_WEIGHT, 0) / 1000 ");
         sql.append("     else 0 ");
         sql.append("   end * nvl(tax.EXCHANGE_RATE, 1) ");
-        sql.append(" ) <> 0 ");
+        sql.append(" ) ) > 0 ");
 
         SQLQuery query = createReceivableFeeStatQuery(sql.toString());
         query.setString("accountPeriod", buildAccountPeriod(statDate));
@@ -161,8 +167,12 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
     private List<BisReceivableFeeStat> filterValidStats(List<BisReceivableFeeStat> stats) {
         List<BisReceivableFeeStat> result = new ArrayList<BisReceivableFeeStat>();
         for (BisReceivableFeeStat stat : stats) {
-            if (stat != null && stat.getAmount() != null && BigDecimal.ZERO.compareTo(stat.getAmount()) != 0) {
-                stat.setAmount(stat.getAmount().setScale(4, RoundingMode.HALF_UP));
+            if (stat != null && stat.getAmount() != null) {
+                BigDecimal amount = stat.getAmount().setScale(2, RoundingMode.HALF_UP);
+                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+                stat.setAmount(amount);
                 result.add(stat);
             }
         }
@@ -170,12 +180,8 @@ public class BisReceivableFeeStatDao extends HibernateDao<BisReceivableFeeStat, 
     }
 
     private String buildAccountPeriod(Date statDate) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(statDate);
-        if (calendar.get(Calendar.DAY_OF_MONTH) >= 26) {
-            calendar.add(Calendar.MONTH, 1);
-        }
-        return new SimpleDateFormat("yyyy-MM").format(calendar.getTime());
+        // 账期与应收对账单的账单年月保持一致，按统计日期所在自然月记录。
+        return new SimpleDateFormat("yyyy-MM").format(statDate);
     }
 
     private Date truncate(Date date) {
