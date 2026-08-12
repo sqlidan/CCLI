@@ -225,6 +225,13 @@ public class StockReportService {
 	 public Page<Stock> getInOutStockStocks(Page<Stock> page,String isBonded,String itemNum,String cunNum,String stockIn,String linkId,String strTime,String endTime) {
 	        return stockReportDao.getInOutStockStocks(page,isBonded,itemNum, cunNum, stockIn, linkId, strTime, endTime);
 	 }
+
+	 /**
+	  * 按统计区间汇总出入库明细中的大类件数、净重及净重占比。
+	  */
+	 public List<Map<String, Object>> getInOutCategorySummary(String strTime, String endTime) {
+		 return stockReportDao.getInOutCategorySummary(strTime, endTime);
+	 }
 	 /**
 	  * 倒箱查验明细调整
 	  * @param page

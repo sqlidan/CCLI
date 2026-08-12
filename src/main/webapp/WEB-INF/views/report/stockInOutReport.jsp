@@ -26,6 +26,7 @@
 	        <input type="text" name="searchEndTime" class="easyui-my97" datefmt="yyyy-MM-dd HH:mm:ss"    data-options="width:150,prompt: '日期止',required:'required'"/>
 			<span class="toolbar-item dialog-tool-separator"></span>
             <a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="cx()">查询</a>
+			<a href="javascript(0)" class="easyui-linkbutton" iconCls="icon-standard-page-excel" plain="true" onclick="exportCategorySummary()">大类汇总导出</a>
 		</form>
 		 
         <shiro:hasPermission name="report:stock:without">
@@ -134,6 +135,17 @@ function report(ntype){
 		var url = "${ctx}/report/stock/inoutport";
 	 	$("#searchFrom").attr("action",url).submit();
 	}
+}
+
+// 导出大类汇总，起止日期是统计必填条件。
+function exportCategorySummary(){
+	var strTime = $("input[name='searchStrTime']").val();
+	var endTime = $("input[name='searchEndTime']").val();
+	if (!strTime || !endTime) {
+		parent.$.messager.alert('提示', '请选择起止日期后再导出！', 'warning');
+		return;
+	}
+	$("#searchFrom").attr("action", "${ctx}/report/stock/inoutCategorySummaryExport").submit();
 }
 //PDF 导出
 function reportpdf(ntype){

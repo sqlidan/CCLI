@@ -4155,4 +4155,65 @@ public class StockReportDao extends HibernateDao<Stock, String> {
         return getList;
     }
 
+    /**
+     * 按入库、分拣、出库三个作业类型汇总货物大类，统计件数、净重及净重占比。
+     */
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> getInOutCategorySummary(String strTime, String endTime) {
+        StringBuffer sql = new StringBuffer();
+        sql.append(" with source_data as ( ");
+        sql.append("   select case asn.if_second_enter when '1' then '入库' when '3' then '分拣' end as business_type, ");
+        sql.append("          sku.type_name as big_name, ");
+        sql.append("          tray.original_piece - tray.remove_piece as piece, ");
+        sql.append("          tray.net_weight as net_weight ");
+        sql.append("     from bis_tray_info tray ");
+        sql.append("    inner join bis_asn asn on asn.asn = tray.asn ");
+        sql.append("     left join base_sku_base_info sku on sku.sku_id = tray.sku_id ");
+        sql.append("    where tray.if_transfer = '0' ");
+        sql.append("      and asn.if_second_enter in ('1', '3') ");
+        sql.append("      and asn.inbound_date >= to_date(:strTime, 'yyyy-mm-dd hh24:mi:ss') ");
+        sql.append("      and asn.inbound_date < to_date(:endTime, 'yyyy-mm-dd hh24:mi:ss') ");
+        sql.append("   union all ");
+        sql.append("   select '出库' as business_type, ");
+        sql.append("          sku.type_name as big_name, ");
+        sql.append("          loading.piece as piece, ");
+        sql.append("          loading.net_weight as net_weight ");
+        sql.append("     from bis_loading_info loading ");
+        sql.append("     left join base_sku_base_info sku on sku.sku_id = loading.sku_id ");
+        sql.append("    where loading.loading_state = '2' ");
+        sql.append("      and loading.loading_time >= to_date(:strTime, 'yyyy-mm-dd hh24:mi:ss') ");
+        sql.append("      and loading.loading_time < to_date(:endTime, 'yyyy-mm-dd hh24:mi:ss') ");
+        sql.append(" ), summary_data as ( ");
+        sql.append("   select nvl(big_name, '未维护大类') as big_name, ");
+        sql.append("          sum(case when business_type = '入库' then nvl(piece, 0) else 0 end) as in_piece, ");
+        sql.append("          sum(case when business_type = '入库' then nvl(net_weight, 0) else 0 end) as in_net_weight, ");
+        sql.append("          sum(case when business_type = '分拣' then nvl(piece, 0) else 0 end) as sorting_piece, ");
+        sql.append("          sum(case when business_type = '分拣' then nvl(net_weight, 0) else 0 end) as sorting_net_weight, ");
+        sql.append("          sum(case when business_type = '出库' then nvl(piece, 0) else 0 end) as out_piece, ");
+        sql.append("          sum(case when business_type = '出库' then nvl(net_weight, 0) else 0 end) as out_net_weight ");
+        sql.append("     from source_data ");
+        sql.append("    group by nvl(big_name, '未维护大类') ");
+        sql.append(" ) ");
+        sql.append(" select big_name as BIG_NAME, ");
+        sql.append("        in_piece as IN_PIECE, ");
+        sql.append("        round(in_net_weight, 2) as IN_NET_WEIGHT, ");
+        sql.append("        round(decode(sum(in_net_weight) over (), 0, 0, in_net_weight / sum(in_net_weight) over () * 100), 2) as IN_NET_WEIGHT_RATE, ");
+        sql.append("        sorting_piece as SORTING_PIECE, ");
+        sql.append("        round(sorting_net_weight, 2) as SORTING_NET_WEIGHT, ");
+        sql.append("        round(decode(sum(sorting_net_weight) over (), 0, 0, sorting_net_weight / sum(sorting_net_weight) over () * 100), 2) as SORTING_NET_WEIGHT_RATE, ");
+        sql.append("        out_piece as OUT_PIECE, ");
+        sql.append("        round(out_net_weight, 2) as OUT_NET_WEIGHT, ");
+        sql.append("        round(decode(sum(out_net_weight) over (), 0, 0, out_net_weight / sum(out_net_weight) over () * 100), 2) as OUT_NET_WEIGHT_RATE, ");
+        sql.append("        in_piece + sorting_piece + out_piece as TOTAL_PIECE, ");
+        sql.append("        round(in_net_weight + sorting_net_weight + out_net_weight, 2) as TOTAL_NET_WEIGHT ");
+        sql.append("   from summary_data ");
+        sql.append("  order by big_name ");
+
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("strTime", strTime);
+        params.put("endTime", endTime);
+        SQLQuery sqlQuery = createSQLQuery(sql.toString(), params);
+        return sqlQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+    }
+
 }

@@ -24,6 +24,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.haiersoft.ccli.base.entity.BaseItemname;
 import com.haiersoft.ccli.common.persistence.Page;
 import com.haiersoft.ccli.common.utils.CreatPDFUtils;
@@ -679,6 +690,183 @@ public class StockReportController extends BaseController {
 		        }
 		    }
         }
+    }
+
+    /**
+     * 导出出入库明细页面按货物大类汇总的件数、净重及净重占比。
+     */
+    @RequestMapping(value = "inoutCategorySummaryExport")
+    @ResponseBody
+    public void exportInOutCategorySummary(@ModelAttribute BisOutStock obj, HttpServletResponse response) throws Exception {
+        if (!hasText(obj.getSearchStrTime()) || !hasText(obj.getSearchEndTime())) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("text/plain;charset=UTF-8");
+            response.getWriter().write("起止日期不能为空！");
+            return;
+        }
+
+        List<Map<String, Object>> summaryList = stockReportService.getInOutCategorySummary(obj.getSearchStrTime(), obj.getSearchEndTime());
+        Workbook workbook = buildInOutCategorySummaryWorkbook(summaryList, obj.getSearchStrTime(), obj.getSearchEndTime());
+        String fileName = URLEncoder.encode("出入库大类汇总.xlsx", "UTF-8");
+        response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        OutputStream outputStream = response.getOutputStream();
+        workbook.write(outputStream);
+        outputStream.close();
+    }
+
+    /**
+     * 生成出入库大类汇总导出文件，文件中展示统计区间和各作业类型汇总结果。
+     */
+    private Workbook buildInOutCategorySummaryWorkbook(List<Map<String, Object>> summaryList, String strTime, String endTime) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("出入库大类汇总");
+        String[] headers = { "大类", "入库件数", "入库净重", "入库净重占比(%)", "分拣件数", "分拣净重", "分拣净重占比(%)", "出库件数", "出库净重", "出库净重占比(%)", "期间总件数", "期间总重量" };
+        int[] widths = { 20, 13, 14, 16, 13, 14, 16, 13, 14, 16, 15, 15 };
+        for (int i = 0; i < widths.length; i++) {
+            sheet.setColumnWidth(i, widths[i] * 256);
+        }
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, headers.length - 1));
+        sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, headers.length - 1));
+        sheet.createFreezePane(0, 3);
+
+        CellStyle titleStyle = createSummaryTitleStyle(workbook);
+        CellStyle rangeStyle = createSummaryRangeStyle(workbook);
+        CellStyle headerStyle = createSummaryHeaderStyle(workbook);
+        CellStyle textStyle = createSummaryTextStyle(workbook);
+        CellStyle numberStyle = createSummaryNumberStyle(workbook, "#,##0.00");
+        CellStyle rateStyle = createSummaryNumberStyle(workbook, "0.00");
+
+        Row titleRow = sheet.createRow(0);
+        titleRow.setHeightInPoints(28);
+        createSummaryTextCell(titleRow, 0, "出入库大类汇总", titleStyle);
+        Row rangeRow = sheet.createRow(1);
+        rangeRow.setHeightInPoints(22);
+        createSummaryTextCell(rangeRow, 0, "统计区间：" + strTime + " 至 " + endTime, rangeStyle);
+        Row headerRow = sheet.createRow(2);
+        headerRow.setHeightInPoints(22);
+        for (int i = 0; i < headers.length; i++) {
+            createSummaryTextCell(headerRow, i, headers[i], headerStyle);
+        }
+
+        int rowIndex = 3;
+        for (Map<String, Object> summary : summaryList) {
+            Row row = sheet.createRow(rowIndex++);
+            row.setHeightInPoints(20);
+            createSummaryTextCell(row, 0, getSummaryValue(summary, "BIG_NAME"), textStyle);
+            createSummaryNumberCell(row, 1, getSummaryValue(summary, "IN_PIECE"), numberStyle);
+            createSummaryNumberCell(row, 2, getSummaryValue(summary, "IN_NET_WEIGHT"), numberStyle);
+            createSummaryNumberCell(row, 3, getSummaryValue(summary, "IN_NET_WEIGHT_RATE"), rateStyle);
+            createSummaryNumberCell(row, 4, getSummaryValue(summary, "SORTING_PIECE"), numberStyle);
+            createSummaryNumberCell(row, 5, getSummaryValue(summary, "SORTING_NET_WEIGHT"), numberStyle);
+            createSummaryNumberCell(row, 6, getSummaryValue(summary, "SORTING_NET_WEIGHT_RATE"), rateStyle);
+            createSummaryNumberCell(row, 7, getSummaryValue(summary, "OUT_PIECE"), numberStyle);
+            createSummaryNumberCell(row, 8, getSummaryValue(summary, "OUT_NET_WEIGHT"), numberStyle);
+            createSummaryNumberCell(row, 9, getSummaryValue(summary, "OUT_NET_WEIGHT_RATE"), rateStyle);
+            createSummaryNumberCell(row, 10, getSummaryValue(summary, "TOTAL_PIECE"), numberStyle);
+            createSummaryNumberCell(row, 11, getSummaryValue(summary, "TOTAL_NET_WEIGHT"), numberStyle);
+        }
+        sheet.setAutoFilter(new CellRangeAddress(2, Math.max(2, rowIndex - 1), 0, headers.length - 1));
+        return workbook;
+    }
+
+    /**
+     * 创建汇总导出标题样式。
+     */
+    private CellStyle createSummaryTitleStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        Font font = workbook.createFont();
+        font.setFontName("宋体");
+        font.setFontHeightInPoints((short) 16);
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        style.setFont(font);
+        return style;
+    }
+
+    /**
+     * 创建汇总导出统计区间样式。
+     */
+    private CellStyle createSummaryRangeStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        return style;
+    }
+
+    /**
+     * 创建汇总导出表头样式。
+     */
+    private CellStyle createSummaryHeaderStyle(Workbook workbook) {
+        CellStyle style = createSummaryTextStyle(workbook);
+        style.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+        style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        Font font = workbook.createFont();
+        font.setFontName("宋体");
+        font.setFontHeightInPoints((short) 11);
+        font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        font.setColor(IndexedColors.WHITE.getIndex());
+        style.setFont(font);
+        return style;
+    }
+
+    /**
+     * 创建汇总导出文本单元格样式。
+     */
+    private CellStyle createSummaryTextStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setAlignment(CellStyle.ALIGN_CENTER);
+        style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        style.setBorderTop(CellStyle.BORDER_THIN);
+        style.setBorderBottom(CellStyle.BORDER_THIN);
+        style.setBorderLeft(CellStyle.BORDER_THIN);
+        style.setBorderRight(CellStyle.BORDER_THIN);
+        return style;
+    }
+
+    /**
+     * 创建汇总导出数值单元格样式。
+     */
+    private CellStyle createSummaryNumberStyle(Workbook workbook, String format) {
+        CellStyle style = createSummaryTextStyle(workbook);
+        style.setAlignment(CellStyle.ALIGN_RIGHT);
+        DataFormat dataFormat = workbook.createDataFormat();
+        style.setDataFormat(dataFormat.getFormat(format));
+        return style;
+    }
+
+    /**
+     * 写入汇总导出文本单元格。
+     */
+    private void createSummaryTextCell(Row row, int columnIndex, String value, CellStyle style) {
+        Cell cell = row.createCell(columnIndex);
+        cell.setCellValue(value == null ? "" : value);
+        cell.setCellStyle(style);
+    }
+
+    /**
+     * 写入汇总导出数值单元格。
+     */
+    private void createSummaryNumberCell(Row row, int columnIndex, String value, CellStyle style) {
+        Cell cell = row.createCell(columnIndex);
+        cell.setCellValue(hasText(value) ? Double.parseDouble(value) : 0D);
+        cell.setCellStyle(style);
+    }
+
+    /**
+     * 获取原生查询结果中的字段值。
+     */
+    private String getSummaryValue(Map<String, Object> summary, String key) {
+        Object value = summary.get(key);
+        return value == null ? "" : value.toString();
+    }
+
+    /**
+     * 判断字符串是否已填写。
+     */
+    private boolean hasText(String value) {
+        return value != null && value.trim().length() > 0;
     }
 
     /***
