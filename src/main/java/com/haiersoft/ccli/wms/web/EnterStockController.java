@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.haiersoft.ccli.cost.entity.BisStandingBook;
+import com.haiersoft.ccli.bounded.service.BaseBoundedService;
 import com.haiersoft.ccli.report.web.OCRUtils;
 import com.haiersoft.ccli.supervision.web.FTPUtils;
 import com.haiersoft.ccli.wms.entity.PreEntryInvtQuery.BisPreEntryInvtQuery;
@@ -44,6 +45,7 @@ import org.jeecgframework.poi.excel.entity.enmus.ExcelType;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
@@ -127,8 +129,10 @@ public class EnterStockController extends BaseController {
     private InStockReportService inStockReportService;
     @Autowired
 	private AsnActionDao asnActionDao;
-    @Autowired
+	@Autowired
 	private AsnActionService asnActionService;
+	@Autowired
+	private BaseBoundedService baseBoundedService;
 
 
     /**
@@ -735,6 +739,7 @@ public class EnterStockController extends BaseController {
      */
     @RequestMapping(value = "passEnterStockAndUpdateASNActions/{linkId}")
     @ResponseBody
+    @Transactional
     public String passEnterStockAndUpdateASNActions(@PathVariable("linkId") String linkId) {
 
         BisEnterStock enterStock = enterStockService.get(linkId);
@@ -750,7 +755,7 @@ public class EnterStockController extends BaseController {
 				asnActionService.update(aa);
 			}
 		}
-        return "success";
+        return auditEnterStockAndCreateBaseBounded(linkId);
     }
 
 
@@ -764,7 +769,15 @@ public class EnterStockController extends BaseController {
      */
     @RequestMapping(value = "passEnterStock/{linkId}")
     @ResponseBody
+    @Transactional
     public String passEnterStock(@PathVariable("linkId") String linkId) {
+        return auditEnterStockAndCreateBaseBounded(linkId);
+    }
+
+    /**
+     * 审核通过入库联系单，并为保税联系单创建保税货物底账基础信息。
+     */
+    private String auditEnterStockAndCreateBaseBounded(String linkId) {
         User user = UserUtil.getCurrentUser();
 
         BisEnterStock enterStock = enterStockService.get(linkId);
@@ -774,6 +787,7 @@ public class EnterStockController extends BaseController {
         enterStock.setExamineTime(new Date());
 
         enterStockService.update(enterStock);
+        baseBoundedService.createAutoBaseBounded(enterStock, enterStockInfoService.getList(linkId));
         return "success";
     }
 

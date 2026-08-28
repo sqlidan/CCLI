@@ -187,6 +187,13 @@ public class TrayInfoService extends BaseService<TrayInfo, Integer> {
 	public List<TrayInfo> findByF(List<PropertyFilter> filters) {
 		return trayInfoDao.find(filters);
 	}
+
+	/**
+	 * 查询指定入库联系单下仍在库的保税托盘。
+	 */
+	public List<TrayInfo> getBondedStockTrayList(String contactNum) {
+		return trayInfoDao.getBondedStockTrayList(contactNum);
+	}
 	
 	public String updateTrayInfoforNewCtnNum(String ctnNumNew,String ctnNumOld,String linkId){
 		return trayInfoDao.updateTrayInfoforNewCtnNum(ctnNumNew,ctnNumOld,linkId); 

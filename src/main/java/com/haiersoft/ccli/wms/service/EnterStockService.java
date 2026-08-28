@@ -193,6 +193,18 @@ public class EnterStockService extends BaseService<BisEnterStock, String> {
 	}
 
 	/**
+	 * 按报关单号和提单号准确查询有效的保税入库联系单，用于保税底账库存回填。
+	 */
+	public List<BisEnterStock> getBondedEnterStockByBillNumAndBgdh(String billNum, String bgdh) {
+		return enterStockDao.find(
+				Restrictions.eq("delFlag", "0"),
+				Restrictions.eq("ifBonded", "1"),
+				Restrictions.eq("itemNum", billNum),
+				Restrictions.eq("bgdh", bgdh)
+		);
+	}
+
+	/**
 	 * 入库报告书--普通客户
 	 * @param itemNum 提单号
 	 * @param cunNum 厢号

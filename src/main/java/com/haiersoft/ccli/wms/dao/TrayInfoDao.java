@@ -8,6 +8,7 @@ import java.util.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hibernate.SQLQuery;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 import com.haiersoft.ccli.common.persistence.HibernateDao;
@@ -27,6 +28,18 @@ import org.springframework.util.CollectionUtils;
 
 @Repository
 public class TrayInfoDao extends HibernateDao<TrayInfo, Integer> {
+	/**
+	 * 查询指定入库联系单下仍在库的保税托盘，用于回填保税货物底账库存信息。
+	 */
+	public List<TrayInfo> getBondedStockTrayList(String contactNum) {
+		return find(
+				Restrictions.eq("contactNum", contactNum),
+				Restrictions.eq("isBonded", "1"),
+				Restrictions.gt("nowPiece", 0),
+				Restrictions.in("cargoState", new String[] {"01", "10"})
+		);
+	}
+
 	/**
 	 * 根据库存算出总的计算量
 	 * @param contact_num

@@ -31,6 +31,16 @@ public class BaseBoundedDao extends HibernateDao<BaseBounded, String>{
     }
 
 	/**
+	 * 按创建时间区间查询保税货物底账，用于定时回填前一天新增底账的库存信息。
+	 */
+	public List<BaseBounded> getBaseBoundedListByCreatedTime(Date startTime, Date endTime) {
+		return find(
+				org.hibernate.criterion.Restrictions.ge("createdTime", startTime),
+				org.hibernate.criterion.Restrictions.lt("createdTime", endTime)
+		);
+	}
+
+	/**
 	 * @param page
 	 * @Description: 分页查询
 	 */
