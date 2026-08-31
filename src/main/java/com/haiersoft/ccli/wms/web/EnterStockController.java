@@ -663,7 +663,7 @@ public class EnterStockController extends BaseController {
             //BIS_STANDING_BOOK
             //已产生费用的提单不允许删除的逻辑
             Map<String,Object> params = new HashMap<String,Object>();
-            params.put("billNo",enterStock.getItemNum());
+            params.put("billNum",enterStock.getItemNum());
             List<BisStandingBook> bisEnterStockList = new ArrayList<>();
             bisEnterStockList = standingBookService.getList(params);
             if (bisEnterStockList!=null && bisEnterStockList.size() > 0){
